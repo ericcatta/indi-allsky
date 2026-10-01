@@ -1,13 +1,13 @@
 # Hybrid acceptance status
 
-Updated 30 September 2026. **Classic frontend removal is deployed. Whole-product acceptance is not complete.**
+Updated 1 October 2026. **Classic frontend removal is deployed. Whole-product acceptance is not complete.**
 The user deferred the separate 24-hour day/night test and detector/AI implementation.
 Those activities are outside this acceptance run, not passed tests.
 
 ## Current installation and regression
 
 The latest application change is `04048c31`; subsequent commits add tests and evidence.
-The geometry-to-Keogram link now preserves camera/profile. Its 175 Python and 34 JavaScript checks passed; the deployed source link was verified, but destination browser navigation was interrupted by a network change and remains pending. [Latest change](testing/evidence/hybrid-geometry-scope-20261001.json).
+The geometry-to-Keogram link now preserves camera/profile. Its 175 Python and 34 JavaScript checks passed; native source-to-Settings navigation now passes for both cameras/profiles after network recovery. Both recent frames decoded on 1 October at 13:05:00 / 13:05:07. [Latest change](testing/evidence/hybrid-geometry-scope-20261001.json).
 
 Hybrid is the only UI and requires login. Useful shared backend, drivers, workers,
 public media URLs and integration APIs remain. Configuration revision is 118.

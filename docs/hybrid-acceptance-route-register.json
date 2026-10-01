@@ -5027,8 +5027,8 @@
         {
           "source": "testing/evidence/hybrid-image-tools-native-20260930.json",
           "record": "checks",
-          "control": "Native catalog choices, scoped offsets/reload and geometry fit; clipboard receipt explicitly blocked",
-          "recorded_status": "mixed"
+          "control": "Native catalog choices, scoped offsets/reload and geometry fit; clipboard receipt explicitly blocked; see individual passed controls in source; aggregate incomplete",
+          "recorded_status": "bloccato"
         }
       ]
     },
@@ -5341,8 +5341,14 @@
         {
           "source": "testing/evidence/hybrid-image-tools-native-20260930.json",
           "record": "checks",
-          "control": "Native catalog choices, scoped offsets/reload and geometry fit; clipboard receipt explicitly blocked",
-          "recorded_status": "mixed"
+          "control": "Native catalog choices, scoped offsets/reload and geometry fit; clipboard receipt explicitly blocked; see individual passed controls in source; aggregate incomplete",
+          "recorded_status": "bloccato"
+        },
+        {
+          "source": "testing/evidence/hybrid-geometry-scope-20261001.json",
+          "record": "deployment",
+          "control": "Review keogram angle setting: native scoped navigation for both cameras and isolated both-role checks; no save",
+          "recorded_status": "superato"
         }
       ]
     },

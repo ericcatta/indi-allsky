@@ -157,3 +157,5 @@ riferimento tecnico chiuso, distinto dai sei editor operativi.
 [Storage, verifica nativa del 30 settembre](../testing/evidence/hybrid-storage-table-native-20260930.json): cambio camera/profilo, filtro e stato vuoto, paginazione, tutte le righe, copia e tredici ordinamenti crescenti verificati sui dati di produzione. Solo amministratore desktop; ricezione CSV/Excel ancora aperta.
 
 [Aggiornamenti e log, verifica nativa del 30 settembre](../testing/evidence/hybrid-updates-log-native-20260930.json): conferme incomplete bloccate, servizio Idle, cronologia, numero righe, filtro vuoto/selettivo, aggiornamento automatico e navigazione fra fonti. Nessun aggiornamento reale avviato. Il JSON collega anche le prove storiche isolate del ciclo upgrade, conservandone data e limiti.
+
+[Geometria → Keogram Settings, 1 ottobre](../testing/evidence/hybrid-geometry-scope-20261001.json): perdita di camera/profilo corretta; percorso nativo verificato per entrambe le camere, test isolati per entrambi i ruoli, nessun salvataggio in produzione.
