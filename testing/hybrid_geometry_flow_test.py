@@ -2,7 +2,9 @@
 """Geometry previews and actual reviewed profile/global Settings persistence."""
 import argparse
 from copy import deepcopy
+from html import unescape
 import re
+from urllib.parse import urlsplit, parse_qs
 from hybrid_runtime_fixture import isolated_app, login_client
 from hybrid_generation_fixture import seed_generation
 from hybrid_settings_flow_test import BrowserValues, payload_from_page
@@ -34,6 +36,17 @@ def run(runtime_config):
                 assert response.status_code==200,response.text[:300]
                 assert 'Preview generation remains disabled' not in response.text
                 assert 'Review values in Camera Settings' in response.text
+                angle_link = unescape(re.search(r'<a href="([^"]+)">Review keogram angle setting</a>', response.text)[1])
+                angle_query = parse_qs(urlsplit(angle_link).query)
+                assert angle_query == {'search': ['KEOGRAM_ANGLE'], 'camera_id': [str(cid)],
+                                       'profile_id': ['test-profile-' + str(cid)]}, angle_link
+                angle_page = client.get(angle_link)
+                assert angle_page.status_code == 200
+                assert 'KEOGRAM_ANGLE' in angle_page.text
+                with app.app_context():
+                    assert IndiAllSkyDbConfigTable.query.count() == 1
+                    assert IndiAllSkyDbConfigTable.query.one().data == original
+                    assert IndiAllSkyDbTaskQueueTable.query.count() == 0
                 if cid==2:
                     values=BrowserValues(response.text).values
                     assert values['IMAGE_CIRCLE_DIAMETER']=='360' and values['OFFSET_X']=='10' and values['OFFSET_Y']=='-20'

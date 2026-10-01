@@ -44,7 +44,7 @@
 <canvas id="geometry-canvas" aria-label="Image with circle and keogram overlay"></canvas>
 </div>
 <p>Reviewing values opens an unsaved Settings draft. Save only after checking the camera profile and the effect of any rotation, scaling or crop already applied to the image. Keogram angle remains a separate setting.</p>
-<a href="{{ url_for('indi_allsky.modern_admin_full_settings_view', search='KEOGRAM_ANGLE') }}">Review keogram angle setting</a>
+<a href="{{ url_for('indi_allsky.modern_admin_full_settings_view', search='KEOGRAM_ANGLE', camera_id=geometry_camera.id, profile_id=geometry_profile) }}">Review keogram angle setting</a>
 </section>
 <script type="application/json" id="geometry-config">{{ {'imageUrl':geometry_preview}|tojson }}</script>
 </main>

@@ -1,0 +1,25 @@
+{
+  "baseline": "dff129b3",
+  "defect": "Geometry Review keogram angle setting link omitted camera_id and profile_id; reproduced by isolated route test",
+  "before_log": "/home/eric/hybrid-geometry-scope-before.log",
+  "fix": "Carry the selected geometry camera and profile into the existing Full Settings search link; no settings/pipeline changes",
+  "targeted": {
+    "status": "passed",
+    "test": "testing/hybrid_geometry_flow_test.py",
+    "log": "/home/eric/hybrid-geometry-scope-after.log",
+    "scope": "Admin and ordinary user, cameras 1 and 2; exact query, successful target response, unchanged configuration content/revision/task count; existing save/permissions/empty-state checks retained"
+  },
+  "regression": {
+    "status": "passed",
+    "python_report": "/home/eric/hybrid-geometry-scope-regression-20261001/results.json",
+    "python_entries": 175,
+    "source_changed": false,
+    "python_sha256": "8cb22da469f351789dd19d9a8bf519a3d38b39b4385ac5a77990338cd6a2ed10",
+    "javascript_entries": 34,
+    "javascript_report": "/tmp/hybrid-geometry-scope-js-20261001.json",
+    "javascript_sha256": "114aad9b2944ee6160d428979c03762625713f76160c7c4f884723e7fb837163"
+  },
+  "deployment": {
+    "status": "not deployed"
+  }
+}
