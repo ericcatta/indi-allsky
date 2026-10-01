@@ -15,7 +15,8 @@
     "python_report": "/home/eric/hybrid-geometry-validation-regression-20261001/results.json",
     "python_entries": 175,
     "source_changed": false,
-    "sha256": "4f4fb4e71364af67028d7d776eaf5b768405a702015dc31d16c40f99816189a6"
+    "sha256": "4f4fb4e71364af67028d7d776eaf5b768405a702015dc31d16c40f99816189a6",
+    "asset_followup": "Full suite covers JS fix; final cache-version-only template change additionally checked with hybrid_geometry_flow_test.py and native browser"
   },
   "native_existing_controls": [
     "Azimuth270 synchronizes Keogram -90; fullscreen screenshot shows red circle and horizontal line with width2",
@@ -24,6 +25,16 @@
     "Review draft retains profile asi678mc and requested helper2900/15/-20; actual offset fields show15/-20; no save"
   ],
   "deployment": {
-    "status": "not deployed"
+    "status": "deployed and verified",
+    "application_revision": "66a045d4",
+    "asset_revision": "64c28b38",
+    "method": "Web-only reload; capture PID1565 active, NRestarts0",
+    "native": [
+      "geometry-v3 script URL verified; old cached script initially reproduced defect until asset URL bumped",
+      "360-degree azimuth blocks Copy and Review, retains error and Geometry URL",
+      "270-degree azimuth yields -90 Keogram angle and valid preview; Review opens correct unsaved asi678mc draft",
+      "Now frames13:20:46/13:20:54 decode4608x2592/3840x2160"
+    ],
+    "rollback": "Restore image-geometry.js and template from cb259f92 with a new asset version, reload Gunicorn; no database/config migration"
   }
 }
