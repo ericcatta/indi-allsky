@@ -20,6 +20,14 @@
     "javascript_sha256": "114aad9b2944ee6160d428979c03762625713f76160c7c4f884723e7fb837163"
   },
   "deployment": {
-    "status": "not deployed"
+    "status": "deployed; native destination recheck pending",
+    "revision": "04048c31",
+    "method": "Fast-forward pull and Gunicorn reload; Pi revision confirmed",
+    "capture_pid": 1565,
+    "capture_restarts": 0,
+    "capture_active": true,
+    "native_source": "Geometry page camera 2/profile asi678mc renders corrected Settings URL with both parameters; preview metadata image189438 at2026-10-01 08:57:47",
+    "native_destination": "Click interrupted by ERR_NETWORK_CHANGED; no successful production Settings destination claim",
+    "rollback": "Restore only image_geometry.html from dff129b3 and reload Gunicorn; no data migration"
   }
 }

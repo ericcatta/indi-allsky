@@ -2,7 +2,9 @@
 
 ## Current application
 
-The latest application change deployed on 30 September is `85d9f04c`.
+The latest application change deployed on 1 October is `04048c31`.
+The geometry-to-Keogram link now preserves camera/profile. Its 175 Python and 34 JavaScript checks passed; the deployed source link was verified, but destination browser navigation was interrupted by a network change and remains pending. [Latest change](testing/evidence/hybrid-geometry-scope-20261001.json).
+
 Later documentation/test commits do not change the running application.
 Read the actual checkout revision with `git rev-parse HEAD`; do not use an older
 release heading as proof of the installed version.

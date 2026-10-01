@@ -6,7 +6,9 @@ Those activities are outside this acceptance run, not passed tests.
 
 ## Current installation and regression
 
-The latest application change is `85d9f04c`; subsequent commits add tests and evidence.
+The latest application change is `04048c31`; subsequent commits add tests and evidence.
+The geometry-to-Keogram link now preserves camera/profile. Its 175 Python and 34 JavaScript checks passed; the deployed source link was verified, but destination browser navigation was interrupted by a network change and remains pending. [Latest change](testing/evidence/hybrid-geometry-scope-20261001.json).
+
 Hybrid is the only UI and requires login. Useful shared backend, drivers, workers,
 public media URLs and integration APIs remain. Configuration revision is 118.
 
