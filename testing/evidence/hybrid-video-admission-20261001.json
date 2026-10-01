@@ -1,0 +1,66 @@
+{
+  "date": "2026-10-01",
+  "baseline": "e2404cfd",
+  "application": "81fa7805",
+  "defect": {
+    "before": "Missing stored task action raised uncaught KeyError after setRunning, outside the existing effect exception boundary. Route setup and kwargs preparation also escaped it. Reproduced by the isolated test before editing video.py.",
+    "after": "Validate task data/action/kwargs and prepare camera context inside the existing rollback/FAILED boundary; unknown action message retained and subsequent valid jobs execute."
+  },
+  "tests": {
+    "targeted": "hybrid_video_failure_test.py: actual AST-extracted processTask, real isolated SQLite tasks, invalid object/action/kwargs, context failure, rollback and next successful job",
+    "python": {
+      "count": 177,
+      "status": "passed",
+      "source_changed": false,
+      "report": "/home/eric/hybrid-video-admission-regression-20261001/results.json",
+      "sha256": "4d0534f4abdf5aafdb02a08d585b37de4ed5abffe702c62b6ba7afb70df19484"
+    },
+    "javascript": {
+      "count": 35,
+      "status": "passed",
+      "report": "/tmp/hybrid-video-admission-js-20261001.json",
+      "sha256": "622b2e3566ea0e85447eb2267a94577f183952171985aab462c4f2bf127232dc"
+    },
+    "local_and_tested_source_manifest": "4a0b29b45efa1b1bf7ee54bc1f108e51274280a9bd75e0ac3a517f4808933293",
+    "diff_check": "passed"
+  },
+  "deployment": {
+    "preflight": "No pending MANUAL/QUEUED/RUNNING tasks, no tracked production changes, config118, 11GiB disk available, /tmp1%.",
+    "action": "Fast-forward pull and controlled restart of indi-allsky.service; web unchanged.",
+    "started": "2026-10-01 15:09:26 CEST",
+    "capture": {
+      "pid": 440350,
+      "state": "active",
+      "automatic_restarts": 0
+    },
+    "web": {
+      "pid": 1540,
+      "state": "active",
+      "automatic_restarts": 0
+    },
+    "config_after": 118,
+    "log": "/var/log/indi-allsky/indi-allsky.log from 15:09:26 through approximately15:10:45: zero ERROR/CRITICAL/Traceback entries. User journal unavailable; not used as evidence of no errors.",
+    "native_frames": [
+      {
+        "camera_id": 1,
+        "timestamp": "2026-10-01 15:09:39",
+        "decoded": true,
+        "width": 4608,
+        "height": 2592
+      },
+      {
+        "camera_id": 2,
+        "timestamp": "2026-10-01 15:09:49",
+        "decoded": true,
+        "width": 3840,
+        "height": 2160
+      }
+    ],
+    "rollback": "Revert 81fa7805 (or restore only indi_allsky/video.py from e2404cfd), then controlled capture restart and verify new frames from both cameras. No DB/config restore: change is code-only, schema and persisted settings unchanged."
+  },
+  "limits": [
+    "No malformed task injected into production. Failure/recovery cases are isolated tests.",
+    "Bounded post-restart verification, not 24-hour acceptance.",
+    "Does not complete the remaining whole-product control matrix."
+  ]
+}

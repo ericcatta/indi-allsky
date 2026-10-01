@@ -2,7 +2,7 @@
 
 ## Current application
 
-The latest application change deployed on 1 October is `623495cb`: history query validation and camera-safe aggregate Loops. [Verification and rollback](testing/evidence/hybrid-history-query-20261001.json).
+The latest application change deployed on 1 October is `81fa7805`: video task preparation failures now become terminal failed tasks without stopping the worker. [Verification and rollback](testing/evidence/hybrid-video-admission-20261001.json).
 Geometry now rejects invalid azimuth before copy/review; the updated asset version is verified in production. 175 Python checks and 35 JavaScript tests passed. [Validation and deployment](testing/evidence/hybrid-geometry-validation-20261001.json).
 
 The geometry-to-Keogram link now preserves camera/profile. Its 175 Python and 34 JavaScript checks passed; native source-to-Settings navigation now passes for both cameras/profiles after network recovery. Both recent frames decoded on 1 October at 13:05:00 / 13:05:07. [Latest change](testing/evidence/hybrid-geometry-scope-20261001.json).
@@ -14,9 +14,10 @@ Classic frontend is removed. Hybrid requires login; shared backend and public
 compatibility handlers remain. Configuration revision is 118.
 
 The current application passed 177 Python/compile entrypoints and 35 JavaScript
-tests. The last deployment reloaded only Gunicorn; capture PID 1565 remained
-active with zero restarts and both images decoded in the native browser.
-[Regression and deployment](testing/evidence/hybrid-history-query-20261001.json).
+tests. The last deployment restarted capture in a controlled window; capture PID
+440350 is active with zero automatic restarts and both new images decoded in the
+native browser. Gunicorn remained active at PID 1540.
+[Regression and deployment](testing/evidence/hybrid-video-admission-20261001.json).
 This is bounded acceptance, not full-product or 24-hour certification.
 See [current status and open gates](HYBRID_ACCEPTANCE_STATUS.md).
 
@@ -56,6 +57,11 @@ Afterward verify installed source, authentication, the affected UI/request/effec
 and fresh decoded frames from both cameras. A running unit alone is insufficient.
 
 ## Rollback of the latest code-only changes
+
+For video task failure handling `81fa7805`, revert that commit or restore only
+`indi_allsky/video.py` from `e2404cfd`. Restart capture in a controlled window
+and verify new decoded frames from both cameras. No schema/configuration changes
+were made; do not restore an older database to undo this code change.
 
 For AJAX object admission `85d9f04c`, revert that code change: restore
 `indi_allsky/flask/views.py` from `306c5235` and remove its newly introduced

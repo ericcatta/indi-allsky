@@ -6,7 +6,7 @@ Those activities are outside this acceptance run, not passed tests.
 
 ## Current installation and regression
 
-The latest application change is `623495cb`; subsequent commits add tests and evidence.
+The latest application change is `81fa7805`; subsequent commits add tests and evidence.
 History controls now reject malformed inputs; aggregate Loop queries enforce per-camera delivery policies and the existing result ceiling. [History validation](testing/evidence/hybrid-history-query-20261001.json).
 
 Geometry now rejects invalid azimuth before copy/review; the updated asset version is verified in production. 175 Python checks and 35 JavaScript tests passed. [Validation and deployment](testing/evidence/hybrid-geometry-validation-20261001.json).
@@ -17,10 +17,13 @@ Hybrid is the only UI and requires login. Useful shared backend, drivers, worker
 public media URLs and integration APIs remain. Configuration revision is 118.
 
 Camera Info now handles missing sensor/lens metadata without crashing or inventing zero measurements. Partial known values remain visible. The current application passed **177 Python/compile entrypoints and 35 JavaScript tests**.
-The latest runtime evidence includes the exact report hashes, web-only deployment,
-unchanged capture PID 1565, zero automatic restarts, and decoded frames from both
-cameras at 1 October 14:24:39 / 14:24:48. These are dated observations, not continuous monitoring.
-[Latest runtime regression and deployment](testing/evidence/hybrid-history-query-20261001.json).
+Video task preparation now shares the effect failure boundary: malformed tasks and
+route setup errors terminate as FAILED, with rollback, while the next valid job can run.
+The full regression passed again (177 Python/compile and 35 JavaScript).
+After the controlled capture restart, PID 440350 is active with zero automatic
+restarts; both cameras' new frames decoded at 15:09:39 / 15:09:49 on 1 October.
+These are bounded observations, not continuous monitoring.
+[Latest regression and deployment](testing/evidence/hybrid-video-admission-20261001.json).
 The cleanup extension is included in this regression. All 719 Full Config fields are interpreted in Hybrid (202 through domain parsers and 517 in its orchestrator); frozen legacy fingerprints remain unchanged.
 
 ## Verified outcomes and their limits
