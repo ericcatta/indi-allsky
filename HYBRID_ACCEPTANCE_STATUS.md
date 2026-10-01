@@ -33,7 +33,7 @@ The cleanup extension is included in this regression. All 719 Full Config fields
 | Settings context | Camera/profile preserved through Settings, history, snapshot detail and return; malformed uploaded restore files rejected without new revision | [Navigation](testing/evidence/hybrid-settings-chain-20260929.json), [invalid files](testing/evidence/hybrid-restore-invalid-files-native-20260930.json) |
 | Media navigation | Image/timelapse list, detail and return retain camera/profile; wrong-camera references rejected | [Navigation](testing/evidence/hybrid-media-detail-context-20260930.json) |
 | Generation | Both cameras' day output tasks succeeded; camera-2 generated videos fully decoded and played to natural end in browser | [Generation](testing/evidence/hybrid-generation-followup-20260930.json) |
-| Download delivery | User-received panorama video exactly matches the Raspberry file hash. Both camera mask downloads also match the server files by SHA-256. These prove individual downloads, not all export families | [Received panorama](testing/evidence/hybrid-generation-followup-20260930.json), [received masks](testing/evidence/hybrid-mask-download-native-20261001.json) |
+| Download delivery | User-received panorama video exactly matches the Raspberry file hash. Both camera mask downloads match the server files by SHA-256. Both cameras' JPEG/PNG FITS previews were received and fully decoded; source hashes remained unchanged. These prove individual downloads, not all export families | [Received panorama](testing/evidence/hybrid-generation-followup-20260930.json), [received masks](testing/evidence/hybrid-mask-download-native-20261001.json), [FITS previews](testing/evidence/hybrid-fits-preview-receipt-20261001.json) |
 | Cleanup | All four native buttons deleted exactly the expected synthetic files/rows; other camera preserved; archive reflects deletion | [Native effects](testing/evidence/hybrid-cleanup-native-effects-20260930.json) |
 | Links after cleanup | 240 download responses and 48 Image/FITS detail responses: removed entries return 404, retained downloads preserve exact bytes | [Regression](testing/evidence/hybrid-cleanup-stale-links-20260930.json) |
 | Full Config admission | Malformed/non-object JSON rejected before WTForms; no config revision, content change or queued task; valid parser semantics preserved | [Full Config](testing/evidence/hybrid-full-config-input-20260930.json) |
@@ -53,8 +53,9 @@ A historical check is not automatically a current full-domain certification.
 ## Remaining acceptance gates
 
 1. **Complete the control/effect matrix.** The latest static inventory is from
-   `970d1799`: 99 GET entries, 505 contexts, 376 rendered and 129 blocked/redirected;
-   43,978 occurrences grouped into 7,368 exact page/control identities. These are
+   `51a248ee`: 99 GET entries, 500 executed contexts, 376 rendered and 124 blocked;
+   seven non-template entries require dedicated tests. The discovery includes
+   43,978 occurrences grouped into 7,369 exact page/control identities. These are
    discovery counts, not successful clicks. The route register links evidence but
    does not yet certify every identity, dynamic control, role, camera/profile,
    narrow-screen variant and error path. Unobserved cases remain open.

@@ -1,0 +1,161 @@
+{
+  "date": "2026-10-01",
+  "baseline": "51a248ee9aa1a84e8c250484d60ca62474a5c1a6",
+  "application": "623495cb",
+  "environment": "Native production browser, administrator desktop; saved light FITS930/931",
+  "controls": [
+    {
+      "page": "/modern-admin/tools/process-fits",
+      "control_ids": [
+        "OUTPUT_IMAGE_TYPE",
+        "processing-run",
+        "processing-download"
+      ],
+      "role": "administrator",
+      "camera_id": 2,
+      "profile_id": "asi678mc",
+      "fits_id": 931,
+      "prerequisites": "Existing local light FITS and authenticated processing permission",
+      "expected_request": "POST /indi-allsky/js/processing, then local download of the generated preview",
+      "expected_effect": "Decoded file in the chosen format at full source dimensions; original FITS unchanged",
+      "status": "superato",
+      "observed": {
+        "filename": "camera-2-light-931.jpg",
+        "format": "JPEG",
+        "dimensions": [
+          3840,
+          2160
+        ],
+        "bytes": 630119,
+        "sha256": "bfbbf1f40e9b6bc1fe297a65fe494ddd48eb8e52acf9fdb0b180ff5b80595bf5",
+        "received_at_local": "2026-10-01T14:33:20.542306"
+      }
+    },
+    {
+      "page": "/modern-admin/tools/process-fits",
+      "control_ids": [
+        "OUTPUT_IMAGE_TYPE",
+        "processing-run",
+        "processing-download"
+      ],
+      "role": "administrator",
+      "camera_id": 2,
+      "profile_id": "asi678mc",
+      "fits_id": 931,
+      "prerequisites": "Existing local light FITS and authenticated processing permission",
+      "expected_request": "POST /indi-allsky/js/processing, then local download of the generated preview",
+      "expected_effect": "Decoded file in the chosen format at full source dimensions; original FITS unchanged",
+      "status": "superato",
+      "observed": {
+        "filename": "camera-2-light-931.png",
+        "format": "PNG",
+        "dimensions": [
+          3840,
+          2160
+        ],
+        "bytes": 7430528,
+        "sha256": "2027b3817764413fa63807bd0bdba6bc10eca49688f84fba25058dfee2a93c23",
+        "received_at_local": "2026-10-01T14:34:05.931407"
+      }
+    },
+    {
+      "page": "/modern-admin/tools/process-fits",
+      "control_ids": [
+        "OUTPUT_IMAGE_TYPE",
+        "processing-run",
+        "processing-download"
+      ],
+      "role": "administrator",
+      "camera_id": 1,
+      "profile_id": "imx708-wide",
+      "fits_id": 930,
+      "prerequisites": "Existing local light FITS and authenticated processing permission",
+      "expected_request": "POST /indi-allsky/js/processing, then local download of the generated preview",
+      "expected_effect": "Decoded file in the chosen format at full source dimensions; original FITS unchanged",
+      "status": "superato",
+      "observed": {
+        "filename": "camera-1-light-930.jpg",
+        "format": "JPEG",
+        "dimensions": [
+          4608,
+          2592
+        ],
+        "bytes": 1216903,
+        "sha256": "4fe59b5b6a4528ede97e8c44d08bfd517c789aa09ebd3a9cc18e7870c51caa96",
+        "received_at_local": "2026-10-01T14:34:23.458310"
+      }
+    },
+    {
+      "page": "/modern-admin/tools/process-fits",
+      "control_ids": [
+        "OUTPUT_IMAGE_TYPE",
+        "processing-run",
+        "processing-download"
+      ],
+      "role": "administrator",
+      "camera_id": 1,
+      "profile_id": "imx708-wide",
+      "fits_id": 930,
+      "prerequisites": "Existing local light FITS and authenticated processing permission",
+      "expected_request": "POST /indi-allsky/js/processing, then local download of the generated preview",
+      "expected_effect": "Decoded file in the chosen format at full source dimensions; original FITS unchanged",
+      "status": "superato",
+      "observed": {
+        "filename": "camera-1-light-930.png",
+        "format": "PNG",
+        "dimensions": [
+          4608,
+          2592
+        ],
+        "bytes": 6478411,
+        "sha256": "edbe8e6042e0631127a2a2e1370e86a32788f924c7e24841d689c966a692891c",
+        "received_at_local": "2026-10-01T14:34:46.409013"
+      }
+    },
+    {
+      "page": "/modern-admin/tools/process-fits",
+      "control_ids": [
+        "processing-fullscreen",
+        "processing-exit"
+      ],
+      "camera_id": 1,
+      "profile_id": "imx708-wide",
+      "role": "administrator",
+      "status": "superato",
+      "observed": "Fullscreen screenshot reviewed; Exit fullscreen returns to the visible Process FITS heading."
+    },
+    {
+      "page": "/modern-admin/media/archive",
+      "control": "Download original, FITS930",
+      "role": "administrator",
+      "camera_id": 1,
+      "status": "bloccato",
+      "observed": "Native click leaves archive open; expected ccd1_20261001_130530.fit is absent from Downloads; no new FITS file found there. No received-original claim."
+    }
+  ],
+  "file_verification": "Each of the four new downloaded images was fully decoded with Pillow Image.load; format/dimensions, size, mtime and SHA-256 recorded. Files remain in local Downloads; image contents are not published.",
+  "source_integrity": {
+    "method": "Before/after SSH SHA-256 over original source files selected by read-only runtime database lookup",
+    "930": {
+      "bytes": 35835840,
+      "sha256_before_and_after": "3adafb04b8b2d445648bd2fc2c8e30ce8cbe70ab9890e237d9e80c70392735ad"
+    },
+    "931": {
+      "bytes": 16594560,
+      "sha256_before_and_after": "bfb2278e4e0b10fd227ff1f56b68e1557731c8d71dd19687e1a4a52a3da17d8a"
+    },
+    "config_revision_after": 118
+  },
+  "browser_download_probe": {
+    "environment": "Temporary localhost18116 HTTP server, synthetic non-sensitive JSON/CSV/binary only",
+    "attachment_results": "Six native clicks, with and without explicit download attributes, reached server200; no corresponding file appeared in Downloads.",
+    "data_uri_results": "Three download links containing synthetic JSON/CSV/binary data URIs produced exact expected local files. Their bytes were checked before removing the three test files.",
+    "interpretation": "Missing HTTP attachment receipt is reproduced independently of Hybrid. This does not prove a Hybrid application defect, nor certify original/configuration/table-export delivery. The previously requested manual verification remains open.",
+    "cleanup": "Temporary server stopped, temporary browser tabs closed; no production code change."
+  },
+  "limitations": [
+    "Only these formats, saved frames and role were exercised natively.",
+    "No complete parameter-matrix, RAW delivery or original FITS receipt claim.",
+    "This is evidence-only; no configuration, acquisition, runtime or image algorithm change."
+  ]
+}

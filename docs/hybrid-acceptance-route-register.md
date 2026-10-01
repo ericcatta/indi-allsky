@@ -167,3 +167,5 @@ Native mask downloads for both cameras were received on 1 October and match the 
 Camera Info now tolerates missing driver/lens metadata. Isolated role/camera tests and native numerical parity, narrow-screen and keyboard checks are recorded in [camera metadata evidence](../testing/evidence/hybrid-camera-info-metadata-20261001.json).
 
 History input admission and aggregate Loop delivery policies are verified by [history query evidence](../testing/evidence/hybrid-history-query-20261001.json), including native Loop interval/camera controls and explicit browser limitations.
+
+Discovery refreshed at `51a248ee`: 99 GET entries, 500 executed contexts (376 rendered, 124 blocked), seven non-template entries left to dedicated tests, 43,978 control occurrences and 7,369 exact identities. No functional passes are inferred. Four actual FITS preview downloads and source-integrity checks are recorded in [preview receipt evidence](../testing/evidence/hybrid-fits-preview-receipt-20261001.json).

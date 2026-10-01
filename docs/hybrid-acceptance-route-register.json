@@ -5625,6 +5625,12 @@
           "record": "checks",
           "control": "Native full-resolution FITS preview, validation/reset and RAW absent-data recovery; exact cases and limits in source",
           "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-fits-preview-receipt-20261001.json",
+          "record": "controls and source_integrity",
+          "control": "Both cameras JPEG/PNG downloads received and fully decoded; source hashes unchanged; fullscreen and exit",
+          "recorded_status": "superato"
         }
       ]
     },
@@ -8094,6 +8100,47 @@
     }
   ],
   "current_control_discovery": {
+    "commit": "51a248ee9aa1a84e8c250484d60ca62474a5c1a6",
+    "date": "2026-10-01",
+    "environment": "isolated synthetic Flask; Classic physically absent",
+    "source_manifest_sha256": "a462749ec22ecbee893e1bc4806a47e492df938f4557af3a7ec06d14d1d63d39",
+    "source_manifest_algorithm": "SHA-256 of json.dumps(run_hybrid_regression.source_hashes(root), sort_keys=True).encode()",
+    "report": "/home/eric/hybrid-controls-20261001.json",
+    "report_sha256": "14c06a6e57c25ece91bf8927ec6960c9c76cddb1eb9999580703b71fc67fcc29",
+    "get_entries": 99,
+    "contexts": 500,
+    "rendered_contexts": 376,
+    "blocked_contexts": 124,
+    "unexecuted_non_template_get_entries": 7,
+    "render_defects": 0,
+    "searched_placeholder_signals": 0,
+    "control_occurrences": 43978,
+    "controls_certified_by_discovery": 0,
+    "limitations": [
+      "Includes repeated controls across roles, camera scopes, aliases and shared navigation; count is not unique features or percentage",
+      "Static HTML only; JavaScript-generated controls require the separate browser evidence",
+      "Rendering and absence of selected placeholder phrases do not prove functional completion"
+    ],
+    "identity_index": {
+      "path": "/home/eric/hybrid-control-index-20261001.json",
+      "sha256": "ba7f8ffbd89e6031c54e5efc463b5eda3b7f03955ed0461fb72fedd5ba1c4a97",
+      "identities": 7369,
+      "references": 43978,
+      "rule": "Resolved page path plus exact collector control ID suffix; every source page/context/control index is retained. No semantic merging.",
+      "limitation": "Static identities are not unique product features. Functional evidence is not automatically assigned to each identity."
+    },
+    "identity_delta": {
+      "added": 6,
+      "removed": 5,
+      "routes": [
+        "/modern-admin/media/images",
+        "/modern-admin/media/timelapses",
+        "/modern-admin/tools/image-circle-helper"
+      ],
+      "note": "Changed detail/context links; identity count is not a feature count or acceptance percentage."
+    }
+  },
+  "previous_control_discovery": {
     "commit": "970d179941dd3dbfc76da76965cee1d7f40cadb9",
     "date": "2026-09-29",
     "environment": "isolated synthetic Flask; Classic physically absent",
@@ -8122,35 +8169,6 @@
       "limitation": "Static identities are not unique product features. Functional evidence is not automatically assigned to each identity."
     },
     "changed_identity_contexts_since_previous": 40
-  },
-  "previous_control_discovery": {
-    "commit": "7d9e49f993bcbeb4a373d3940a072892b7f95128",
-    "date": "2026-09-21",
-    "environment": "isolated synthetic Flask; Classic physically absent",
-    "source_manifest_sha256": "8afa58896e66419724265b748e5f917a7893ee5c1ed8166609420eaa9692f509",
-    "report": "/home/eric/hybrid-current-controls-20260921.json",
-    "report_sha256": "6bd756f13a3a34a7e139a6372e0372b777ba0daff1ccb2764c162fa43ccf912b",
-    "get_entries": 99,
-    "contexts": 505,
-    "rendered_contexts": 376,
-    "blocked_contexts": 129,
-    "render_defects": 0,
-    "searched_placeholder_signals": 0,
-    "control_occurrences": 43978,
-    "controls_certified_by_discovery": 0,
-    "limitations": [
-      "Includes repeated controls across roles, camera scopes, aliases and shared navigation; count is not unique features or percentage",
-      "Static HTML only; JavaScript-generated controls require the separate browser evidence",
-      "Rendering and absence of selected placeholder phrases do not prove functional completion"
-    ],
-    "identity_index": {
-      "path": "/home/eric/hybrid-current-control-index-20260921.json",
-      "sha256": "74408981c430ee52d88f18ff7e099ba3796c73208c600e690b20fbf96376574c",
-      "identities": 7351,
-      "references": 43978,
-      "rule": "Resolved page path plus exact collector control ID suffix; every source page/context/control index is retained. No semantic merging.",
-      "limitation": "Static identities are not unique product features. Existing functional evidence is not automatically assigned to each identity."
-    }
   },
   "current_authentication_boundary": {
     "source": "testing/evidence/hybrid-live-auth-boundary-20260921.json",
