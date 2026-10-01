@@ -22,7 +22,9 @@ aggiuntiva sul Raspberry.
 
 Ultimo censimento statico, riferito a `51a248ee` (1 ottobre): 99 ingressi GET, 500 contesti, 376 rendering riusciti, 124 contesti bloccati e nessun errore di rendering. Il report contiene 43.978 occorrenze di controlli, comprese ripetizioni fra ruoli e camere; nessun click viene certificato dal solo censimento. Percorso, hash e limiti sono nel campo `current_control_discovery` del JSON.
 
-Indice statico: 7.369 identità con tutti i 43.978 riferimenti originali conservati. Non rappresenta un conteggio di funzionalità né certifica automaticamente le interazioni. Sei ingressi API/redirect sono collegati alle [prove isolate già superate sulla versione installata](../testing/evidence/hybrid-current-discovery-20260921.json); download nativi ed effetti hardware restano fuori da queste prove.
+I 124 contesti non renderizzati sono stati [riconciliati singolarmente](../testing/evidence/hybrid-discovery-reconciliation-20261001.json): 89 redirect diretti al login, 11 alias Settings anonimi, 8 redirect di navigazione previsti e 16 accessi bloccati intenzionalmente dalla fixture a processi/DBus. Gli alias hanno prove storiche separate della catena verso il login. Questi numeri non sono difetti accertati e non certificano i controlli delle destinazioni; gli esiti originali restano conservati.
+
+Indice statico: 7.369 identità con tutti i 43.978 riferimenti originali conservati. Non rappresenta un conteggio di funzionalità né certifica automaticamente le interazioni. Tutti i sette ingressi senza template sono collegati ai [test di contratto passati nell’ultima regressione](../testing/evidence/hybrid-discovery-reconciliation-20261001.json), compreso il redirect di ingresso Hybrid; download nativi ed effetti hardware restano fuori da queste prove.
 
 [Verifica HTTPS anonima sul Raspberry](../testing/evidence/hybrid-live-auth-boundary-20260921.json): tutti i 99 ingressi GET Hybrid, 396 casi GET/HEAD nelle due camere/profili, arrivano al login. Sono verificati anche i passaggi degli alias Settings. Questo risultato riguarda il confine di autenticazione, non certifica i controlli dopo il login.
 

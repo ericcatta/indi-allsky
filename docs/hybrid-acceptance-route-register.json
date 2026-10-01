@@ -8781,7 +8781,8 @@
         "/modern-admin/tools/image-circle-helper"
       ],
       "note": "Changed detail/context links; identity count is not a feature count or acceptance percentage."
-    }
+    },
+    "blocked_context_reconciliation": "testing/evidence/hybrid-discovery-reconciliation-20261001.json"
   },
   "previous_control_discovery": {
     "commit": "970d179941dd3dbfc76da76965cee1d7f40cadb9",

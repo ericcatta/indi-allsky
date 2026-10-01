@@ -118,7 +118,13 @@ historical I/O latency gate. [Storage review](testing/evidence/hybrid-storage-re
 
 1. **Complete the control/effect matrix.** The latest static inventory is from
    `51a248ee`: 99 GET entries, 500 executed contexts, 376 rendered and 124 blocked;
-   seven non-template entries require dedicated tests. The discovery includes
+   [Reconciliation](testing/evidence/hybrid-discovery-reconciliation-20261001.json)
+   identifies 89 direct login redirects, 11 anonymous Settings aliases, eight
+   expected navigation redirects and 16 fixture-blocked process/DBus contexts;
+   these are not 124 demonstrated product defects. Original control statuses are
+   unchanged. All seven non-template entries have dedicated contract tests
+   passing in the latest regression; native receipts and hardware effects remain
+   separate. The discovery includes
    43,978 occurrences grouped into 7,369 exact page/control identities. These are
    discovery counts, not successful clicks. The route register links evidence but
    does not yet certify every identity, dynamic control, role, camera/profile,
