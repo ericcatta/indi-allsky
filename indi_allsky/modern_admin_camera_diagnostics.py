@@ -14,13 +14,19 @@ class ModernAdminCameraInfoService:
 
 
     def build_context(self, camera, privacy_mode=False):
-        lens_aperture = camera.lensFocalLength / camera.lensFocalRatio
-        camera_width_mm = camera.width * camera.pixelSize / 1000.0
-        camera_height_mm = camera.height * camera.pixelSize / 1000.0
-        camera_diagonal_mm = math.hypot(camera_width_mm, camera_height_mm)
-        arcsec_pixel = camera.pixelSize / camera.lensFocalLength * 206.2648
-        image_circle_diameter = int(camera.lensImageCircle)
-        image_circle_diameter_mm = image_circle_diameter * camera.pixelSize / 1000.0
+        width, height, pixel_size, focal_length, focal_ratio, circle = (
+            self.positive_measurement(getattr(camera, key, None)) for key in
+            ('width', 'height', 'pixelSize', 'lensFocalLength', 'lensFocalRatio', 'lensImageCircle')
+        )
+        lens_aperture = focal_length / focal_ratio if focal_length and focal_ratio else None
+        camera_width_mm = width * pixel_size / 1000.0 if width and pixel_size else None
+        camera_height_mm = height * pixel_size / 1000.0 if height and pixel_size else None
+        camera_diagonal_mm = (math.hypot(camera_width_mm, camera_height_mm)
+                              if camera_width_mm and camera_height_mm else None)
+        arcsec_pixel = pixel_size / focal_length * 206.2648 if pixel_size and focal_length else None
+        image_circle_diameter = int(circle) if circle else None
+        image_circle_diameter_mm = (image_circle_diameter * pixel_size / 1000.0
+                                    if image_circle_diameter and pixel_size else None)
         deg_fov_width, deg_fov_height, deg_fov_diagonal = self.calculate_field_of_view(
             camera=camera,
             image_circle_diameter=image_circle_diameter,
@@ -30,15 +36,15 @@ class ModernAdminCameraInfoService:
         return {
             'camera'                  : camera,
             'owner'                   : 'Private' if privacy_mode else camera.owner,
-            'camera_cfa'              : self.cfa_map[camera.cfa],
+            'camera_cfa'              : self.cfa_map.get(camera.cfa, 'Unknown'),
             'lensAperture'            : lens_aperture,
             'camera_width_mm'         : camera_width_mm,
             'camera_height_mm'        : camera_height_mm,
             'camera_diagonal_mm'      : camera_diagonal_mm,
             'arcsec_pixel'            : arcsec_pixel,
-            'dms_pixel'               : self.decdeg2dms(arcsec_pixel / 3600.0),
-            'arcsec_um'               : arcsec_pixel / camera.pixelSize,
-            'deg2_px'                 : (arcsec_pixel / 3600) ** 2,
+            'dms_pixel'               : self.decdeg2dms(arcsec_pixel / 3600.0) if arcsec_pixel is not None else None,
+            'arcsec_um'               : arcsec_pixel / pixel_size if arcsec_pixel is not None else None,
+            'deg2_px'                 : (arcsec_pixel / 3600) ** 2 if arcsec_pixel is not None else None,
             'image_circle_diameter'   : image_circle_diameter,
             'image_circle_diameter_mm': image_circle_diameter_mm,
             'deg_fov_width'           : deg_fov_width,
@@ -48,16 +54,23 @@ class ModernAdminCameraInfoService:
 
 
     def calculate_field_of_view(self, camera, image_circle_diameter, arcsec_pixel):
-        camera_diagonal = math.hypot(camera.width, camera.height)
-        arcsec_fov_width = min(image_circle_diameter, camera.width) * arcsec_pixel * self.arcsec_pix_factor
-        arcsec_fov_height = min(image_circle_diameter, camera.height) * arcsec_pixel * self.arcsec_pix_factor
-        arcsec_fov_diagonal = min(image_circle_diameter, camera_diagonal) * arcsec_pixel * self.arcsec_pix_factor
+        width = self.positive_measurement(camera.width)
+        height = self.positive_measurement(camera.height)
+        diagonal = math.hypot(width, height) if width and height else None
 
-        return (
-            arcsec_fov_width / 3600,
-            arcsec_fov_height / 3600,
-            arcsec_fov_diagonal / 3600,
-        )
+        def field_of_view(dimension):
+            if not dimension or not image_circle_diameter or arcsec_pixel is None:
+                return None
+            return min(image_circle_diameter, dimension) * arcsec_pixel * self.arcsec_pix_factor / 3600
+
+        return tuple(field_of_view(dimension) for dimension in (width, height, diagonal))
+
+    @staticmethod
+    def positive_measurement(value):
+        """Unknown sensor/lens metadata must not become a zero measurement."""
+        if isinstance(value, (int, float)) and math.isfinite(value) and value > 0:
+            return value
+        return None
 
 
     def decdeg2dms(self, dd):

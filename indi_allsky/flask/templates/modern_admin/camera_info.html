@@ -10,6 +10,9 @@ var camera_id = {{ camera_id }};
 {% endblock %}
 
 {% block content %}
+{% macro measurement(value, pattern, unit='') -%}
+{{ (pattern|format(value)) ~ unit if value is not none else '—' }}
+{%- endmacro %}
 <main class="modern-admin-shell" aria-labelledby="modern-admin-camera-info-title">
     {% set modern_admin_header_label = 'Camera info header' %}
     {% set modern_admin_heading = 'Camera Info' %}
@@ -26,22 +29,23 @@ var camera_id = {{ camera_id }};
         {% for choice in diagnostic_camera_choices %}<a href="{{ url_for(request.endpoint, camera_id=choice.camera_id, profile_id=choice.profile_id) }}" {% if choice.camera_id == camera_id|int %}aria-current="page"{% endif %}>{{ choice.label }}</a>{% endfor %}
         </nav>
 
+        <p>A dash means that the camera or lens measurement is unavailable.</p>
         <dl class="modern-admin-detail-list modern-admin-detail-list-wide">
             <div><dt>Name</dt><dd>{{ camera.name }}</dd></div>
             <div><dt>Friendly Name</dt><dd>{{ camera.friendlyName or '—' }}</dd></div>
-            <div><dt>Driver</dt><dd>{{ camera.driver }}</dd></div>
-            <div><dt>Resolution</dt><dd>{{ camera.width }} x {{ camera.height }}</dd></div>
-            <div><dt>Sensor Size</dt><dd>{{ "%0.1f"|format(camera_width_mm | float) }}mm x {{ "%0.1f"|format(camera_height_mm | float) }}mm</dd></div>
-            <div><dt>Pixel Size</dt><dd>{{ "%0.2f"|format(camera.pixelSize | float) }}um</dd></div>
+            <div><dt>Driver</dt><dd>{{ camera.driver or '—' }}</dd></div>
+            <div><dt>Resolution</dt><dd>{{ camera.width if camera.width is not none else '—' }} x {{ camera.height if camera.height is not none else '—' }}</dd></div>
+            <div><dt>Sensor Size</dt><dd>{{ measurement(camera_width_mm, '%0.1f', 'mm') }} x {{ measurement(camera_height_mm, '%0.1f', 'mm') }}</dd></div>
+            <div><dt>Pixel Size</dt><dd>{{ measurement(camera.pixelSize, '%0.2f', 'um') }}</dd></div>
             <div><dt>CFA</dt><dd>{{ camera_cfa }}</dd></div>
-            <div><dt>Bits</dt><dd>{{ camera.bits | int }}</dd></div>
-            <div><dt>Gain</dt><dd>{{ "%0.2f"|format(camera.minGain | float) }} - {{ "%0.2f"|format(camera.maxGain | float) }}</dd></div>
-            <div><dt>Exposure</dt><dd>{{ "%0.6f"|format(camera.minExposure | float) }} - {{ camera.maxExposure | int }}s</dd></div>
-            <div><dt>Lens</dt><dd>{{ camera.lensName }}</dd></div>
-            <div><dt>Focal Length</dt><dd>{{ "%0.2f"|format(camera.lensFocalLength | float) }}mm</dd></div>
-            <div><dt>Focal Ratio</dt><dd>f/{{ "%0.2f"|format(camera.lensFocalRatio | float) }}</dd></div>
-            <div><dt>Field of View</dt><dd>{{ "%0.1f"|format(deg_fov_width | float) }} deg x {{ "%0.1f"|format(deg_fov_height | float) }} deg</dd></div>
-            <div><dt>Owner</dt><dd>{{ owner }}</dd></div>
+            <div><dt>Bits</dt><dd>{{ measurement(camera.bits, '%d') }}</dd></div>
+            <div><dt>Gain</dt><dd>{{ measurement(camera.minGain, '%0.2f') }} - {{ measurement(camera.maxGain, '%0.2f') }}</dd></div>
+            <div><dt>Exposure</dt><dd>{{ measurement(camera.minExposure, '%0.6f') }} - {{ measurement(camera.maxExposure, '%d', 's') }}</dd></div>
+            <div><dt>Lens</dt><dd>{{ camera.lensName or '—' }}</dd></div>
+            <div><dt>Focal Length</dt><dd>{{ measurement(camera.lensFocalLength, '%0.2f', 'mm') }}</dd></div>
+            <div><dt>Focal Ratio</dt><dd>f/{{ measurement(camera.lensFocalRatio, '%0.2f') }}</dd></div>
+            <div><dt>Field of View</dt><dd>{{ measurement(deg_fov_width, '%0.1f', ' deg') }} x {{ measurement(deg_fov_height, '%0.1f', ' deg') }}</dd></div>
+            <div><dt>Owner</dt><dd>{{ owner or '—' }}</dd></div>
         </dl>
     </section>
 </main>

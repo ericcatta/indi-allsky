@@ -106,6 +106,35 @@ def test_camera_info_service_has_no_flask_db_or_filesystem_dependency():
     assert 'getFilesystemPath' not in source
 
 
+def test_missing_geometry_is_unavailable_without_discarding_known_values():
+    service = ModernAdminCameraInfoService(cfa_map={1: 'RGGB'})
+    for field in ('width', 'height', 'pixelSize', 'lensFocalLength', 'lensFocalRatio', 'lensImageCircle'):
+        for value in (None, 0, -1, float('nan'), float('inf')):
+            camera = FakeCamera()
+            setattr(camera, field, value)
+            result = service.build_context(camera)
+            assert result['owner'] == camera.owner
+            for key, measurement in result.items():
+                if isinstance(measurement, (float, int)):
+                    assert math.isfinite(measurement), key
+            if field == 'lensFocalRatio':
+                assert result['lensAperture'] is None
+                assert result['camera_width_mm'] == 11.6
+                assert result['deg_fov_width'] is not None
+            if field == 'width':
+                assert result['camera_width_mm'] is None
+                assert result['camera_height_mm'] == 8.7
+                assert result['deg_fov_width'] is None
+                assert result['deg_fov_height'] is not None
+            if field == 'pixelSize':
+                assert result['arcsec_pixel'] is None
+                assert result['dms_pixel'] is None
+                assert result['deg_fov_width'] is None
+    camera = FakeCamera()
+    camera.cfa = 999
+    assert service.build_context(camera)['camera_cfa'] == 'Unknown'
+
+
 def run_tests():
     from datetime import datetime, timedelta
     policy = ModernAdminImageLagPolicy()
@@ -119,6 +148,7 @@ def run_tests():
             start, end = history.window_bounds(timestamp, camera_now, offset)
             expected = datetime.fromtimestamp(timestamp) + timedelta(seconds=offset) if timestamp else camera_now
             assert end == expected and end - start == timedelta(days=7)
+    test_missing_geometry_is_unavailable_without_discarding_known_values()
     test_camera_info_service_preserves_camera_lens_context_shape()
     test_camera_info_service_preserves_privacy_owner()
     test_modern_camera_info_view_uses_camera_info_service()
