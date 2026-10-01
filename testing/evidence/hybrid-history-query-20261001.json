@@ -1,0 +1,76 @@
+{
+  "date": "2026-10-01",
+  "baseline": "14a1b645",
+  "application": "623495cb",
+  "changes": [
+    "History pages/providers reject malformed or overflowing timestamps with 400 before date arithmetic. Negative/invalid history or camera controls are rejected. Normal zero/default and valid timestamps retained.",
+    "Image/RAW/panorama Loop result limits now enforce the existing 1000-record ceiling; four-hour history and chart one-day caps retained.",
+    "An omitted Loop camera no longer reads undefined camera_now/web policy fields: aggregate requests use server time and each image camera's local/remote policy and S3 prefix.",
+    "Empty remote URLs/keys no longer admit a local file when local delivery is disabled."
+  ],
+  "before": {
+    "timestamp_reproduction": "Isolated ModernAdminLoopView raised ValueError converting timestamp=bad; /home/eric/hybrid-history-query-before-20261001.log",
+    "aggregate_reproduction": "New missing-camera test exposed AttributeError for camera_now. Inspection also found camera-specific web/S3 fields accessed without cameraSetup. Final tests use real synthetic images and different per-camera delivery policies.",
+    "initial_guard_failures": "Three source-shape guards required updating for the deliberate validated parse. Original context fingerprint strings remain unchanged; a narrow AST normalization admits only zero-argument history_timestamp() calls with an exact per-class count. No Full Config fingerprint changed."
+  },
+  "tests": {
+    "entrypoint": "testing/hybrid_history_query_flow_test.py",
+    "scope": "Six Hybrid pages and four JSON providers; both roles; malformed/overflow timestamp, invalid scope/history/limit, upper caps, missing-camera request; actual aggregate image queries with local-disabled, admin-network and distinct S3-prefix cases; empty remote references; anonymous Hybrid login redirects; config/task counts unchanged.",
+    "python": {
+      "status": "passed",
+      "count": 177,
+      "source_changed": false,
+      "report": "/home/eric/hybrid-history-final-regression-20261001/results.json",
+      "sha256": "5244044e0ef7a0381c0e5a17aa94a9cb2bb1d11b6443b2b47dd5d76b28151d78"
+    },
+    "javascript": {
+      "status": "passed",
+      "count": 35,
+      "report": "/tmp/hybrid-history-final-js-20261001.json",
+      "sha256": "622b2e3566ea0e85447eb2267a94577f183952171985aab462c4f2bf127232dc"
+    },
+    "diff_check": "passed"
+  },
+  "deployment": {
+    "preflight": "14a1b645; tracked tree unchanged, existing user untracked files preserved; config118; no active queued/running/manual tasks; 12GiB available; capture/web active with zero restarts.",
+    "method": "Fast-forward pull and Gunicorn-only reload; installed623495cb",
+    "capture": {
+      "pid": 1565,
+      "restarts": 0,
+      "state": "active"
+    },
+    "web": {
+      "pid": 1540,
+      "restarts": 0,
+      "state": "active"
+    },
+    "rollback": "Revert623495cb and reload Gunicorn. This is a read-only web query change: no database/configuration migration or data restore is required."
+  },
+  "native_checks": [
+    {
+      "control": "Loop timestamp=bad",
+      "status": "superato",
+      "observed": "Production browser renders400 Bad Request with timestamp must be an integer."
+    },
+    {
+      "control": "All Cameras Loop, History4Hours, ASI678MC selection and return",
+      "status": "superato",
+      "observed": "Both images decode at4608x2592 and3840x2160; History selects14400 and displays older10:30/10:31 frames. ASI selection retains profile_id=asi678mc and shows only its decoded image. Return All Cameras shows two decoded images."
+    },
+    {
+      "control": "Post-deploy Now",
+      "status": "superato",
+      "observed": "Frames2026-10-01 14:24:39 IMX708 and14:24:48 ASI678MC both complete/decoded at full resolution."
+    },
+    {
+      "control": "Direct native JSON aggregate navigation",
+      "status": "bloccato",
+      "observed": "Browser reports ERR_BLOCKED_BY_CLIENT for direct /js/loop?limit=2 navigation. No direct production API response/limit outcome claimed; isolated Flask effect tests and production UI paths are separate evidence."
+    }
+  ],
+  "limits": [
+    "Native checks use production administrator desktop; other roles and malformed parameter combinations are automated.",
+    "Aggregate remote policy tests use synthetic media and URLs, not live external upload integrations.",
+    "No acquisition, scheduler, scientific algorithm or saved configuration changes; no24-hour stability claim."
+  ]
+}

@@ -251,6 +251,12 @@
           "record": "controls[5]",
           "control": "ASI678MC camera link",
           "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-history-query-20261001.json",
+          "record": "tests",
+          "control": "Validated history controls and camera scope; bounded Loop results and per-camera aggregate delivery policies where applicable",
+          "recorded_status": "superato"
         }
       ]
     },
@@ -391,6 +397,12 @@
           "source": "testing/evidence/hybrid-image-lag-native-20260920.json",
           "record": "controls[11]",
           "control": "Diagnostic camera > IMX708 Wide",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-history-query-20261001.json",
+          "record": "tests",
+          "control": "Validated history controls and camera scope; bounded Loop results and per-camera aggregate delivery policies where applicable",
           "recorded_status": "superato"
         }
       ]
@@ -1227,6 +1239,12 @@
           "control": "Navigation drawer / Loop",
           "recorded_status": "superato",
           "observed_page": "/modern-admin/loop"
+        },
+        {
+          "source": "testing/evidence/hybrid-history-query-20261001.json",
+          "record": "tests",
+          "control": "Validated history controls and camera scope; bounded Loop results and per-camera aggregate delivery policies where applicable",
+          "recorded_status": "superato"
         }
       ]
     },
@@ -1894,6 +1912,12 @@
           "source": "testing/evidence/hybrid-fits-raw-native-20261001.json",
           "record": "checks",
           "control": "Native full-resolution FITS preview, validation/reset and RAW absent-data recovery; exact cases and limits in source",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-history-query-20261001.json",
+          "record": "tests",
+          "control": "Validated history controls and camera scope; bounded Loop results and per-camera aggregate delivery policies where applicable",
           "recorded_status": "superato"
         }
       ]
@@ -2761,6 +2785,12 @@
           "control": "Navigation drawer / Charts",
           "recorded_status": "superato",
           "observed_page": "/modern-admin/observatory/charts"
+        },
+        {
+          "source": "testing/evidence/hybrid-history-query-20261001.json",
+          "record": "tests",
+          "control": "Validated history controls and camera scope; bounded Loop results and per-camera aggregate delivery policies where applicable",
+          "recorded_status": "superato"
         }
       ]
     },
@@ -2973,6 +3003,12 @@
           "control": "Navigation drawer / VirtualSky",
           "recorded_status": "superato",
           "observed_page": "/modern-admin/observatory/virtualsky"
+        },
+        {
+          "source": "testing/evidence/hybrid-history-query-20261001.json",
+          "record": "tests",
+          "control": "Validated history controls and camera scope; bounded Loop results and per-camera aggregate delivery policies where applicable",
+          "recorded_status": "superato"
         }
       ]
     },
@@ -6674,7 +6710,15 @@
         "GET"
       ],
       "handler_module": "indi_allsky.flask.views",
-      "handler": "JsonChartView"
+      "handler": "JsonChartView",
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-history-query-20261001.json",
+          "record": "tests",
+          "control": "Validated history controls and camera scope; bounded Loop results and per-camera aggregate delivery policies where applicable",
+          "recorded_status": "superato"
+        }
+      ]
     },
     {
       "route": "/js/focus",
@@ -6737,7 +6781,15 @@
         "GET"
       ],
       "handler_module": "indi_allsky.flask.views",
-      "handler": "JsonImageLoopView"
+      "handler": "JsonImageLoopView",
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-history-query-20261001.json",
+          "record": "tests",
+          "control": "Validated history controls and camera scope; bounded Loop results and per-camera aggregate delivery policies where applicable",
+          "recorded_status": "superato"
+        }
+      ]
     },
     {
       "route": "/js/looppanorama",
@@ -6746,7 +6798,15 @@
         "GET"
       ],
       "handler_module": "indi_allsky.flask.views",
-      "handler": "JsonPanoramaLoopView"
+      "handler": "JsonPanoramaLoopView",
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-history-query-20261001.json",
+          "record": "tests",
+          "control": "Validated history controls and camera scope; bounded Loop results and per-camera aggregate delivery policies where applicable",
+          "recorded_status": "superato"
+        }
+      ]
     },
     {
       "route": "/js/loopraw",
@@ -6755,7 +6815,15 @@
         "GET"
       ],
       "handler_module": "indi_allsky.flask.views",
-      "handler": "JsonRawImageLoopView"
+      "handler": "JsonRawImageLoopView",
+      "evidence": [
+        {
+          "source": "testing/evidence/hybrid-history-query-20261001.json",
+          "record": "tests",
+          "control": "Validated history controls and camera scope; bounded Loop results and per-camera aggregate delivery policies where applicable",
+          "recorded_status": "superato"
+        }
+      ]
     },
     {
       "route": "/js/processing",

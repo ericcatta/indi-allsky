@@ -165,3 +165,5 @@ riferimento tecnico chiuso, distinto dai sei editor operativi.
 Native mask downloads for both cameras were received on 1 October and match the Raspberry files by SHA-256; CSV/Excel/snapshot receipt remains unverified. See [mask download evidence](../testing/evidence/hybrid-mask-download-native-20261001.json).
 
 Camera Info now tolerates missing driver/lens metadata. Isolated role/camera tests and native numerical parity, narrow-screen and keyboard checks are recorded in [camera metadata evidence](../testing/evidence/hybrid-camera-info-metadata-20261001.json).
+
+History input admission and aggregate Loop delivery policies are verified by [history query evidence](../testing/evidence/hybrid-history-query-20261001.json), including native Loop interval/camera controls and explicit browser limitations.
