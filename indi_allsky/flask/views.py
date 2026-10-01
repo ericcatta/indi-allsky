@@ -1412,6 +1412,7 @@ class AjaxConfigView(BaseView):
                 username=username,
                 note=config_note,
                 config_adapter=self._indi_allsky_config_obj,
+                expected_config_id=self.indi_allsky_config_id,
             )
             app.logger.info('Saved new config')
         except ConfigSaveException as e:
@@ -2731,9 +2732,13 @@ class ModernAdminCamerasView(ModernAdminView):
             new_config = plan_camera_mode(self.indi_allsky_config, enable_requested)
             username = current_user.username if not app.config['LOGIN_DISABLED'] else 'system'
             ModernAdminSettingsRuntimeService().save_config_revision(
-                new_config, username, 'Hybrid multi-camera mode: ' + ('enabled' if enable_requested else 'disabled'))
+                new_config, username, 'Hybrid multi-camera mode: ' + ('enabled' if enable_requested else 'disabled'),
+                expected_config_id=self.indi_allsky_config_id)
             self.indi_allsky_config = new_config
             result['modern_admin_multi_camera_success'] = 'Multi-camera capture ' + ('enabled' if enable_requested else 'disabled') + ' in saved configuration. Restart indi-allsky to apply the change.'
+        except ConfigSaveException as e:
+            db.session.rollback()
+            result['modern_admin_multi_camera_error'] = str(e)
         except ValueError as e:
             result['modern_admin_multi_camera_error'] = str(e)
         except Exception:
@@ -2783,9 +2788,13 @@ class ModernAdminCamerasView(ModernAdminView):
                 return result
             username = current_user.username if not app.config['LOGIN_DISABLED'] else 'system'
             ModernAdminSettingsRuntimeService().save_config_revision(
-                new_config, username, 'Hybrid select capture camera: ' + str(camera.id))
+                new_config, username, 'Hybrid select capture camera: ' + str(camera.id),
+                expected_config_id=self.indi_allsky_config_id)
             self.indi_allsky_config = new_config
             result['modern_admin_camera_switch_success'] = 'Camera selection saved. Restart indi-allsky to apply the change.'
+        except ConfigSaveException as e:
+            db.session.rollback()
+            result['modern_admin_camera_switch_error'] = str(e)
         except ValueError as e:
             result['modern_admin_camera_switch_error'] = str(e)
         except Exception:
@@ -6540,6 +6549,7 @@ class AjaxConfigRestoreView(BaseView):
                 config=config_dict,
                 username=username,
                 config_adapter=self._indi_allsky_config_obj,
+                expected_config_id=self.indi_allsky_config_id,
             )
         except ConfigSaveException as e:
             error_data = {

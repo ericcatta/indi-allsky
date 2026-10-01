@@ -3,6 +3,7 @@ from copy import deepcopy
 from flask import abort, current_app, redirect, request, url_for
 from flask_login import current_user
 from . import db
+from ..exceptions import ConfigSaveException
 from .storage_estimate import storage_forecast
 from ..modern_admin_settings_runtime import ModernAdminSettingsRuntimeService
 from ..storage_pressure import StoragePressureOptions
@@ -39,9 +40,12 @@ class StorageSettingsMixin:
                         KEEP_DAYS=options.keep_days)
                     username = 'system' if current_app.config['LOGIN_DISABLED'] else current_user.username
                     ModernAdminSettingsRuntimeService().save_config_revision(
-                        config, username, 'Hybrid storage protection settings')
+                        config, username, 'Hybrid storage protection settings', expected_config_id=revision)
                     return redirect(url_for('indi_allsky.modern_admin_storage_protection_settings_view', saved='1',
                         camera_id=request.args.get('camera_id', self.camera.id), profile_id=request.args.get('profile_id')), code=303)
+                except ConfigSaveException as exc:
+                    db.session.rollback()
+                    error, status = str(exc), 409
                 except (ValueError, TypeError):
                     error, status = 'Use positive thresholds, a recovery target above the threshold and at least one whole day of retention.', 400
                 except Exception:

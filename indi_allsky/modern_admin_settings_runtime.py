@@ -1139,7 +1139,9 @@ class ModernAdminSettingsRuntimeService:
         return config_adapter.save(username, note)
 
 
-    def save_full_config(self, config, username, note, config_adapter):
+    def save_full_config(self, config, username, note, config_adapter, expected_config_id=None):
+        if expected_config_id is not None:
+            config_adapter.reserve_revision(expected_config_id)
         config_adapter.config = config
         return config_adapter.save(username, note)
 
@@ -1204,8 +1206,10 @@ class ModernAdminSettingsRestoreService:
                                    note='Restored internal snapshot {0}'.format(snapshot.id))
 
 
-    def restore_config(self, config, username, config_adapter, note=None):
+    def restore_config(self, config, username, config_adapter, note=None, expected_config_id=None):
         self.validate_restore_target(config)
+        if expected_config_id is not None:
+            config_adapter.reserve_revision(expected_config_id)
         config_adapter.config = config
         return config_adapter.save(username, note or self.DEFAULT_RESTORE_NOTE)
 
