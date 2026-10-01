@@ -1,0 +1,68 @@
+{
+  "date": "2026-10-01",
+  "baseline": "d3872802",
+  "application": "3a058fae",
+  "defects": {
+    "before": [
+      "Missing task action escaped processUpload with KeyError after atomic claim.",
+      "S3 deletion with only s3_key completed the simulated remote effect, then raised UnboundLocalError for entry.",
+      "Unexpected connect errors had no guaranteed client close."
+    ],
+    "after": [
+      "Claim stays before effects; preparation/execution failures roll back and mark RUNNING tasks FAILED, without replaying terminal tasks.",
+      "Remote deletion has no local cleanup, completes successfully and reports Remote file deleted.",
+      "Unexpected connection failures close the client; put errors retain the existing finally close."
+    ]
+  },
+  "tests": {
+    "targeted": "Actual processUpload/_executeUpload AST methods, real isolated SQLite, simulated non-network adapter; invalid task and remote path, connect/put errors, context rollback, client close, next task success, duplicate suppression, S3 deletion and unchanged disposable source bytes. Existing concurrent claim and finalization tests retained.",
+    "python": {
+      "count": 178,
+      "status": "passed",
+      "source_changed": false,
+      "report": "/home/eric/hybrid-upload-failure-regression-20261001/results.json",
+      "sha256": "5ea0fff094e64476ff06e6fc4b866f5e824748481cc339df6f530d16c99dece0"
+    },
+    "javascript": {
+      "count": 35,
+      "status": "passed",
+      "report": "/tmp/hybrid-upload-failure-js-20261001.json",
+      "sha256": "622b2e3566ea0e85447eb2267a94577f183952171985aab462c4f2bf127232dc"
+    },
+    "source_manifest": "f92697340c215dd75dd0823b7d7b39453bee336a0051aff2a631bb6cf86e0bf7",
+    "diff_check": "passed"
+  },
+  "deployment": {
+    "preflight": "No pending MANUAL/QUEUED/RUNNING tasks; tracked production checkout unchanged; config118.",
+    "action": "Fast-forward to 3a058fae, controlled capture restart. No external transfer or remote deletion submitted.",
+    "capture": {
+      "pid": 472545,
+      "state": "active",
+      "automatic_restarts": 0,
+      "started": "2026-10-01 15:27:10 CEST"
+    },
+    "config_after": 118,
+    "log": "Production capture log 15:27:10\u201315:27:36 contains no ERROR/CRITICAL/Traceback entries.",
+    "rollback": "Revert 3a058fae or restore only indi_allsky/uploader.py from d3872802; controlled capture restart and verify new frames from both cameras. No database/configuration restore required.",
+    "native_frames": [
+      {
+        "camera_id": 1,
+        "timestamp": "2026-10-01 15:27:37",
+        "decoded": true,
+        "width": 4608,
+        "height": 2592
+      },
+      {
+        "camera_id": 2,
+        "timestamp": "2026-10-01 15:27:32",
+        "decoded": true,
+        "width": 3840,
+        "height": 2160
+      }
+    ]
+  },
+  "limits": [
+    "External integrations are disabled; adapter tests do not certify real credentials, remote effects or provider availability.",
+    "No 24-hour acceptance; complete page/control matrix remains open."
+  ]
+}
