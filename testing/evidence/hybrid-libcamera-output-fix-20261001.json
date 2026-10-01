@@ -1,0 +1,65 @@
+{
+  "date": "2026-10-01",
+  "baseline": "5db14280",
+  "deployment": "Not deployed; production remains on application 117d22fb. Live acceptance window ended at 20:00 Europe/Zurich.",
+  "change": "Use an anonymous temporary output file for all libcamera profiles, preventing unread-pipe backpressure during synchronous wait or asynchronous poll; close that file and preserve the exception if process creation fails.",
+  "unchanged": [
+    "Camera command arguments",
+    "Exposure/gain/cadence",
+    "Watchdog limits",
+    "Saved image and metadata paths",
+    "Configuration and database"
+  ],
+  "reproduction": "Historical full-profile output selection blocks a real child writing 4 MiB; secondary-profile temporary-file selection completes. See hybrid-libcamera-pipe-reproduction-20261001.py, pinned to 117d22fb.",
+  "targeted_test": {
+    "entrypoint": "testing/hybrid_libcamera_output_test.py",
+    "mac": "passed",
+    "isolated_linux": "passed",
+    "coverage": [
+      "Full and secondary profiles",
+      "Synchronous wait and asynchronous poll with 4 MiB unread output",
+      "Exact stdout/stderr capture and repeat reads",
+      "Output closure and idempotent close",
+      "FileNotFoundError, ValueError and KeyboardInterrupt propagation with closed output resource"
+    ]
+  },
+  "regression": {
+    "report": "/home/eric/hybrid-libcamera-output-regression-20261001/results.json",
+    "sha256": "0c5b9097dd1cd96bad82067a20986e080708662dffdbae69ca3242dbf0318096",
+    "status": "failed",
+    "executed": 182,
+    "passed": 181,
+    "failed": [
+      "testing/hybrid_async_syslog_test.py"
+    ],
+    "source_changed": false,
+    "source_manifest_sha256": "c18a4361f6cb1c078a57f9f5e668b62e97dab615194dd1f6e089dd8ecb1c5e31",
+    "execution": "Isolated checkout, nice 19; no production deployment or restart"
+  },
+  "syslog_recheck": {
+    "status": "passed",
+    "source_unchanged": true,
+    "priority": "normal",
+    "instrumentation": "Read-only Python line trace records wall and CPU time at the existing assertion",
+    "saturation_wall_seconds": 0.009790842988877557,
+    "saturation_cpu_seconds": 0.009853923999999986,
+    "log": "/home/eric/hybrid-libcamera-output-syslog-recheck-20261001.log",
+    "sha256": "85ccf0205527b430f9ecd2c77e361b509e2951d72c767bcd4656892ca67e942e",
+    "limit": "The initial half-second assertion failure is retained; scheduling delay is possible but not proven. No threshold or syslog source changed; no claim of a clean single full-suite run."
+  },
+  "javascript": {
+    "passed": 35,
+    "failed": 0,
+    "report": "/tmp/hybrid-libcamera-output-js-20261001.json",
+    "sha256": "513aa40c67e281024eca125edbd5bceeb58e025621ea586db4558de36f294679"
+  },
+  "limits": [
+    "The production IMX708 timeout cause remains unproven; this fixes a separately reproduced blocking mechanism.",
+    "Hardware acceptance under encoder load is pending.",
+    "No post-20:00 live tests or production restart were performed."
+  ],
+  "changed_source_sha256": {
+    "indi_allsky/camera/libcamera.py": "8bd7a8714cbc44b9c5b11a9b98d351bc57f3ad47190de0422877570e82a6df7d",
+    "testing/hybrid_libcamera_output_test.py": "870e7a392bc0c4242c940204a5803b77fcbe944ec73cda9cf38f86abad3d51d0"
+  }
+}

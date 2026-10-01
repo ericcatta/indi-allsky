@@ -706,16 +706,6 @@ class IndiClientLibCameraGeneric(IndiClient):
         self._logHybridAwbCaptureCommandDiag(cmd, self._hybrid_awb_capture_control, exposure, exposure_us, gain, self.libcamera_timeout)
 
 
-        if images_only:
-            # MULTI_CAMERA_DIAG: avoid an unread PIPE in the asynchronous
-            # libcamera path. A verbose rpicam/libcamera process can block if
-            # stdout fills before getCcdExposureStatus() reads it.
-            self.libcamera_output_f = tempfile.TemporaryFile(mode='w+b')
-            libcamera_stdout = self.libcamera_output_f
-        else:
-            self.libcamera_output_f = None
-            libcamera_stdout = subprocess.PIPE
-
         timing_diag = self._multiCameraTimingDiagEnabled()
         if timing_diag:
             _multi_camera_diag(
@@ -743,11 +733,7 @@ class IndiClientLibCameraGeneric(IndiClient):
 
         self.processStartTime = time.time()
         self.processStartMonotonic = time.monotonic()
-        self.libcamera_process = subprocess.Popen(
-            cmd,
-            stdout=libcamera_stdout,
-            stderr=subprocess.STDOUT,
-        )
+        self._startLibcameraProcess(cmd)
         logger.info(
             'rpicam-still started profile=%s camera_id=%s pid=%s requested_exposure=%0.8fs timeout=%0.1fs command=%s',
             getattr(self, 'profile_id', 'default'),
@@ -890,6 +876,21 @@ class IndiClientLibCameraGeneric(IndiClient):
 
 
         return True, 'READY'
+
+
+    def _startLibcameraProcess(self, cmd):
+        # Both synchronous wait() and asynchronous polling leave output unread
+        # until exit. A pipe can fill and block rpicam before it saves the frame.
+        self.libcamera_output_f = tempfile.TemporaryFile(mode='w+b')
+        try:
+            self.libcamera_process = subprocess.Popen(
+                cmd,
+                stdout=self.libcamera_output_f,
+                stderr=subprocess.STDOUT,
+            )
+        except BaseException:
+            self._closeLibcameraOutput()
+            raise
 
 
     def _readLibcameraOutput(self):

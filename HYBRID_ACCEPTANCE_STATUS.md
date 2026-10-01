@@ -4,6 +4,19 @@ Updated 1 October 2026. **Classic frontend removal is deployed. Whole-product ac
 The user deferred the separate 24-hour day/night test and detector/AI implementation.
 Those activities are outside this acceptance run, not passed tests.
 
+## Pending correction (not deployed)
+
+The libcamera full-profile output deadlock is corrected in source, using the
+same temporary-file approach as secondary profiles and cleaning up failed starts.
+Real subprocess tests pass on Mac and isolated Linux. The full isolated run
+completed 182 checks: 181 passed and the syslog half-second timing assertion
+failed at nice 19. That unchanged test passed on a normal-priority rerun (9.8 ms);
+the original failure remains recorded, not relabeled as a clean full-suite pass.
+All 35 JavaScript tests passed. No deployment or capture restart was performed
+after the 20:00 live-test cutoff. The actual IMX708 timeout under encoder load
+remains open pending hardware verification.
+[Correction, exact sources and test limits](testing/evidence/hybrid-libcamera-output-fix-20261001.json).
+
 ## Current installation and regression
 
 The latest application change is `117d22fb`: panorama previews retain atomic

@@ -1,5 +1,21 @@
 # Hybrid: deployment and rollback
 
+## Pending capture correction (not deployed)
+
+The libcamera output correction replaces the unread pipe in full profiles with
+an anonymous temporary file, as already used by secondary profiles. This prevents
+verbose child output from blocking synchronous wait or asynchronous polling.
+Process-start failures close the file and preserve the original exception.
+It changes no capture interval, exposure, gain, watchdog, schema or configuration.
+
+Deployment remains pending after the 1 October 20:00 live acceptance cutoff.
+Do not treat a source commit or isolated regression as proof of installation.
+In the next controlled window, back up `indi_allsky/camera/libcamera.py`, deploy
+the tested revision, restart capture and verify fresh frames from both cameras.
+Repeat acquisition during video generation before closing the observed timeout
+under load. Rollback restores that file from `5db14280` and restarts capture;
+no database rollback is required. The production timeout's cause is still open.
+
 ## Current application
 
 The latest application change deployed on 1 October is `117d22fb`: panorama

@@ -1,8 +1,11 @@
 import ast, json, subprocess, sys, tempfile
 from pathlib import Path
 from types import SimpleNamespace
+# Historical reproduction: retain the failing implementation after the fix.
 source = Path('indi_allsky/camera/libcamera.py')
-tree = ast.parse(source.read_text())
+root = Path(__file__).resolve().parents[2]
+baseline = subprocess.check_output(['git', 'show', '117d22fb:' + str(source)], cwd=root, text=True)
+tree = ast.parse(baseline)
 block = next(n for n in ast.walk(tree) if isinstance(n, ast.If) and isinstance(n.test, ast.Name) and n.test.id == 'images_only' and any(isinstance(v, ast.Attribute) and v.attr == 'TemporaryFile' for v in ast.walk(n)))
 program = compile(ast.Module(body=[block], type_ignores=[]), str(source), 'exec')
 results=[]
