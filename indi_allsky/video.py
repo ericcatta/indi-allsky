@@ -283,7 +283,8 @@ class VideoWorker(Process):
 
             action_method(task, **kwargs)
         except Exception as error:
-            logger.exception('Video task %d action=%s failed', task.id, action)
+            # A failed flush expires ORM attributes; use the queue ID until rollback.
+            logger.exception('Video task %d action=%s failed', task_id, action)
             db.session.rollback()
             db.session.refresh(task)
             if task.state in (TaskQueueState.QUEUED, TaskQueueState.RUNNING):

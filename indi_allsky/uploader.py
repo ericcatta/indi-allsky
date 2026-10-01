@@ -196,7 +196,8 @@ class FileUploader(Thread):
 
             self._executeUpload(task)
         except Exception as error:
-            logger.exception('Upload task %s failed', task.id)
+            # A failed flush expires ORM attributes; use the queue ID until rollback.
+            logger.exception('Upload task %s failed', task_id)
             db.session.rollback()
             db.session.refresh(task)
             if task.state == models.TaskQueueState.RUNNING:

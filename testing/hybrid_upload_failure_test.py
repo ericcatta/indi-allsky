@@ -33,6 +33,9 @@ def run():
                 events.append(('put', kwargs))
                 if mode[0] == 'put':
                     raise RuntimeError('synthetic unexpected transfer error')
+                if mode[0] == 'commit':
+                    db.session.add(Task(queue=None, state=State.QUEUED, data={}))
+                    db.session.commit()  # Real NOT NULL failure, not a mocked exception.
                 return {'id': 12}
             def close(self):
                 events.append(('close', None))
@@ -71,7 +74,7 @@ def run():
         for invalid in ({}, [], {'action': constants.TRANSFER_UPLOAD, 'local_file': str(source)}):
             execute(invalid, State.FAILED)
         payload = {'action':constants.TRANSFER_UPLOAD, 'local_file':str(source), 'remote_file':'test.dat'}
-        for failure in ('connect', 'put'):
+        for failure in ('connect', 'put', 'commit'):
             mode[0] = failure; events.clear()
             execute(payload, State.FAILED)
             assert ('close', None) in events, failure

@@ -20,12 +20,17 @@ def run():
         def fail(task,**kwargs):
             db.session.get(Camera,2).name='must rollback'
             raise TypeError('provider returned None')
+        def fail_commit(task, **kwargs):
+            task.queue = None  # Real NOT NULL failure leaves SQLAlchemy pending rollback.
+            db.session.commit()
+        worker.fail_commit = fail_commit
         worker.fail=fail
         worker.succeed=lambda task,**kwargs:task.setSuccess('Effect complete')
         with app.app_context():
             original=db.session.get(Camera,2).name
             cases = [({'action': 'fail'}, State.FAILED),
                      ({'action': 'unknown'}, State.FAILED),
+                     ({'action': 'fail_commit'}, State.FAILED),
                      ({}, State.FAILED), ([], State.FAILED),
                      ({'action': 'succeed', 'kwargs': None}, State.FAILED),
                      ({'action': 'succeed', 'kwargs': []}, State.FAILED),
@@ -37,6 +42,7 @@ def run():
                 namespace['processTask'](worker,{'task_id':task.id,'profile_id':'test-profile-2','camera_id':2})
                 db.session.refresh(task)
                 assert task.state==expected and task.result
+                assert task.queue == Queue.VIDEO
                 assert db.session.get(Camera,2).name==original
             def fail_context(*args, **kwargs):
                 db.session.get(Camera, 2).name = 'must rollback context'
