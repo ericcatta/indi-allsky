@@ -1,0 +1,74 @@
+{
+  "date": "2026-10-01",
+  "revision": "688e8f46",
+  "application": "623495cb",
+  "environment": "Production Raspberry, authenticated administrator, native Codex browser",
+  "status": "superato",
+  "scope": "Current Sky Cycle counts and five Cycle navigation links only",
+  "database_verification": {
+    "connection": "SQLite mode=ro, /var/lib/indi-allsky/indi-allsky.sqlite",
+    "date": "2026-10-01",
+    "cutoff_rule": "image.createDate < displayed latest timestamp + 1 second; capture continues",
+    "cameras": [
+      {
+        "camera_id": 1,
+        "images": 1917,
+        "night": false,
+        "first": "06:53:01",
+        "last": "14:53:13",
+        "fits": 4,
+        "raw": 0
+      },
+      {
+        "camera_id": 2,
+        "images": 1917,
+        "night": false,
+        "first": "06:52:54",
+        "last": "14:53:22",
+        "fits": 4,
+        "raw": 0
+      }
+    ],
+    "output_tables": [
+      "video",
+      "keogram",
+      "startrail",
+      "startrailvideo",
+      "minivideo",
+      "panoramavideo"
+    ],
+    "output_counts": "All zero for both cameras; matches rendered successful/total 0/0"
+  },
+  "controls": [
+    {
+      "control": "Refresh report",
+      "result": "New timestamps 14:53:58 / 14:53:52 and image counts 1920 / 1919 appeared",
+      "status": "superato"
+    },
+    {
+      "control": "Highlights",
+      "result": "Highlights heading and eight saved-image cards with metadata and inspect links",
+      "status": "superato"
+    },
+    {
+      "control": "Library",
+      "result": "Library heading and 48 current image entries from both cameras",
+      "status": "superato"
+    },
+    {
+      "control": "Observatory",
+      "result": "Camera/source, filesystem, tasks, integrations and tools sections",
+      "status": "superato"
+    },
+    {
+      "control": "Now",
+      "result": "Both named cameras and running capture summary rendered",
+      "status": "superato"
+    }
+  ],
+  "limits": [
+    "Navigation verifies the destination, not every control on that destination.",
+    "Current live data contains day records only and no generated outputs for this date; other branches are not live-certified by this check.",
+    "No configuration or capture mutation. No 24-hour observation."
+  ]
+}

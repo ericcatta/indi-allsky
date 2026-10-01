@@ -4199,6 +4199,11 @@
           "control": "Navigation drawer / Sky Cycle",
           "recorded_status": "superato",
           "observed_page": "/modern-admin/sky-cycle"
+        },
+        {
+          "source": "testing/evidence/hybrid-sky-cycle-live-20261001.json",
+          "control": "Live database counts, refresh and four Cycle navigation destinations",
+          "recorded_status": "superato"
         }
       ]
     },
