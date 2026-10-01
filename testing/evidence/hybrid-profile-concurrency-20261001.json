@@ -1,0 +1,90 @@
+{
+  "date": "2026-10-01",
+  "defect": "Two overlapping profile saves read the same revision and both succeeded; the later whole-config write could discard the first profile edit.",
+  "reproduction": {
+    "log": "/home/eric/hybrid-profile-concurrency-before-20261001.log",
+    "exit_code": 1,
+    "revision_count": 3,
+    "responses": [
+      [
+        1,
+        200,
+        false
+      ],
+      [
+        2,
+        200,
+        false
+      ]
+    ]
+  },
+  "change": "Settings profile persistence reserves the SQLite writer transaction, checks the revision loaded by the request, and rejects a stale edit before saving. Existing form feedback reports the conflict.",
+  "targeted": {
+    "log": "/home/eric/hybrid-profile-concurrency-after-20261001.log",
+    "exit_code": 0,
+    "scope": "Two real Flask processes against a disposable SQLite database; one edit survives, one stale write is rejected. Extended regression also verifies a fresh retry retains both edits and global settings."
+  },
+  "regression": {
+    "status": "passed",
+    "python_report": "/home/eric/hybrid-profile-concurrency-final-20261001/results.json",
+    "javascript_passed": 35,
+    "javascript_report": "/tmp/hybrid-profile-concurrency-js-20261001.json",
+    "javascript_sha256": "622b2e3566ea0e85447eb2267a94577f183952171985aab462c4f2bf127232dc",
+    "local_source_manifest_sha256": "9ae0a3098016b701c18e85ad6ed65d9f1f7a4c3f0f5a491b78e48c5c4f3e131d",
+    "python_passed": 180,
+    "source_changed": false,
+    "python_report_sha256": "d9c13f0677910264a1966f0014dd22b73e6d63541bd94580777c6652313c8b15",
+    "tested_source_manifest_sha256": "9ae0a3098016b701c18e85ad6ed65d9f1f7a4c3f0f5a491b78e48c5c4f3e131d"
+  },
+  "deployment": {
+    "status": "installed; bounded native frame check passed",
+    "commit": "0afac099",
+    "backup": "/home/eric/hybrid-backups/hybrid-profile-concurrency-20261001",
+    "rollback": "Restore config.py, modern_admin_settings_runtime.py and flask/views.py from f121d98b or verified backup; reload Gunicorn only. Do not restore database or media.",
+    "web_only_reload": true,
+    "capture_pid_unchanged": 537392,
+    "web_pid_unchanged": 1540,
+    "automatic_restarts": 0,
+    "config_revision_unchanged": 118,
+    "pending_tasks": 0,
+    "native_frames": [
+      {
+        "camera_id": 1,
+        "time": "2026-10-01 17:32:42",
+        "complete": true,
+        "width": 4608,
+        "height": 2592
+      },
+      {
+        "camera_id": 2,
+        "time": "2026-10-01 17:32:38",
+        "complete": true,
+        "width": 3840,
+        "height": 2160
+      }
+    ],
+    "installed_sha256": {
+      "indi_allsky/config.py": "f92b63fca57f02726aa6ed52dc033f30cfd1bfaf1b89851c2d7cd1c510e993dc",
+      "indi_allsky/modern_admin_settings_runtime.py": "efaf2affce8652917a7b039cde482ddf8499339228a0e1686b8edcaf147a1214",
+      "indi_allsky/flask/views.py": "33e2fbf38ecec19dc875612231312f79400ecc3fcd88763f6bea9dbb55373a87"
+    },
+    "backup_sha256": {
+      "config.py": "f97726ced4f9b3cb1a481ecfad85caa13b48493c712483a2edfdaf76d23673b2",
+      "modern_admin_settings_runtime.py": "daf45ba58dd7e73b281585043679a3274573c4fc1521ff906d69485bcdbd27c8",
+      "views.py": "5254f68ddb2d6264720ab66613c6829e830a5cf64426688b1bd84d9bbaacca1a"
+    }
+  },
+  "limits": [
+    "This test covers overlapping requests through save_settings_config_revision, not every configuration writer.",
+    "Sequential submissions from an old open form are not covered by a form revision token in this change.",
+    "Concurrent behavior is exercised on the deployed SQLite backend; other database engines are not certified.",
+    "No production settings changed; acquisition remains active.",
+    "This is not completion of the full control matrix or the overall acceptance goal."
+  ],
+  "initial_regression": {
+    "report": "/home/eric/hybrid-profile-concurrency-regression-20261001/results.json",
+    "passed": 179,
+    "failed": "modern_admin_settings_runtime_test.py: service must not depend on Flask/db.session",
+    "resolution": "Moved transaction reservation into the injected persistence adapter. Existing guard unchanged and passing; real concurrency/retry test passes after correction."
+  }
+}

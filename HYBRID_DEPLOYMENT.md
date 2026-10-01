@@ -2,9 +2,10 @@
 
 ## Current application
 
-The latest application change deployed on 1 October is `db205760`: Hybrid AWB
-sync validates the destination camera before saving either profile.
-[Verification and limits](testing/evidence/hybrid-profile-sync-capability-20261001.json).
+The latest application change deployed on 1 October is `0afac099`: overlapping
+Hybrid profile saves reject stale revisions instead of silently replacing another
+edit. [Verification and limits](testing/evidence/hybrid-profile-concurrency-20261001.json).
+The preceding AWB sync capability fix is `db205760`.
 The preceding worker recovery change is `ffb4335c`.
 The previous `f21f87d5` change corrected Observatory disk usage.
 Geometry now rejects invalid azimuth before copy/review; the updated asset version is verified in production. 175 Python checks and 35 JavaScript tests passed. [Validation and deployment](testing/evidence/hybrid-geometry-validation-20261001.json).
@@ -17,10 +18,10 @@ release heading as proof of the installed version.
 Classic frontend is removed. Hybrid requires login; shared backend and public
 compatibility handlers remain. Configuration revision is 118.
 
-The current application passed 179 Python/compile entrypoints and 35 JavaScript
+The current application passed 180 Python/compile entrypoints and 35 JavaScript
 tests. The last deployment reloaded only Gunicorn; capture PID 537392 and web
 PID 1540 remained unchanged, active, with zero automatic restarts. Both recent
-camera frames decoded after deployment. [Regression and deployment](testing/evidence/hybrid-profile-sync-capability-20261001.json).
+camera frames decoded after deployment. [Regression and deployment](testing/evidence/hybrid-profile-concurrency-20261001.json).
 This is bounded acceptance, not full-product or 24-hour certification.
 See [current status and open gates](HYBRID_ACCEPTANCE_STATUS.md).
 

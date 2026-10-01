@@ -3761,6 +3761,12 @@
           "record": "targeted",
           "control": "Backend AWB sync destination validation, atomic failure and compatible success; native confirmation remains open",
           "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-profile-concurrency-20261001.json",
+          "record": "targeted",
+          "control": "Overlapping profile saves reject stale revision; fresh retry preserves both edits and global settings in isolated SQLite",
+          "recorded_status": "superato"
         }
       ]
     },
