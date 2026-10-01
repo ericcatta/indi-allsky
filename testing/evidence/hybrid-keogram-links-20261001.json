@@ -1,0 +1,37 @@
+{
+  "date": "2026-10-01",
+  "baseline": "08652ebe",
+  "status": "candidate; targeted tests passed; full candidate regression and native deployment acceptance pending",
+  "defect": "Keogram listing links to Realtime and Long-term Keogram omitted the selected camera/profile query.",
+  "fix": "Carry the listing selected camera and requested profile in both existing links. No generation, algorithm or configuration changes.",
+  "targeted": {
+    "entrypoint": "testing/hybrid_media_detail_context_test.py",
+    "environment": "Isolated Flask fixture, Classic imports/templates/assets forbidden",
+    "before": {
+      "exit_code": 1,
+      "assertion": "Open Realtime Keogram URL missing camera/profile",
+      "log": "/home/eric/hybrid-keogram-links-before-20261001.log",
+      "sha256": "23021f4918e453d15ccd858a42536ebce3e8110472f6abff3e32ff0493e45511"
+    },
+    "after": {
+      "exit_code": 0,
+      "log": "/home/eric/hybrid-keogram-links-after-20261001.log",
+      "sha256": "7642cca9245c522901433cbd6d9caf5f89274a96a26af6255c98d23555a985b9"
+    },
+    "coverage": [
+      "Both links, admin and ordinary user, cameras 1 and 2",
+      "Exact query camera/profile values",
+      "Actual destination template context camera ID",
+      "Existing image/timelapse detail/return and wrong-camera rejection"
+    ]
+  },
+  "deployment": "Not deployed; production unchanged after live acceptance cutoff",
+  "limits": [
+    "Native clicks and full regression of the combined candidate remain pending.",
+    "This does not certify all controls or all historical blocked records in the route register."
+  ],
+  "source_sha256": {
+    "indi_allsky/flask/templates/modern_admin/keograms.html": "59f4fd0b685a9ebac1002b2f99cc3d52d372425da6fc8dfc7df8b6fb570bc6e6",
+    "testing/hybrid_media_detail_context_test.py": "2a056875b6209ecd37438dbe297b9c3024f58c454f70701f85f923cf19a80548"
+  }
+}

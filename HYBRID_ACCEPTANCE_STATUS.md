@@ -17,6 +17,13 @@ after the 20:00 live-test cutoff. The actual IMX708 timeout under encoder load
 remains open pending hardware verification.
 [Correction, exact sources and test limits](testing/evidence/hybrid-libcamera-output-fix-20261001.json).
 
+The pending Keograms navigation correction also preserves camera/profile in
+both Realtime and Long-term links. The regression reproduced the missing query;
+after correction, both roles and cameras load the correct destination context.
+Only the targeted suite has run for this additional change: full combined
+regression and native deployment verification remain pending.
+[Keogram links candidate](testing/evidence/hybrid-keogram-links-20261001.json).
+
 ## Current installation and regression
 
 The latest application change is `117d22fb`: panorama previews retain atomic

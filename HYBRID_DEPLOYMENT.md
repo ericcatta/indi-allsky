@@ -16,6 +16,13 @@ Repeat acquisition during video generation before closing the observed timeout
 under load. Rollback restores that file from `5db14280` and restarts capture;
 no database rollback is required. The production timeout's cause is still open.
 
+The pending Keograms template correction retains camera/profile when opening
+Realtime or Long-term Keogram. Its targeted before/after test passes, but full
+combined-candidate regression and native clicks are pending. This template-only
+change requires a web reload when deployed. Rollback restores
+`indi_allsky/flask/templates/modern_admin/keograms.html` from `08652ebe`;
+no database or capture setting rollback is needed.
+
 ## Current application
 
 The latest application change deployed on 1 October is `117d22fb`: panorama
