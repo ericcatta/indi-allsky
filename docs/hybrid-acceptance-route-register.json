@@ -4347,6 +4347,126 @@
           "record": "controls",
           "control": "Native scoped camera navigation; file-space filtering, empty state, paging, copy and thirteen ascending column sorts; limits in source",
           "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-storage-navigation-20261001.json",
+          "record": "controls[0]",
+          "control": "IMX708 Wide camera 1",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-storage-navigation-20261001.json",
+          "record": "controls[1]",
+          "control": "Storage Protection camera 1",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-storage-navigation-20261001.json",
+          "record": "controls[2]",
+          "control": "File Space Usage camera 1",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-storage-navigation-20261001.json",
+          "record": "controls[3]",
+          "control": "Drives camera 1",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-storage-navigation-20261001.json",
+          "record": "controls[4]",
+          "control": "Gallery camera 1",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-storage-navigation-20261001.json",
+          "record": "controls[5]",
+          "control": "Images camera 1",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-storage-navigation-20261001.json",
+          "record": "controls[6]",
+          "control": "FITS Inspection camera 1",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-storage-navigation-20261001.json",
+          "record": "controls[7]",
+          "control": "FITS Viewer camera 1",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-storage-navigation-20261001.json",
+          "record": "controls[8]",
+          "control": "Generate camera 1",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-storage-navigation-20261001.json",
+          "record": "controls[9]",
+          "control": "Process FITS camera 1",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-storage-navigation-20261001.json",
+          "record": "controls[10]",
+          "control": "ASI678MC camera 2",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-storage-navigation-20261001.json",
+          "record": "controls[11]",
+          "control": "Storage Protection camera 2",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-storage-navigation-20261001.json",
+          "record": "controls[12]",
+          "control": "File Space Usage camera 2",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-storage-navigation-20261001.json",
+          "record": "controls[13]",
+          "control": "Drives camera 2",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-storage-navigation-20261001.json",
+          "record": "controls[14]",
+          "control": "Gallery camera 2",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-storage-navigation-20261001.json",
+          "record": "controls[15]",
+          "control": "Images camera 2",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-storage-navigation-20261001.json",
+          "record": "controls[16]",
+          "control": "FITS Inspection camera 2",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-storage-navigation-20261001.json",
+          "record": "controls[17]",
+          "control": "FITS Viewer camera 2",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-storage-navigation-20261001.json",
+          "record": "controls[18]",
+          "control": "Generate camera 2",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-storage-navigation-20261001.json",
+          "record": "controls[19]",
+          "control": "Process FITS camera 2",
+          "recorded_status": "superato"
         }
       ]
     },
