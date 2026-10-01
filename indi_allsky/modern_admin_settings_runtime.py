@@ -1066,6 +1066,27 @@ class ModernAdminConfigRevisionPersistenceAdapter:
         self.clock = clock or self.utcnow
 
 
+    def reserve_revision(self, expected_config_id):
+        """Keep the revision check and subsequent save in one writer transaction."""
+        from sqlalchemy import text
+        from sqlalchemy.exc import OperationalError
+        from .exceptions import ConfigSaveException
+
+        query = self.db_session.query(self.config_model).order_by(self.config_model.id.desc())
+        try:
+            if self.db_session.get_bind().dialect.name == 'sqlite':
+                self.db_session.execute(text('BEGIN IMMEDIATE'))
+            else:
+                query = query.with_for_update()
+            latest = query.first()
+        except OperationalError as exc:
+            self.db_session.rollback()
+            raise ConfigSaveException('Configuration is busy. Reload and review before retrying.') from exc
+        if latest is None or latest.id != expected_config_id:
+            self.db_session.rollback()
+            raise ConfigSaveException('Configuration changed. Reload this page and review before saving. No config was saved.')
+
+
     def save_revision(self, config, user_entry, note, encrypted):
         config_entry = self.config_model(
             data=config,
@@ -1110,8 +1131,10 @@ class ModernAdminSettingsRuntimeService:
         self.config_adapter_factory = config_adapter_factory or self.default_config_adapter_factory
 
 
-    def save_config_revision(self, config, username, note):
+    def save_config_revision(self, config, username, note, expected_config_id=None):
         config_adapter = self.config_adapter_factory()
+        if expected_config_id is not None:
+            config_adapter.reserve_revision(expected_config_id)
         config_adapter.config = config
         return config_adapter.save(username, note)
 

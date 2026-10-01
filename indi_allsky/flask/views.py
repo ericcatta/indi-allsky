@@ -9753,7 +9753,9 @@ class ModernAdminSettingsInventoryView(SettingsCameraScopedTemplateMixin, Modern
 
 
     def save_settings_config_revision(self, config, username, note):
-        return self.settings_runtime_service().save_config_revision(config, username, note)
+        return self.settings_runtime_service().save_config_revision(
+            config, username, note, expected_config_id=self.indi_allsky_config_id,
+        )
 
 
     def get_settings_ownership_context(self):

@@ -965,6 +965,16 @@ class IndiAllSkyConfig(IndiAllSkyConfigBase):
         return config_entry
 
 
+    def reserve_revision(self, expected_config_id):
+        from .modern_admin_settings_runtime import ModernAdminConfigRevisionPersistenceAdapter
+
+        return ModernAdminConfigRevisionPersistenceAdapter(
+            config_model=IndiAllSkyDbConfigTable,
+            db_session=db.session,
+            config_level=__config_level__,
+        ).reserve_revision(expected_config_id)
+
+
     def _setConfigEntry(self, config, user_entry, note, encrypted):
         from .modern_admin_settings_runtime import ModernAdminConfigRevisionPersistenceAdapter
 
