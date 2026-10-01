@@ -1854,6 +1854,12 @@
           "control": "Navigation drawer / RAW Source",
           "recorded_status": "superato",
           "observed_page": "/modern-admin/media/raw"
+        },
+        {
+          "source": "testing/evidence/hybrid-fits-raw-native-20261001.json",
+          "record": "checks",
+          "control": "Native full-resolution FITS preview, validation/reset and RAW absent-data recovery; exact cases and limits in source",
+          "recorded_status": "superato"
         }
       ]
     },
@@ -1870,6 +1876,12 @@
           "source": "testing/evidence/hybrid-loop-post-classic-20260921.json",
           "record": "controls[5]",
           "control": "Empty state / Processed image loop",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-fits-raw-native-20261001.json",
+          "record": "checks",
+          "control": "Native full-resolution FITS preview, validation/reset and RAW absent-data recovery; exact cases and limits in source",
           "recorded_status": "superato"
         }
       ]
@@ -5559,6 +5571,12 @@
           "record": "controls[9]",
           "control": "production FITS preview",
           "recorded_status": "bloccato"
+        },
+        {
+          "source": "testing/evidence/hybrid-fits-raw-native-20261001.json",
+          "record": "checks",
+          "control": "Native full-resolution FITS preview, validation/reset and RAW absent-data recovery; exact cases and limits in source",
+          "recorded_status": "superato"
         }
       ]
     },

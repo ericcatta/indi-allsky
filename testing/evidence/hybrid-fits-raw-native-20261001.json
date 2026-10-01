@@ -1,0 +1,84 @@
+{
+  "baseline": "fb33e9a9",
+  "application": "64c28b38",
+  "environment": "Native production browser, administrator desktop; actual saved FITS930/931; preview operations only",
+  "checks": [
+    {
+      "control": "Process FITS camera2 / Source preview",
+      "status": "superato",
+      "observed": "Source FITS931 produced decoded JPEG3840x2160; reported0.082s."
+    },
+    {
+      "control": "Process FITS camera2 / Output Type PNG / Process preview",
+      "status": "superato",
+      "observed": "Decoded PNG3840x2160, reported0.915s, download name camera-2-light-931.png. No received-file claim."
+    },
+    {
+      "control": "Reset parameters",
+      "status": "superato",
+      "observed": "Status Parameters reset and previous image hidden."
+    },
+    {
+      "control": "IMX708 Wide camera link",
+      "status": "superato",
+      "observed": "Selected camera1/profile imx708-wide and light FITS930."
+    },
+    {
+      "control": "Process FITS camera1 / Source preview",
+      "status": "superato",
+      "observed": "Decoded JPEG4608x2592, reported0.181s."
+    },
+    {
+      "control": "Process FITS camera1 / Process preview",
+      "status": "superato",
+      "observed": "Decoded JPEG4608x2592, reported1.275s, download name camera-1-light-930.jpg."
+    },
+    {
+      "control": "Find a parameter / IMAGE_ROTATE_ANGLE",
+      "status": "superato",
+      "observed": "Search revealed only Rotation Angle row."
+    },
+    {
+      "control": "Invalid rotation / Process preview",
+      "status": "superato",
+      "observed": "999 rejected with Rotation angle must be180 or less; previous preview hidden and fix-highlighted-parameters status."
+    },
+    {
+      "control": "Frame type Dark / empty ID / Load frame",
+      "status": "superato",
+      "observed": "Camera1 preserved; no dark FITS state; Process preview disabled."
+    },
+    {
+      "control": "Frame type Bad pixel map / Load frame",
+      "status": "superato",
+      "observed": "No bpm FITS state; Process preview disabled."
+    },
+    {
+      "control": "Browse FITS archive",
+      "status": "superato",
+      "observed": "Reached camera1/profile imx708-wide archive with actual ccd1 FITS filenames."
+    },
+    {
+      "control": "RAW camera filters",
+      "status": "superato",
+      "observed": "Camera1 and camera2 show no raw rows; ASI selection uses profile_id=asi678mc and resolves camera2."
+    },
+    {
+      "control": "RAW image loop / History",
+      "status": "superato",
+      "observed": "Camera2 loop reports No frames in this time range for15minutes and4hours."
+    },
+    {
+      "control": "Processed image loop",
+      "status": "superato",
+      "observed": "Link retains camera2/profile asi678mc; resulting loop loads decoded3840x2160 image."
+    }
+  ],
+  "limits": [
+    "Reported processing times are UI/server measurements, not optimization benchmarks",
+    "No preview download receipt or original RAW delivery verified",
+    "RAW playback cannot be tested with real data because no RAW rows are available",
+    "Only the specified processing settings exercised; no claim every processing parameter is verified",
+    "No configuration save or source-file overwrite requested; existing isolated pipeline tests cover source preservation"
+  ]
+}

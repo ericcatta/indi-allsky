@@ -159,3 +159,5 @@ riferimento tecnico chiuso, distinto dai sei editor operativi.
 [Aggiornamenti e log, verifica nativa del 30 settembre](../testing/evidence/hybrid-updates-log-native-20260930.json): conferme incomplete bloccate, servizio Idle, cronologia, numero righe, filtro vuoto/selettivo, aggiornamento automatico e navigazione fra fonti. Nessun aggiornamento reale avviato. Il JSON collega anche le prove storiche isolate del ciclo upgrade, conservandone data e limiti.
 
 [Geometria → Keogram Settings, 1 ottobre](../testing/evidence/hybrid-geometry-scope-20261001.json): perdita di camera/profilo corretta; percorso nativo verificato per entrambe le camere, test isolati per entrambi i ruoli, nessun salvataggio in produzione.
+
+[FITS reali e RAW senza dati, 1 ottobre](../testing/evidence/hybrid-fits-raw-native-20261001.json): anteprime sorgente/elaborate delle due camere decodificate a piena risoluzione, validazione rotazione, reset e stati dark/BPM/RAW assenti. Ricezione download e riproduzione RAW con dati restano non verificate.
