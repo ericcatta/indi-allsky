@@ -185,17 +185,32 @@ still running/queued and are not certified by this check.
    been deployed for either finding. Automatic timelapse task 14213 completed
    and its native output opened, but playback to the end was not verified.
    [Under-load evidence and reproduction](testing/evidence/hybrid-night-load-20261001.json).
-4. **Record unavailable physical/integration effects as untested.** No GPIO,
-   focuser, fan, heater or external sensor driver is assigned in configuration 118.
-   The user reports no external disks/storage or upload integrations in use.
-   S3/MQTT/Sync/YouTube are disabled; physical connections and external test
-   destinations are unavailable/unidentified. Mocked adapter tests and disabled UI
-   states do not establish physical effects. Preserve these supported functions.
-5. **Finish the remaining repository/backend review.** The existing
-   [dependency review](docs/HYBRID_DEPENDENCIES.md), installer checks and specific
-   retirements above establish their scopes, not an exhaustive absence of dead
-   code, concurrency defects or resource leaks. Clean builds on every supported
-   platform have not been performed and must not be implied.
+4. **Close the candidate release.** Run the full regression against the combined
+   candidate, inspect the final source/evidence diff, deploy in an agreed window,
+   and verify both the rpicam change and Keogram navigation. Reconcile the control
+   matrix with the exact deployed revision, preserve useful backend components,
+   and record every remaining defect or unverified effect before release.
+   The existing [dependency review](docs/HYBRID_DEPENDENCIES.md), installer checks,
+   static-name review and focused backend fixes remain bounded evidence; they do
+   not guarantee absence of all bugs. The user requested a systematic audit,
+   not a mathematical proof that no defect can exist.
+
+## Recorded verification limits
+
+No GPIO, focuser, fan, heater or external sensor driver is assigned in
+configuration 118. The user reports no external disks/storage or upload
+integrations in use. S3/MQTT/Sync/YouTube are disabled; physical connections and
+external test destinations are unavailable/unidentified. Their live effects
+remain explicitly untested, not passed or removed from supported functionality.
+The reporting requirement is satisfied by this disclosure; activating new
+hardware or integrations is not an implicit requirement of this installation's
+acceptance. Any future activation needs its own direct acceptance.
+
+Clean installations on every supported OS/architecture have not been performed.
+That is a portability limit, not an additional release gate invented by this
+audit. Retained build dependencies must not be removed without suitable evidence.
+See the [remaining acceptance checklist](docs/HYBRID_ACCEPTANCE_REMAINING.md)
+for specific unresolved cases and the evidence needed to close them.
 
 Abrupt power-loss durability is untested. The successful cold start followed an
 orderly shutdown; do not conflate the two. No abrupt-power-cut experiment or
