@@ -1,0 +1,98 @@
+{
+  "date": "2026-10-01",
+  "application_commit": "ffb4335c",
+  "controls": [
+    {
+      "page": "/modern-admin/settings/cameras",
+      "role": "administrator fixture account",
+      "camera_id": 2,
+      "profile_id": "test-profile-2",
+      "environment": "isolated native browser localhost:18121",
+      "request": "POST form with native CSRF",
+      "status": "superato",
+      "control": "Driver validation: missing INDI port",
+      "expected": "Reject incomplete connection without saving",
+      "observed": "Inline INDI Port required error and explicit No config was saved; subsequent revision count confirms no extra save."
+    },
+    {
+      "page": "/modern-admin/settings/cameras",
+      "role": "administrator fixture account",
+      "camera_id": 2,
+      "profile_id": "test-profile-2",
+      "environment": "isolated native browser localhost:18121",
+      "request": "POST form with native CSRF",
+      "status": "superato",
+      "control": "Save Driver / Connection",
+      "expected": "Save the selected profile connection only",
+      "observed": "Set fixture-camera.invalid and port 7624; revision 2 stores nested indi server/port/camera_name and canonicalizes the old camera-name field. Success message requires explicit restart."
+    },
+    {
+      "page": "/modern-admin/settings/cameras",
+      "role": "administrator fixture account",
+      "camera_id": 2,
+      "profile_id": "test-profile-2",
+      "environment": "isolated native browser localhost:18121",
+      "request": "POST form with native CSRF",
+      "status": "superato",
+      "control": "Save Acquisition",
+      "expected": "Persist selected gain without changing other camera",
+      "observed": "Night gain 43 persisted in revision 3; existing exposure maximum 12 preserved during canonicalization into nested gain/exposure. Success message observed."
+    },
+    {
+      "page": "/modern-admin/settings/cameras",
+      "role": "administrator fixture account",
+      "camera_id": 2,
+      "profile_id": "test-profile-2",
+      "environment": "isolated native browser localhost:18121",
+      "request": "POST form with native CSRF",
+      "status": "superato",
+      "control": "Save Lens & Optics",
+      "expected": "Persist selected profile lens override",
+      "observed": "Revision 4 stores lens.name Acceptance Lens Two; success message observed."
+    },
+    {
+      "page": "/modern-admin/settings/cameras",
+      "role": "administrator fixture account",
+      "camera_id": 2,
+      "profile_id": "test-profile-2",
+      "environment": "isolated native browser localhost:18121",
+      "request": "POST form with native CSRF",
+      "status": "superato",
+      "control": "Save Hybrid Controller",
+      "expected": "Persist processing and AWB mode in selected profile",
+      "observed": "Revision 5 stores hybrid processing_mode and postprocess_rgb AWB apply mode; success message and Hybrid summary observed."
+    },
+    {
+      "page": "/modern-admin/settings/cameras",
+      "role": "administrator fixture account",
+      "camera_id": 2,
+      "profile_id": "test-profile-2",
+      "environment": "isolated native browser localhost:18121",
+      "request": "POST form with native CSRF",
+      "status": "bloccato",
+      "control": "Hybrid Save & Sync confirmation",
+      "expected": "Cancel and confirm separately, then verify the bounded copy to the other profile",
+      "observed": "Click timed out in browser input dispatch. Dialog API returned undefined; subsequent DOM access and tab close also timed out. No new revision was saved. User asked to cancel any visible native confirmation. This is an automation blocker, not a demonstrated application defect."
+    }
+  ],
+  "database_verification": {
+    "revisions": 5,
+    "queued_tasks": 0,
+    "other_profile_exactly_unchanged_at_every_save": true,
+    "global_keys_outside_MULTI_CAMERA_exactly_unchanged": true,
+    "selected_profile_identity_binding_outputs_and_test_extension_preserved": true,
+    "production_revision_unchanged": 118
+  },
+  "cleanup": {
+    "server_stopped": true,
+    "tunnel_stopped": true,
+    "temporary_tab_close": "Timed out; user confirmation dialog handoff pending",
+    "temporary_database_removed": true
+  },
+  "limits": [
+    "Four single-profile Save buttons verified with representative changed values, not every field/value combination.",
+    "Save & Sync native cancel/confirm effects remain unverified; no successful sync claim.",
+    "No live camera configuration or hardware effect changed; no worker consumed tasks.",
+    "Existing 178 Python/35 JavaScript regression remains the current application regression; no application source modified in this mission."
+  ]
+}

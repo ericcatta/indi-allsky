@@ -3719,6 +3719,42 @@
           "record": "controls[1]",
           "control": "Profile tab \u2192 Settings index \u2192 Exposure / Gain",
           "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-profile-saves-native-20261001.json",
+          "record": "controls[0]",
+          "control": "Driver validation: missing INDI port",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-profile-saves-native-20261001.json",
+          "record": "controls[1]",
+          "control": "Save Driver / Connection",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-profile-saves-native-20261001.json",
+          "record": "controls[2]",
+          "control": "Save Acquisition",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-profile-saves-native-20261001.json",
+          "record": "controls[3]",
+          "control": "Save Lens & Optics",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-profile-saves-native-20261001.json",
+          "record": "controls[4]",
+          "control": "Save Hybrid Controller",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-profile-saves-native-20261001.json",
+          "record": "controls[5]",
+          "control": "Hybrid Save & Sync confirmation",
+          "recorded_status": "bloccato"
         }
       ]
     },

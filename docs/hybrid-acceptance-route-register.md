@@ -94,7 +94,7 @@ Indice statico: 7.369 identità con tutti i 43.978 riferimenti originali conserv
 | `/modern-admin/settings/basic` | 2 | [hybrid-settings-domain-controls-20260929](../testing/evidence/hybrid-settings-domain-controls-20260929.json) |
 | `/modern-admin/settings/camera-connection` | 1 | [hybrid-settings-export-route-acceptance-20260930](../testing/evidence/hybrid-settings-export-route-acceptance-20260930.json) |
 | `/modern-admin/settings/camera-profile` | 1 | [hybrid-settings-export-route-acceptance-20260930](../testing/evidence/hybrid-settings-export-route-acceptance-20260930.json) |
-| `/modern-admin/settings/cameras` | 4 | [hybrid-mobile-navigation-20260921](../testing/evidence/hybrid-mobile-navigation-20260921.json), [hybrid-settings-navigation-context-20260921](../testing/evidence/hybrid-settings-navigation-context-20260921.json) |
+| `/modern-admin/settings/cameras` | 10 | [hybrid-mobile-navigation-20260921](../testing/evidence/hybrid-mobile-navigation-20260921.json), [hybrid-settings-navigation-context-20260921](../testing/evidence/hybrid-settings-navigation-context-20260921.json), [Salvataggi profilo e limite conferma Sync](../testing/evidence/hybrid-profile-saves-native-20261001.json) |
 | `/modern-admin/settings/capture` | 1 | [hybrid-capture-fallback-native-20260930](../testing/evidence/hybrid-capture-fallback-native-20260930.json) |
 | `/modern-admin/settings/developer` | 1 | [hybrid-settings-export-route-acceptance-20260930](../testing/evidence/hybrid-settings-export-route-acceptance-20260930.json) |
 | `/modern-admin/settings/exposure-gain` | 1 | [hybrid-settings-export-route-acceptance-20260930](../testing/evidence/hybrid-settings-export-route-acceptance-20260930.json) |
