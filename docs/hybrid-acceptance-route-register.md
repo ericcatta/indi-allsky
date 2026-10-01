@@ -6,6 +6,8 @@ Gli esiti sono riferimenti puntuali alle prove originali, che specificano revisi
 
 [Registro completo con riferimenti ai singoli controlli](hybrid-acceptance-route-register.json).
 
+[Archivio reale, amministratore](../testing/evidence/hybrid-archive-production-20261001.json): entrambe le camere, dettagli decodificati, paginazione, ritorno con filtri, stato vuoto e recupero. La prova non sostituisce il vecchio ambito utente ordinario o un benchmark prolungato.
+
 Riconciliazione del 1 ottobre: il campo `resolution` collega undici esiti storici
 alle successive prove superate, senza modificare `recorded_status`:
 

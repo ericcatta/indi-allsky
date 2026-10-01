@@ -1425,7 +1425,18 @@
           "source": "testing/evidence/hybrid-archive-2026-09-06.json",
           "record": "controls[14]",
           "control": "Live archive, production data and performance",
-          "recorded_status": "bloccato"
+          "recorded_status": "bloccato",
+          "additional_evidence": {
+            "source": "testing/evidence/hybrid-archive-production-20261001.json",
+            "record": "controls",
+            "scope": "Real production administrator workload now checked; historical ordinary-user/performance aggregate not promoted to passed."
+          }
+        },
+        {
+          "source": "testing/evidence/hybrid-archive-production-20261001.json",
+          "record": "controls",
+          "control": "Native production admin: two cameras, pagination, decoded image details, exact return, empty search and reset recovery",
+          "recorded_status": "superato"
         }
       ]
     },
@@ -6149,7 +6160,19 @@
           "source": "testing/evidence/hybrid-generated-media-2026-09-06.json",
           "record": "controls[53]",
           "control": "Live worker output and hardware recovery",
-          "recorded_status": "bloccato"
+          "recorded_status": "bloccato",
+          "additional_evidence": [
+            {
+              "source": "testing/evidence/hybrid-mini-generation-post-classic-20260921.json",
+              "record": "controls",
+              "scope": "Both cameras: native queue, real worker SUCCESS, actual output, natural-end playback."
+            },
+            {
+              "source": "testing/evidence/hybrid-combined-release-20261001.json",
+              "record": "controls[10] and bounded_capture_load",
+              "scope": "Camera 2 repeated on latest application; both cameras continue capture. Induced hardware-failure recovery is not claimed."
+            }
+          ]
         },
         {
           "source": "testing/evidence/hybrid-real-encoding-2026-09-08.json",

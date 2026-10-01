@@ -10,6 +10,11 @@ on disposable state; no production credentials or history changed. Native key-re
 confirmation and post-reload login remain outside this proof.
 [Scoped evidence](testing/evidence/hybrid-remaining-controls-20261001.json).
 
+Production archive checks now cover both camera listings and decoded details,
+pagination with exact return, empty search and filter recovery in the native
+administrator session. Ordinary-user live scope and sustained performance remain
+separate. [Archive evidence](testing/evidence/hybrid-archive-production-20261001.json).
+
 ## Current installation and regression
 
 Checkout `48c2eddb` was deployed on 1 October at 22:37 local time, after the user

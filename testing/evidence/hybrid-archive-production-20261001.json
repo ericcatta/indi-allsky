@@ -1,0 +1,83 @@
+{
+  "date": "2026-10-01",
+  "application": "c552829d",
+  "environment": "Production Raspberry, native administrator session; actual camera images; no writes or service changes",
+  "controls": [
+    {
+      "control": "Initial camera 1 listing",
+      "status": "superato",
+      "camera_id": 1,
+      "profile_id": "imx708-wide",
+      "rows": 48
+    },
+    {
+      "control": "Next page",
+      "status": "superato",
+      "camera_id": 1,
+      "profile_id": "imx708-wide",
+      "cursor": "2026-10-01T22:10:20|194911",
+      "rows": 48,
+      "native_navigation_and_observation_ms": 527,
+      "timing_limit": "Single browser-tool wall-clock observation; not server timing, throughput or a benchmark."
+    },
+    {
+      "control": "Image details and Back to results",
+      "status": "superato",
+      "camera_id": 1,
+      "image_id": 194909,
+      "decoded_dimensions": [
+        4608,
+        2592
+      ],
+      "complete": true,
+      "return_preserves": [
+        "camera_id",
+        "profile_id",
+        "cursor",
+        "sort",
+        "kind"
+      ]
+    },
+    {
+      "control": "Camera selector and Apply filters",
+      "status": "superato",
+      "camera_id": 2,
+      "rows": 48,
+      "observed": "ASI678MC selected, cards show CAMERA 2, cursor reset."
+    },
+    {
+      "control": "Image details and Back to results",
+      "status": "superato",
+      "camera_id": 2,
+      "image_id": 195007,
+      "decoded_dimensions": [
+        3840,
+        2160
+      ],
+      "complete": true
+    },
+    {
+      "control": "Filename contains and Apply filters",
+      "status": "superato",
+      "camera_id": 2,
+      "query": "hybrid-no-such-test-file-20261001",
+      "rows": 0,
+      "message": "No media match these filters. Reset filters to return to the archive."
+    },
+    {
+      "control": "Reset filters",
+      "status": "superato",
+      "camera_id": 2,
+      "profile_id": "asi678mc",
+      "rows": 48,
+      "observed": "Images return and selected camera is retained."
+    }
+  ],
+  "limits": [
+    "Administrator only; ordinary-user native production proof not implied.",
+    "No download receipt, sustained performance or 24-hour claim.",
+    "Exact label locator initially did not match wrapping-label text; selector observed in the DOM used instead. One locator evaluation timed out; later read-only DOM inspection confirmed full-size camera-2 image decoded.",
+    "Does not re-certify all static archive identities or every media family."
+  ],
+  "cleanup": "Agent-created tab 63 closed; user tabs untouched."
+}
