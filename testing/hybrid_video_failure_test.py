@@ -24,13 +24,34 @@ def run():
         worker.succeed=lambda task,**kwargs:task.setSuccess('Effect complete')
         with app.app_context():
             original=db.session.get(Camera,2).name
-            for action,expected in [('fail',State.FAILED),('unknown',State.FAILED),('succeed',State.SUCCESS)]:
-                task=Task(queue=Queue.VIDEO,state=State.QUEUED,data={'action':action,'kwargs':{'camera_id':2}})
+            cases = [({'action': 'fail'}, State.FAILED),
+                     ({'action': 'unknown'}, State.FAILED),
+                     ({}, State.FAILED), ([], State.FAILED),
+                     ({'action': 'succeed', 'kwargs': None}, State.FAILED),
+                     ({'action': 'succeed', 'kwargs': []}, State.FAILED),
+                     ({'action': None}, State.FAILED),
+                     ({'action': 'succeed'}, State.SUCCESS)]
+            for data, expected in cases:
+                task=Task(queue=Queue.VIDEO,state=State.QUEUED,data=data)
                 db.session.add(task);db.session.commit()
                 namespace['processTask'](worker,{'task_id':task.id,'profile_id':'test-profile-2','camera_id':2})
                 db.session.refresh(task)
                 assert task.state==expected and task.result
                 assert db.session.get(Camera,2).name==original
+            def fail_context(*args, **kwargs):
+                db.session.get(Camera, 2).name = 'must rollback context'
+                raise RuntimeError('route setup failed')
+            worker._set_queue_context = fail_context
+            task = Task(queue=Queue.VIDEO, state=State.QUEUED, data={'action': 'succeed'})
+            db.session.add(task); db.session.commit()
+            namespace['processTask'](worker, {'task_id': task.id, 'profile_id': 'test-profile-2'})
+            assert task.state == State.FAILED
+            assert db.session.get(Camera, 2).name == original
+            worker._set_queue_context = lambda *args, **kwargs: None
+            next_task = Task(queue=Queue.VIDEO, state=State.QUEUED, data={'action': 'succeed'})
+            db.session.add(next_task); db.session.commit()
+            namespace['processTask'](worker, {'task_id': next_task.id, 'profile_id': 'test-profile-2'})
+            assert next_task.state == State.SUCCESS
         print('Video execution: effect exceptions roll back and mark FAILED, unknown actions terminal, next valid task succeeds: PASS')
 
 

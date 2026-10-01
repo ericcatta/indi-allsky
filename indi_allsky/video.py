@@ -257,23 +257,30 @@ class VideoWorker(Process):
         task.setRunning()
 
 
-        action = task.data['action']
-        kwargs = task.data.get('kwargs', {})
-        camera_id = v_dict.get('camera_id') or kwargs.get('camera_id')
-        self._set_queue_context(profile_id, camera_id=camera_id)
-        logger.debug('Video queue route: profile=%s camera_id=%s task_id=%s', profile_id, camera_id, task_id)
-
-
+        action = '<unavailable>'
+        # Preparation belongs to the same failure boundary as the effect: a
+        # malformed stored task or failed route setup must not strand RUNNING
+        # work and terminate the worker before it can receive the next job.
         try:
-            action_method = getattr(self, action)
-        except AttributeError:
-            logger.error('Unknown action: %s', action)
-            task.setFailed('Unknown video task action')
-            return
+            if not isinstance(task.data, dict):
+                raise ValueError('Video task data must be an object')
+            action = task.data.get('action')
+            kwargs = task.data.get('kwargs', {})
+            if not isinstance(action, str) or not action:
+                raise ValueError('Video task action must be a nonempty string')
+            if not isinstance(kwargs, dict):
+                raise ValueError('Video task kwargs must be an object')
+            camera_id = v_dict.get('camera_id') or kwargs.get('camera_id')
+            self._set_queue_context(profile_id, camera_id=camera_id)
+            logger.debug('Video queue route: profile=%s camera_id=%s task_id=%s', profile_id, camera_id, task_id)
 
+            try:
+                action_method = getattr(self, action)
+            except AttributeError:
+                logger.error('Unknown action: %s', action)
+                task.setFailed('Unknown video task action')
+                return
 
-        # perform the action
-        try:
             action_method(task, **kwargs)
         except Exception as error:
             logger.exception('Video task %d action=%s failed', task.id, action)
