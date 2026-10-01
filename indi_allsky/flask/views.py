@@ -13163,6 +13163,12 @@ class ModernAdminCameraSettingsView(ModernAdminSettingsInventoryView):
         processing_mode = self.get_camera_settings_processing_mode(source_profile)
         awb_apply_mode = self.get_camera_settings_hybrid_awb_apply_mode(source_profile)
 
+        # Sync must enforce the same capability gate as the target's own editor.
+        if awb_apply_mode == 'capture_driver':
+            capabilities = self.get_camera_settings_hybrid_capabilities(target_config_profile, awb_apply_mode)
+            if not capabilities.get('capture_apply_available'):
+                raise ValueError('Capture driver AWB is not available for the target camera. Use Auto, Post-process RGB, or Disabled before syncing. No config was saved.')
+
         target_config_profile['processing_mode'] = processing_mode
 
         awb_profile_config = target_config_profile.get('awb')
