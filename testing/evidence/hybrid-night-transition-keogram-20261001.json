@@ -1,0 +1,79 @@
+{
+  "date": "2026-10-01",
+  "application": "117d22fb",
+  "checkout": "360ba720",
+  "environment": "Production Raspberry, existing automatic day-end tasks; native administrator browser and read-only SQLite/filesystem verification",
+  "scope": "Bounded night transition and first automatic output; not the whole end-of-day queue or 24-hour test",
+  "cadence": {
+    "camera_1": {
+      "latest": "2026-10-01 19:39:29",
+      "night": true,
+      "intervals_seconds": [
+        45,
+        45,
+        45,
+        45,
+        45
+      ],
+      "exposure_seconds": 0.3673873543739319,
+      "gain": 1.13
+    },
+    "camera_2": {
+      "latest": "2026-10-01 19:39:37",
+      "night": true,
+      "intervals_seconds": [
+        45,
+        45,
+        45,
+        45,
+        45
+      ],
+      "exposure_seconds": 0.0251286793500185,
+      "gain": 0.0
+    },
+    "status": "superato",
+    "limit": "Five adjacent observed intervals per camera; not guaranteed future timing or all exposure/gain transitions."
+  },
+  "controls": [
+    {
+      "page": "/modern-admin/tasks/14212",
+      "control": "Task state and recorded outcome",
+      "status": "superato",
+      "observed": "Native page changed from RUNNING to SUCCESS; database agrees. Result: Complete generation \u2014 Keogram: generated. Day-only task explicitly marks startrail and startrail-video not_requested."
+    },
+    {
+      "page": "/modern-admin/tasks/14212",
+      "control": "Open Keogram",
+      "status": "superato",
+      "observed": "Native click opens /modern-admin/output?kind=keogram&id=71&camera_id=1&profile_id=; image fully loaded with natural dimensions 3026x843."
+    }
+  ],
+  "output": {
+    "kind": "keogram",
+    "record_id": 71,
+    "camera_id": 1,
+    "frames": 3026,
+    "recorded_and_actual_bytes": 427952,
+    "recorded_and_decoded_dimensions": [
+      3026,
+      843
+    ],
+    "sha256": "6f524b0b02a5091a2d746160c7f6aa6a015f6d66672cbb449e8abdbbce7bd7bd",
+    "verification": "Independent Pillow full decode and filesystem/hash check agree with native preview and saved metadata."
+  },
+  "unfinished_queue": {
+    "14213": "RUNNING generateVideo",
+    "14214": "QUEUED generatePanoramaVideo",
+    "14215": "QUEUED expireData",
+    "14216": "QUEUED generateKeogramStarTrails",
+    "14217": "QUEUED generateVideo",
+    "14218": "QUEUED generatePanoramaVideo",
+    "observation": "FFmpeg PID 773011 observed alive, elapsed 152 seconds and 526.1 cumulative CPU seconds; video71 partial file 13369392 bytes, success=false. Command includes deflicker=size=5:mode=am. No success or final decode claimed."
+  },
+  "limits": [
+    "No new tasks enqueued, camera configuration changed or production media deleted by this check.",
+    "Only camera-1 keogram completion certified here; other automatic tasks remain in progress.",
+    "No timelapse playback/download receipt or physical integration acceptance inferred.",
+    "Existing 181 Python/compile and 35 JavaScript regression unchanged; evidence-only update."
+  ]
+}

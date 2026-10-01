@@ -5607,6 +5607,18 @@
           "control": "Back to Task Queue",
           "recorded_status": "superato",
           "role": "administrator"
+        },
+        {
+          "source": "testing/evidence/hybrid-night-transition-keogram-20261001.json",
+          "record": "controls[0]",
+          "control": "Task state and recorded outcome",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-night-transition-keogram-20261001.json",
+          "record": "controls[1]",
+          "control": "Open Keogram",
+          "recorded_status": "superato"
         }
       ]
     },

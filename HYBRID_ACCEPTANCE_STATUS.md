@@ -122,6 +122,13 @@ parent database row. The full regression passed again: 181 Python/compile and
 production policy and application code are unchanged. It does not close the
 historical I/O latency gate. [Storage review](testing/evidence/hybrid-storage-review-20261001.json).
 
+A bounded automatic night transition check observed five consecutive 45-second
+intervals for each camera with independent exposure/gain. Task 14212 completed
+the day keogram; its native output link opened camera-1 record 71 and the fully
+decoded file matches saved dimensions/size. The remaining day-end tasks were
+still running/queued and are not certified by this check.
+[Night transition and keogram](testing/evidence/hybrid-night-transition-keogram-20261001.json).
+
 ## Remaining acceptance gates
 
 1. **Complete the control/effect matrix.** The latest static inventory is from
