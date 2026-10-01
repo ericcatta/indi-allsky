@@ -1,0 +1,337 @@
+{
+  "date": "2026-10-01",
+  "native_revision": "87dfc0ce",
+  "environment": "Production Raspberry, native browser administrator session",
+  "controls": [
+    {
+      "id": "observatory:refresh-status",
+      "page": "/modern-admin/observatory",
+      "label": "Refresh status",
+      "role": "administrator",
+      "camera_id": null,
+      "profile_id": null,
+      "prerequisites": "Authenticated production session; configured cameras and existing image/FITS records",
+      "request": "GET /modern-admin/observatory",
+      "expected": "Refresh the snapshot",
+      "observed": "Snapshot advanced to 15:33:44; frame times advanced to15:33:38/15:33:32.",
+      "status": "superato"
+    },
+    {
+      "id": "observatory:now",
+      "page": "/modern-admin/observatory",
+      "label": "Now",
+      "role": "administrator",
+      "camera_id": null,
+      "profile_id": null,
+      "prerequisites": "Authenticated production session; configured cameras and existing image/FITS records",
+      "request": "GET /modern-admin/now",
+      "expected": "Navigate to the named view with the selected camera, where applicable",
+      "observed": "Both cameras and running capture summary rendered.",
+      "status": "superato"
+    },
+    {
+      "id": "observatory:capture-cycles-and-generated-outputs",
+      "page": "/modern-admin/observatory",
+      "label": "Capture cycles and generated outputs",
+      "role": "administrator",
+      "camera_id": null,
+      "profile_id": null,
+      "prerequisites": "Authenticated production session; configured cameras and existing image/FITS records",
+      "request": "GET /modern-admin/sky-cycle",
+      "expected": "Navigate to the named view with the selected camera, where applicable",
+      "observed": "Both named cameras, acquisition date, sources and generated-output counts rendered.",
+      "status": "superato"
+    },
+    {
+      "id": "observatory:notifications",
+      "page": "/modern-admin/observatory",
+      "label": "Notifications",
+      "role": "administrator",
+      "camera_id": null,
+      "profile_id": null,
+      "prerequisites": "Authenticated production session; configured cameras and existing image/FITS records",
+      "request": "GET /modern-admin/notifications",
+      "expected": "Navigate to the named view with the selected camera, where applicable",
+      "observed": "Notifications table and summary rendered; Enter navigation also passed at390px.",
+      "status": "superato"
+    },
+    {
+      "id": "observatory:browse-camera-images:camera-1",
+      "page": "/modern-admin/observatory",
+      "label": "Browse camera images",
+      "role": "administrator",
+      "camera_id": 1,
+      "profile_id": null,
+      "prerequisites": "Authenticated production session; configured cameras and existing image/FITS records",
+      "request": "GET /modern-admin/library?camera_id=1&kind=image",
+      "expected": "Navigate to the named view with the selected camera, where applicable",
+      "observed": "Library identified camera1, Images, and48 results; displayed cards had that camera.",
+      "status": "superato"
+    },
+    {
+      "id": "observatory:latest-image-details:camera-1",
+      "page": "/modern-admin/observatory",
+      "label": "Latest image details",
+      "role": "administrator",
+      "camera_id": 1,
+      "profile_id": null,
+      "prerequisites": "Authenticated production session; configured cameras and existing image/FITS records",
+      "request": "GET /modern-admin/media/images/192619?camera_id=1",
+      "expected": "Navigate to the named view with the selected camera, where applicable",
+      "observed": "Correct camera metadata and fully decoded preview; dimensions 4608x2592.",
+      "status": "superato"
+    },
+    {
+      "id": "observatory:browse-fits:camera-1",
+      "page": "/modern-admin/observatory",
+      "label": "Browse FITS",
+      "role": "administrator",
+      "camera_id": 1,
+      "profile_id": null,
+      "prerequisites": "Authenticated production session; configured cameras and existing image/FITS records",
+      "request": "GET /modern-admin/library?camera_id=1&kind=fits",
+      "expected": "Navigate to the named view with the selected camera, where applicable",
+      "observed": "Library identified camera1, FITS and48 records; latest shown937 for camera2 or936 for camera1.",
+      "status": "superato"
+    },
+    {
+      "id": "observatory:browse-raw:camera-1",
+      "page": "/modern-admin/observatory",
+      "label": "Browse RAW",
+      "role": "administrator",
+      "camera_id": 1,
+      "profile_id": null,
+      "prerequisites": "Authenticated production session; configured cameras and existing image/FITS records",
+      "request": "GET /modern-admin/library?camera_id=1&kind=raw",
+      "expected": "Navigate to the named view with the selected camera, where applicable",
+      "observed": "Library identified camera1, RAW and explicit0 results; database has no RAW records.",
+      "status": "superato"
+    },
+    {
+      "id": "observatory:browse-camera-images:camera-2",
+      "page": "/modern-admin/observatory",
+      "label": "Browse camera images",
+      "role": "administrator",
+      "camera_id": 2,
+      "profile_id": null,
+      "prerequisites": "Authenticated production session; configured cameras and existing image/FITS records",
+      "request": "GET /modern-admin/library?camera_id=2&kind=image",
+      "expected": "Navigate to the named view with the selected camera, where applicable",
+      "observed": "Library identified camera2, Images, and48 results; displayed cards had that camera.",
+      "status": "superato"
+    },
+    {
+      "id": "observatory:latest-image-details:camera-2",
+      "page": "/modern-admin/observatory",
+      "label": "Latest image details",
+      "role": "administrator",
+      "camera_id": 2,
+      "profile_id": null,
+      "prerequisites": "Authenticated production session; configured cameras and existing image/FITS records",
+      "request": "GET /modern-admin/media/images/192620?camera_id=2",
+      "expected": "Navigate to the named view with the selected camera, where applicable",
+      "observed": "Correct camera metadata and fully decoded preview; dimensions 3840x2160.",
+      "status": "superato"
+    },
+    {
+      "id": "observatory:browse-fits:camera-2",
+      "page": "/modern-admin/observatory",
+      "label": "Browse FITS",
+      "role": "administrator",
+      "camera_id": 2,
+      "profile_id": null,
+      "prerequisites": "Authenticated production session; configured cameras and existing image/FITS records",
+      "request": "GET /modern-admin/library?camera_id=2&kind=fits",
+      "expected": "Navigate to the named view with the selected camera, where applicable",
+      "observed": "Library identified camera2, FITS and48 records; latest shown937 for camera2 or936 for camera1.",
+      "status": "superato"
+    },
+    {
+      "id": "observatory:browse-raw:camera-2",
+      "page": "/modern-admin/observatory",
+      "label": "Browse RAW",
+      "role": "administrator",
+      "camera_id": 2,
+      "profile_id": null,
+      "prerequisites": "Authenticated production session; configured cameras and existing image/FITS records",
+      "request": "GET /modern-admin/library?camera_id=2&kind=raw",
+      "expected": "Navigate to the named view with the selected camera, where applicable",
+      "observed": "Library identified camera2, RAW and explicit0 results; database has no RAW records.",
+      "status": "superato"
+    },
+    {
+      "id": "observatory:storage-details",
+      "page": "/modern-admin/observatory",
+      "label": "Storage details",
+      "role": "administrator",
+      "camera_id": null,
+      "profile_id": null,
+      "prerequisites": "Authenticated production session; configured cameras and existing image/FITS records",
+      "request": "GET /modern-admin/storage",
+      "expected": "Navigate to the named view with the selected camera, where applicable",
+      "observed": "Storage path, free/used/total capacity and media inventory rendered.",
+      "status": "superato"
+    },
+    {
+      "id": "observatory:inspect-tasks-and-results",
+      "page": "/modern-admin/observatory",
+      "label": "Inspect tasks and results",
+      "role": "administrator",
+      "camera_id": null,
+      "profile_id": null,
+      "prerequisites": "Authenticated production session; configured cameras and existing image/FITS records",
+      "request": "GET /modern-admin/tasks",
+      "expected": "Navigate to the named view with the selected camera, where applicable",
+      "observed": "Task table and467/467 summary rendered.",
+      "status": "superato"
+    },
+    {
+      "id": "observatory:upload-configuration-and-results",
+      "page": "/modern-admin/observatory",
+      "label": "Upload configuration and results",
+      "role": "administrator",
+      "camera_id": null,
+      "profile_id": null,
+      "prerequisites": "Authenticated production session; configured cameras and existing image/FITS records",
+      "request": "GET /modern-admin/uploads",
+      "expected": "Navigate to the named view with the selected camera, where applicable",
+      "observed": "Three providers,0 configured/enabled, queue and notification state rendered.",
+      "status": "superato"
+    },
+    {
+      "id": "observatory:sqm",
+      "page": "/modern-admin/observatory",
+      "label": "SQM",
+      "role": "administrator",
+      "camera_id": null,
+      "profile_id": null,
+      "prerequisites": "Authenticated production session; configured cameras and existing image/FITS records",
+      "request": "GET /modern-admin/observatory/sqm",
+      "expected": "Navigate to the named view with the selected camera, where applicable",
+      "observed": "Actual saved-image timestamp and brightness index displayed.",
+      "status": "superato"
+    },
+    {
+      "id": "observatory:astropanel",
+      "page": "/modern-admin/observatory",
+      "label": "AstroPanel",
+      "role": "administrator",
+      "camera_id": null,
+      "profile_id": null,
+      "prerequisites": "Authenticated production session; configured cameras and existing image/FITS records",
+      "request": "GET /modern-admin/observatory/astropanel",
+      "expected": "Navigate to the named view with the selected camera, where applicable",
+      "observed": "Loading replaced by Updated15:34:57, moon/sun/polaris and planet rise/transit/set values.",
+      "status": "superato"
+    },
+    {
+      "id": "observatory:virtualsky",
+      "page": "/modern-admin/observatory",
+      "label": "VirtualSky",
+      "role": "administrator",
+      "camera_id": null,
+      "profile_id": null,
+      "prerequisites": "Authenticated production session; configured cameras and existing image/FITS records",
+      "request": "GET /modern-admin/observatory/virtualsky",
+      "expected": "Navigate to the named view with the selected camera, where applicable",
+      "observed": "Frame captured15:34:53, updated680x680 sky canvas; screenshot verified map over actual image.",
+      "status": "superato"
+    },
+    {
+      "id": "observatory:realtime-keogram",
+      "page": "/modern-admin/observatory",
+      "label": "Realtime Keogram",
+      "role": "administrator",
+      "camera_id": null,
+      "profile_id": null,
+      "prerequisites": "Authenticated production session; configured cameras and existing image/FITS records",
+      "request": "GET /modern-admin/observatory/realtime-keogram",
+      "expected": "Navigate to the named view with the selected camera, where applicable",
+      "observed": "Loading replaced by Last updated15:35:24, fully decoded1000x843 preview.",
+      "status": "superato"
+    },
+    {
+      "id": "observatory:long-term-keogram",
+      "page": "/modern-admin/observatory",
+      "label": "Long-term Keogram",
+      "role": "administrator",
+      "camera_id": null,
+      "profile_id": null,
+      "prerequisites": "Authenticated production session; configured cameras and existing image/FITS records",
+      "request": "GET /modern-admin/observatory/long-term-keogram",
+      "expected": "Navigate to the named view with the selected camera, where applicable",
+      "observed": "Time-range generation form, cached-preview and recent-sample sections rendered. Generation not submitted in this check.",
+      "status": "superato"
+    }
+  ],
+  "read_only_cross_checks": {
+    "tasks": {
+      "VIDEO_FAILED": 8,
+      "VIDEO_SUCCESS": 459
+    },
+    "sources": {
+      "fits_counts_per_camera": 96,
+      "fits_latest": [
+        "2026-10-01 15:27:22",
+        "2026-10-01 15:27:32"
+      ],
+      "raw_count": 0
+    },
+    "mobile": {
+      "viewport": 390,
+      "document_scroll_width": 390,
+      "main_scroll_width": 356
+    }
+  },
+  "defect": {
+    "before": "Same volume displayed87.1% in Observatory and91% rounded in Storage. Reserved blocks were included only in Observatory denominator.",
+    "observed_bytes": {
+      "total": 125260451840,
+      "used": 109126819840,
+      "free": 10967965696
+    },
+    "expected_percent": 90.9,
+    "change": "Use used/(used+available free), matching psutil/Storage/df; preserve all byte values."
+  },
+  "limits": [
+    "Twenty page-specific links are covered; shared header/sidebar controls are separate evidence.",
+    "This is navigation acceptance, not every destination control or external effect.",
+    "Native role is administrator; ordinary/anonymous permissions and provider failures are exercised by the isolated Observatory test.",
+    "VirtualSky transparent library clock/position nodes were inspected: overlay pointer-events are disabled and screenshot shows no extra visible control; no unrelated map change made.",
+    "No24-hour observation."
+  ],
+  "application": "f21f87d5",
+  "tests": {
+    "python": {
+      "count": 178,
+      "status": "passed",
+      "source_changed": false,
+      "report": "/home/eric/hybrid-observatory-storage-regression-20261001/results.json",
+      "sha256": "53f202b462362348448206715fd15466717678ecc576f2c5eb97a03aeae5a68b"
+    },
+    "javascript": {
+      "count": 35,
+      "status": "passed",
+      "report": "/tmp/hybrid-observatory-storage-js-20261001.json",
+      "sha256": "622b2e3566ea0e85447eb2267a94577f183952171985aab462c4f2bf127232dc"
+    },
+    "source_manifest": "04a69ddcd41851dd3c0314283c1a0cf0f619a80ba3d86b3cb70d91d8b53c6d2b",
+    "targeted": "Reserved/nonreserved/full/zero-capacity fixtures; all existing Observatory tests retained",
+    "diff_check": "passed"
+  },
+  "deployment": {
+    "change": "Fast-forward pull and Gunicorn reload only",
+    "capture": {
+      "pid": 472545,
+      "state": "active",
+      "automatic_restarts": 0
+    },
+    "web": {
+      "pid": 1540,
+      "state": "active",
+      "automatic_restarts": 0
+    },
+    "native_after": "Observatory:10.12GiB free of116.66GiB,91.0% used. Storage:91% used,10.1GB free (rounded UI units).",
+    "rollback": "Restore only indi_allsky/observatory_runtime.py from87dfc0ce (or revert f21f87d5), then reload Gunicorn. No data/configuration change or capture restart needed."
+  }
+}

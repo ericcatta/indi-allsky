@@ -6,7 +6,13 @@ Those activities are outside this acceptance run, not passed tests.
 
 ## Current installation and regression
 
-The latest application change is `3a058fae`; subsequent commits add tests and evidence.
+The latest application change is `f21f87d5`; subsequent commits add tests and evidence.
+Observatory now reports the same disk-use percentage as Storage, excluding system-reserved
+blocks from usable capacity. Its twenty page-specific links were exercised in the
+native browser, including camera-scoped media and completed asynchronous tool loads.
+The latest full regression passed 178 Python/compile and 35 JavaScript checks;
+web-only reload preserved capture PID 472545. [Evidence and scope](testing/evidence/hybrid-observatory-controls-20261001.json).
+
 History controls now reject malformed inputs; aggregate Loop queries enforce per-camera delivery policies and the existing result ceiling. [History validation](testing/evidence/hybrid-history-query-20261001.json).
 
 Geometry now rejects invalid azimuth before copy/review; the updated asset version is verified in production. 175 Python checks and 35 JavaScript tests passed. [Validation and deployment](testing/evidence/hybrid-geometry-validation-20261001.json).
@@ -27,7 +33,7 @@ The full regression passed again (178 Python/compile and 35 JavaScript).
 After the controlled capture restart, PID 472545 is active with zero automatic
 restarts; both cameras' new frames decoded at 15:27:37 / 15:27:32 on 1 October.
 These are bounded observations, not continuous monitoring.
-[Latest regression and deployment](testing/evidence/hybrid-upload-failure-20261001.json).
+[Upload regression and deployment](testing/evidence/hybrid-upload-failure-20261001.json).
 The cleanup extension is included in this regression. All 719 Full Config fields are interpreted in Hybrid (202 through domain parsers and 517 in its orchestrator); frozen legacy fingerprints remain unchanged.
 
 ## Verified outcomes and their limits

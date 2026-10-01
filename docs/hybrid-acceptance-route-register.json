@@ -2658,6 +2658,126 @@
           "control": "Navigation drawer / Observatory",
           "recorded_status": "superato",
           "observed_page": "/modern-admin/observatory"
+        },
+        {
+          "source": "testing/evidence/hybrid-observatory-controls-20261001.json",
+          "record": "controls[0]",
+          "control": "Refresh status",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-observatory-controls-20261001.json",
+          "record": "controls[1]",
+          "control": "Now",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-observatory-controls-20261001.json",
+          "record": "controls[2]",
+          "control": "Capture cycles and generated outputs",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-observatory-controls-20261001.json",
+          "record": "controls[3]",
+          "control": "Notifications",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-observatory-controls-20261001.json",
+          "record": "controls[4]",
+          "control": "Browse camera images camera 1",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-observatory-controls-20261001.json",
+          "record": "controls[5]",
+          "control": "Latest image details camera 1",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-observatory-controls-20261001.json",
+          "record": "controls[6]",
+          "control": "Browse FITS camera 1",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-observatory-controls-20261001.json",
+          "record": "controls[7]",
+          "control": "Browse RAW camera 1",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-observatory-controls-20261001.json",
+          "record": "controls[8]",
+          "control": "Browse camera images camera 2",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-observatory-controls-20261001.json",
+          "record": "controls[9]",
+          "control": "Latest image details camera 2",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-observatory-controls-20261001.json",
+          "record": "controls[10]",
+          "control": "Browse FITS camera 2",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-observatory-controls-20261001.json",
+          "record": "controls[11]",
+          "control": "Browse RAW camera 2",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-observatory-controls-20261001.json",
+          "record": "controls[12]",
+          "control": "Storage details",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-observatory-controls-20261001.json",
+          "record": "controls[13]",
+          "control": "Inspect tasks and results",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-observatory-controls-20261001.json",
+          "record": "controls[14]",
+          "control": "Upload configuration and results",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-observatory-controls-20261001.json",
+          "record": "controls[15]",
+          "control": "SQM",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-observatory-controls-20261001.json",
+          "record": "controls[16]",
+          "control": "AstroPanel",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-observatory-controls-20261001.json",
+          "record": "controls[17]",
+          "control": "VirtualSky",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-observatory-controls-20261001.json",
+          "record": "controls[18]",
+          "control": "Realtime Keogram",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-observatory-controls-20261001.json",
+          "record": "controls[19]",
+          "control": "Long-term Keogram",
+          "recorded_status": "superato"
         }
       ]
     },
