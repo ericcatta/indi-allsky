@@ -1,18 +1,20 @@
 # Remaining Hybrid acceptance work
 
-Checked against source `584f066f` and the recorded evidence on 1 October 2026.
+Checked against deployed source `48c2eddb` and the recorded evidence on 1 October 2026.
 This is a work queue, not a coverage percentage or a replacement for the control
 matrix. Classic removal is deployed; whole-product acceptance remains open.
 The 24-hour observation and detector/AI remain outside the agreed current run.
 
-## Candidate and release
+## Latest release completed
 
-| Work | Existing evidence | Required closure |
-| --- | --- | --- |
-| IMX708 missed exposure under video encoding | [Observed timeout](../testing/evidence/hybrid-night-load-20261001.json): one 90-second interval and recovery. [Output correction](../testing/evidence/hybrid-libcamera-output-fix-20261001.json): separate pipe deadlock reproduced and fixed in source. | Full combined regression, controlled deployment and bounded acquisition under encoder load. Do not equate the reproduced pipe mechanism with a proven cause of the observed timeout. |
-| Keogram tool navigation | [Before/after isolated test](../testing/evidence/hybrid-keogram-links-20261001.json): both links preserve camera/profile and load the expected destination camera. | Combined regression and native clicks after deployment, both cameras. |
-| Combined candidate regression | The rpicam suite completed 182 cases, with one syslog timing failure that passed unchanged on targeted recheck; subsequent collector and Keogram changes have targeted checks. | Run the exact combined source once before release. Preserve failures and source hashes; do not call the earlier report a clean combined pass. |
-| Final delivery | Local/main are synchronized; production intentionally has not received the pending application changes after the live-test cutoff. | Agreed maintenance window, source/version/backup checks, deployment, affected real effects and fresh frames, final diff, operational instructions and synchronized release. |
+The combined candidate is deployed: 182 Python/compile and 35 JavaScript checks
+passed, exact installed source hashes match, both cameras resumed, and all four
+Keogram links passed native checks. Task 14234 generated and played a mini-video;
+both cameras captured during encoding. See the [release evidence](../testing/evidence/hybrid-combined-release-20261001.json).
+The earlier day-end timeout's cause remains unproven; the successful short encode
+must not be represented as sustained worst-case-load certification. A same-SD
+backup caused overlapping filesystem waits and was interrupted; its incomplete
+copy is not a usable backup. Rollback uses retained code files, not the old DB.
 
 ## Named interaction gaps
 
@@ -28,16 +30,16 @@ this table alone does not certify all discovered controls.
 | Generated-media pages | Exact footer links and per-row downloads still require reconciliation with current templates. Old “Open read-only” observations must be mapped to the current controls, not blindly repeated or marked passed from a different Library link. |
 | Account | Admin and ordinary-user save/login flows have [isolated native evidence](../testing/evidence/hybrid-account-native-20260914.json). This does not imply a production password change was performed; do not repeat destructive credential changes merely to erase a historical record. |
 | Restore | Confirm the precise remaining reset/flush variants against isolated tests and native evidence; keep destructive variants on disposable configuration fixtures. |
-| Generation and playback | Preserve successful live worker/output proofs for their exact camera/family. Camera-1 timelapse 71 opened successfully but natural-end playback was not recorded. Mini-generation recovery and other families must retain their own evidence scopes. |
+| Generation and playback | Preserve successful live worker/output proofs for their exact camera/family. Camera-1 timelapse 71 now has natural-end playback evidence; mini-video 7 has generation and natural-end proof. Mini-generation recovery and other families must retain their own evidence scopes. |
 | Network | Network-changing effects require identified connections and a recovery plan in the agreed physical-access window. Read-only discovery is not evidence for reconnect/disconnect effects. |
 
 ## Control matrix reconciliation
 
 Use the [route register](hybrid-acceptance-route-register.json) and its linked
 control discovery, retaining role, camera/profile, prerequisites, expected
-request/effect and source revision. There are 38 historical blocked/defect
-records without a fully passed resolution as of this review. That number is not
-38 current product defects: some combine scopes, refer to older controls, or
+request/effect and source revision. There are 34 historical blocked/defect
+records without a fully passed resolution after resolving the four exact generator links. That number is not
+34 current product defects: some combine scopes, refer to older controls, or
 already have narrower later evidence. The 7,369 static identities likewise are
 not 7,369 independently failed functions.
 
@@ -65,6 +67,6 @@ mathematical absence-of-bugs proof were not requested acceptance gates. Preserve
 necessary migrations, shared drivers/workers, APIs and dependencies rather than
 removing them to make the project look smaller.
 
-No live test or deployment is authorized beyond the expired 20:00 window until
-the user supplies a new window. A new window has been requested; no answer is
-assumed from elapsed time. No 24-hour test should be started as part of it.
+The user revoked the 20:00 deadline on 1 October and authorized continuing to
+completion. Deploy and bounded live checks can resume; the separate 24-hour
+observation remains excluded. Do not request the expired window again.

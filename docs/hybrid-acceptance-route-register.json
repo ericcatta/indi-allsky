@@ -1651,7 +1651,17 @@
           "source": "testing/evidence/hybrid-generated-media-2026-09-06.json",
           "record": "controls[8]",
           "control": "Generate media",
-          "recorded_status": "bloccato"
+          "recorded_status": "bloccato",
+          "resolution": {
+            "reviewed_on": "2026-10-01",
+            "status": "superato",
+            "source": "testing/evidence/hybrid-combined-release-20261001.json",
+            "records": [
+              "controls[3]"
+            ],
+            "scope": "Native production administrator, camera 2 / asi678mc: exact footer link opens the correct generator and camera heading. No other role or download certification.",
+            "historical_outcome_preserved": true
+          }
         },
         {
           "source": "testing/evidence/hybrid-navigation-drawer-20260929.json",
@@ -1722,7 +1732,17 @@
           "source": "testing/evidence/hybrid-generated-media-2026-09-06.json",
           "record": "controls[35]",
           "control": "Create mini timelapse",
-          "recorded_status": "bloccato"
+          "recorded_status": "bloccato",
+          "resolution": {
+            "reviewed_on": "2026-10-01",
+            "status": "superato",
+            "source": "testing/evidence/hybrid-combined-release-20261001.json",
+            "records": [
+              "controls[2]"
+            ],
+            "scope": "Native production administrator, camera 2 / asi678mc: exact footer link opens the correct generator and camera heading. No other role or download certification.",
+            "historical_outcome_preserved": true
+          }
         },
         {
           "source": "testing/evidence/hybrid-navigation-drawer-20260929.json",
@@ -2065,7 +2085,17 @@
           "source": "testing/evidence/hybrid-generated-media-2026-09-06.json",
           "record": "controls[26]",
           "control": "Generate media",
-          "recorded_status": "bloccato"
+          "recorded_status": "bloccato",
+          "resolution": {
+            "reviewed_on": "2026-10-01",
+            "status": "superato",
+            "source": "testing/evidence/hybrid-combined-release-20261001.json",
+            "records": [
+              "controls[1]"
+            ],
+            "scope": "Native production administrator, camera 2 / asi678mc: exact footer link opens the correct generator and camera heading. No other role or download certification.",
+            "historical_outcome_preserved": true
+          }
         },
         {
           "source": "testing/evidence/hybrid-navigation-drawer-20260929.json",
@@ -2136,7 +2166,17 @@
           "source": "testing/evidence/hybrid-generated-media-2026-09-06.json",
           "record": "controls[17]",
           "control": "Generate media",
-          "recorded_status": "bloccato"
+          "recorded_status": "bloccato",
+          "resolution": {
+            "reviewed_on": "2026-10-01",
+            "status": "superato",
+            "source": "testing/evidence/hybrid-combined-release-20261001.json",
+            "records": [
+              "controls[0]"
+            ],
+            "scope": "Native production administrator, camera 2 / asi678mc: exact footer link opens the correct generator and camera heading. No other role or download certification.",
+            "historical_outcome_preserved": true
+          }
         },
         {
           "source": "testing/evidence/hybrid-navigation-drawer-20260929.json",

@@ -1,37 +1,33 @@
 # Hybrid: deployment and rollback
 
-## Pending capture correction (not deployed)
-
-The libcamera output correction replaces the unread pipe in full profiles with
-an anonymous temporary file, as already used by secondary profiles. This prevents
-verbose child output from blocking synchronous wait or asynchronous polling.
-Process-start failures close the file and preserve the original exception.
-It changes no capture interval, exposure, gain, watchdog, schema or configuration.
-
-Deployment remains pending after the 1 October 20:00 live acceptance cutoff.
-Do not treat a source commit or isolated regression as proof of installation.
-In the next controlled window, back up `indi_allsky/camera/libcamera.py`, deploy
-the tested revision, restart capture and verify fresh frames from both cameras.
-Repeat acquisition during video generation before closing the observed timeout
-under load. Rollback restores that file from `5db14280` and restarts capture;
-no database rollback is required. The production timeout's cause is still open.
-
-The pending Keograms template correction retains camera/profile when opening
-Realtime or Long-term Keogram. Its targeted before/after test passes, but full
-combined-candidate regression and native clicks are pending. This template-only
-change requires a web reload when deployed. Rollback restores
-`indi_allsky/flask/templates/modern_admin/keograms.html` from `08652ebe`;
-no database or capture setting rollback is needed.
-
 ## Current application
 
-The latest application change deployed on 1 October is `117d22fb`: panorama
-previews publish atomically without redundant fsync calls; archive sync remains.
-Capture was restarted after 181 Python/compile and 35 JavaScript checks passed.
-Both cameras resumed; their new images decoded in the native browser and panorama
-previews match archived bytes. [Measurement and rollback](testing/evidence/hybrid-panorama-preview-sync-20261001.json).
-Rollback uses the two code files in `/home/eric/hybrid-backups/hybrid-panorama-sync-20261001`
-(or revision `309485f3`) followed by a capture restart; no database rollback.
+On 1 October at 22:37 local time, checkout `48c2eddb` was deployed after the
+user revoked the 20:00 cutoff. Its application changes are `05d6e7d6` (libcamera
+child output uses an anonymous temporary file for every profile) and `584f066f`
+(Keogram links retain camera/profile). All 182 Python/compile entrypoints and
+35 JavaScript tests passed; production sources match the tested manifest.
+Capture restarted as PID 840928 with zero automatic restarts, and Gunicorn
+reloaded. Configuration remains 118. Both cameras produced decoded fresh frames;
+all four Keogram destination clicks passed. Mini-video task 14234 succeeded and
+played to its natural end; both cameras captured during its 37.7-second encode.
+This is bounded validation, not proof of the earlier timeout's root cause.
+[Release evidence and limits](testing/evidence/hybrid-combined-release-20261001.json).
+
+Rollback copies of `indi_allsky/camera/libcamera.py` and
+`indi_allsky/flask/templates/modern_admin/keograms.html` are in
+`/home/eric/hybrid-backups/hybrid-combined-release-20261001` with a private
+manifest and Flask configuration copy. Restore only these two code files,
+restart capture and reload Gunicorn, then verify fresh frames from both cameras.
+No schema/configuration was migrated; **do not restore an older database** to
+undo this release. A new online database copy to the same SD filesystem was
+interrupted after filesystem write waits and stale frames; its incomplete copy
+was removed. The prior coherent cold-start backup is retained. Both cameras
+recovered after terminating that backup process, before the deployment restart.
+
+The preceding application change `117d22fb` removed redundant panorama preview
+fsync calls while retaining atomic publication and archive synchronization.
+[Measurement and rollback](testing/evidence/hybrid-panorama-preview-sync-20261001.json).
 
 The preceding application change is `365f77e5`: VirtualSky
 export availability follows frame loading, including preview redraws. The browser
@@ -50,11 +46,6 @@ release heading as proof of the installed version.
 Classic frontend is removed. Hybrid requires login; shared backend and public
 compatibility handlers remain. Configuration revision is 118.
 
-The current application passed 181 Python/compile entrypoints and 35 JavaScript
-tests. The last deployment restarted capture: PID 771992 is active with zero
-automatic restarts. Configuration remains 118. Both camera frames decoded after
-restart. [Regression and deployment](testing/evidence/hybrid-panorama-preview-sync-20261001.json).
-This is bounded acceptance, not full-product or 24-hour certification.
 See [current status and open gates](HYBRID_ACCEPTANCE_STATUS.md).
 
 ## Deployment locations

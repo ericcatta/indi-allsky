@@ -6,14 +6,17 @@ Gli esiti sono riferimenti puntuali alle prove originali, che specificano revisi
 
 [Registro completo con riferimenti ai singoli controlli](hybrid-acceptance-route-register.json).
 
-Riconciliazione del 1 ottobre: il campo `resolution` collega cinque esiti storici
+Riconciliazione del 1 ottobre: il campo `resolution` collega nove esiti storici
 alle successive prove superate, senza modificare `recorded_status`:
 
 - rilevamento camere: escluso Telescope Simulator, entrambe le camere selezionabili;
 - contesto Settings: camera/profilo corretti per entrambi i profili;
 - paginazione spazio file: il primo Next dopo la cancellazione della ricerca funziona;
 - quattro azioni cleanup: effetti verificati su dati sintetici isolati, altra camera preservata;
-- copia utenti: contenuto effettivo degli appunti verificato, anche filtrato e vuoto.
+- copia utenti: contenuto effettivo degli appunti verificato, anche filtrato e vuoto;
+- quattro link dei footer Keograms, Startrails, Startrail Videos e Mini Timelapses: ingresso al generatore corretto, amministratore in produzione e camera 2 / asi678mc.
+
+[Prove native del rilascio](../testing/evidence/hybrid-combined-release-20261001.json).
 
 Ogni risoluzione specifica ambiente e limiti. Non certifica automaticamente altri
 ruoli o controlli; le ricevute CSV/Excel restano aperte. Il cleanup qui chiuso è

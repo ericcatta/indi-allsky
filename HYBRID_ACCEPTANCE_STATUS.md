@@ -4,35 +4,37 @@ Updated 1 October 2026. **Classic frontend removal is deployed. Whole-product ac
 The user deferred the separate 24-hour day/night test and detector/AI implementation.
 Those activities are outside this acceptance run, not passed tests.
 
-## Pending correction (not deployed)
-
-The libcamera full-profile output deadlock is corrected in source, using the
-same temporary-file approach as secondary profiles and cleaning up failed starts.
-Real subprocess tests pass on Mac and isolated Linux. The full isolated run
-completed 182 checks: 181 passed and the syslog half-second timing assertion
-failed at nice 19. That unchanged test passed on a normal-priority rerun (9.8 ms);
-the original failure remains recorded, not relabeled as a clean full-suite pass.
-All 35 JavaScript tests passed. No deployment or capture restart was performed
-after the 20:00 live-test cutoff. The actual IMX708 timeout under encoder load
-remains open pending hardware verification.
-[Correction, exact sources and test limits](testing/evidence/hybrid-libcamera-output-fix-20261001.json).
-
-The pending Keograms navigation correction also preserves camera/profile in
-both Realtime and Long-term links. The regression reproduced the missing query;
-after correction, both roles and cameras load the correct destination context.
-Only the targeted suite has run for this additional change: full combined
-regression and native deployment verification remain pending.
-[Keogram links candidate](testing/evidence/hybrid-keogram-links-20261001.json).
-
 ## Current installation and regression
 
-The latest application change is `117d22fb`: panorama previews retain atomic
-replacement without redundant file synchronization. Archives still synchronize.
-A three-minute live trace changed from 18 preview fsync calls (4.408 seconds of
-wait) to zero, retaining 12 archive calls. Both cameras resumed after controlled
-capture restart (PID 771992), and their panorama previews decode and match their
-archives exactly. All 181 Python/compile and 35 JavaScript checks passed.
-[Measurement, deployment and limits](testing/evidence/hybrid-panorama-preview-sync-20261001.json).
+Checkout `48c2eddb` was deployed on 1 October at 22:37 local time, after the user
+revoked the 20:00 cutoff. The combined candidate passed **182 Python/compile
+entrypoints and 35 JavaScript tests**, with unchanged sources and an exact
+production manifest match. This new complete pass does not rewrite the earlier
+syslog timing failure.
+
+The libcamera output correction and scoped Keogram links are installed. Capture
+PID 840928 has zero automatic restarts; configuration remains 118. Both cameras
+resumed and their full-size frames decoded. Native Realtime/Long-term Keogram
+links passed for both camera/profile pairs. Mini-video task 14234 generated
+156 frames with deflicker enabled; its 15.6-second output played to natural end.
+Both cameras captured during the 37.7-second encoding interval, with no timeout
+in the checked log. This short job does not establish the earlier day-end timeout's
+cause or certify sustained worst-case load.
+
+Camera-1 timelapse 71 also reached its natural end (121.04 seconds). Four exact
+generated-media footer links now have scoped resolutions in the route register.
+The separate-window Startrail link remains blocked in the native browser tool;
+a decoded inline image is not accepted as proof of that click.
+[Combined release, backup incident and bounded native evidence](testing/evidence/hybrid-combined-release-20261001.json).
+
+A same-SD online backup overlapped severe filesystem write waits and stale frames.
+The incomplete copy was terminated and removed; cameras recovered before the
+release restart. Code/config rollback copies and the prior coherent database
+backup are retained. No production media or database was deleted.
+
+The preceding `117d22fb` release removed redundant preview synchronization while
+retaining atomic publication and archive synchronization.
+[Measurement and limits](testing/evidence/hybrid-panorama-preview-sync-20261001.json).
 
 The preceding application change is `365f77e5`.
 VirtualSky now keeps export disabled while a frame refresh is pending, including

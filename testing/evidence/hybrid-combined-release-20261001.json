@@ -1,0 +1,202 @@
+{
+  "environment": "Production Raspberry; native administrator browser. controls[0:6] before release; later controls after release.",
+  "controls": [
+    {
+      "page": "startrails",
+      "control": "Generate media",
+      "camera_id": 2,
+      "profile_id": "asi678mc",
+      "status": "superato",
+      "observed": "Native link opens the generator with camera/profile in the URL and ZWO CCD ASI678MC heading"
+    },
+    {
+      "page": "startrail-videos",
+      "control": "Generate media",
+      "camera_id": 2,
+      "profile_id": "asi678mc",
+      "status": "superato",
+      "observed": "Native link opens the generator with camera/profile in the URL and ZWO CCD ASI678MC heading"
+    },
+    {
+      "page": "mini-timelapses",
+      "control": "Create mini timelapse",
+      "camera_id": 2,
+      "profile_id": "asi678mc",
+      "status": "superato",
+      "observed": "Native link opens the generator with camera/profile in the URL and ZWO CCD ASI678MC heading"
+    },
+    {
+      "page": "keograms",
+      "control": "Generate media",
+      "camera_id": 2,
+      "profile_id": "asi678mc",
+      "status": "superato",
+      "observed": "Native link opens the generator with camera/profile in the URL and ZWO CCD ASI678MC heading"
+    },
+    {
+      "page": "output",
+      "control": "Play timelapse 71",
+      "camera_id": 1,
+      "status": "superato",
+      "duration": 121.04,
+      "current_time": 121.04,
+      "ended": true,
+      "dimensions": [
+        4608,
+        2592
+      ],
+      "media_error": null,
+      "method": "Native Space, natural end without seeking or rate change"
+    },
+    {
+      "page": "startrails",
+      "control": "Open read-only",
+      "camera_id": 2,
+      "status": "bloccato",
+      "observed": "Selected 20260923 image preview decodes at 3840x2160. Native link click focuses the link but creates no observable browser tab; no console error. File preview success is not proof of separate-window opening."
+    },
+    {
+      "page": "keograms",
+      "control": "Open Realtime Keogram",
+      "camera_id": 2,
+      "profile_id": "asi678mc",
+      "status": "superato",
+      "method": "Native footer click",
+      "destination": "/modern-admin/observatory/realtime-keogram?camera_id=2&profile_id=asi678mc",
+      "observed_camera": "ZWO CCD ASI678MC"
+    },
+    {
+      "page": "keograms",
+      "control": "Open Long Term Keogram",
+      "camera_id": 2,
+      "profile_id": "asi678mc",
+      "status": "superato",
+      "method": "Native footer click",
+      "destination": "/modern-admin/observatory/long-term-keogram?camera_id=2&profile_id=asi678mc",
+      "observed_camera": "ZWO CCD ASI678MC"
+    },
+    {
+      "page": "keograms",
+      "control": "Open Realtime Keogram",
+      "camera_id": 1,
+      "profile_id": "imx708-wide",
+      "status": "superato",
+      "method": "Native footer click",
+      "destination": "/modern-admin/observatory/realtime-keogram?camera_id=1&profile_id=imx708-wide",
+      "observed_camera": "libcamera_imx708"
+    },
+    {
+      "page": "keograms",
+      "control": "Open Long Term Keogram",
+      "camera_id": 1,
+      "profile_id": "imx708-wide",
+      "status": "superato",
+      "method": "Native footer click",
+      "destination": "/modern-admin/observatory/long-term-keogram?camera_id=1&profile_id=imx708-wide",
+      "observed_camera": "libcamera_imx708"
+    },
+    {
+      "page": "mini-generate > tasks > output",
+      "control": "Queue mini timelapse, inspect result, open and play output",
+      "camera_id": 2,
+      "profile_id": "asi678mc",
+      "status": "superato",
+      "task_id": 14234,
+      "task_state": "SUCCESS",
+      "source_image_id": 194975,
+      "pre_seconds": 7200,
+      "post_seconds": 60,
+      "output_id": 7,
+      "frames": 156,
+      "bytes": 9787908,
+      "fps": 10,
+      "duration": 15.6,
+      "current_time": 15.6,
+      "ended": true,
+      "dimensions": [
+        3840,
+        2160
+      ],
+      "media_error": null,
+      "method": "Native form submit; task result link; native Space playback to natural end. Selector call reported a timeout after starting playback; subsequent read-only video inspection confirmed natural end. No download receipt claimed."
+    }
+  ],
+  "date": "2026-10-01",
+  "release_checkout": "48c2eddb",
+  "application_changes": [
+    "05d6e7d6",
+    "584f066f"
+  ],
+  "regression": {
+    "python_entrypoints": 182,
+    "python_failures": 0,
+    "javascript_entrypoints": 35,
+    "javascript_failures": 0,
+    "source_changed": false,
+    "production_matches_tested_sources": true,
+    "source_manifest_sha256": "a808dd41e6e98e75a6b801fa44ce82b30005b7d52c63bb2138c5471b9a172615",
+    "pi_report": "/home/eric/hybrid-combined-release-20261001/results.json",
+    "pi_report_sha256": "bce992fc685f797d414a6e997bafdc882712997a946e9da529d3a1848f9a4a49",
+    "javascript_report_sha256": "ea5d64e2dc830c28341d35678db7c53de60532c8b427ee2edec1d9785bce34fd"
+  },
+  "application_before_release": "117d22fb",
+  "deployment": {
+    "time": "2026-10-01T22:37:25+02:00",
+    "capture_restart": true,
+    "web_reload": true,
+    "capture_pid": 840928,
+    "capture_automatic_restarts": 0,
+    "config_revision": 118,
+    "free_space_reported": "7.3 GiB",
+    "tmp_used": "18 MiB",
+    "tracked_production_source_matches_tested_manifest": true,
+    "preserved_untracked_user_files": true,
+    "rollback": "Restore libcamera.py and keograms.html from /home/eric/hybrid-backups/hybrid-combined-release-20261001; restart capture and reload web. No database rollback."
+  },
+  "backup_incident": {
+    "status": "Interrupted new database copy; incomplete copy removed, code/config backups retained",
+    "observed": "During an online copy to the same SD filesystem, backup and image worker entered D state at do_get_write_access. Frames were stale. Backup PID 817740 was verified against its destination and terminated; both cameras resumed without restarting capture. No kernel warning was observed in the checked interval. This does not establish the cause of all historical stalls.",
+    "retained_prior_coherent_backup": "/home/eric/hybrid-backups/hybrid-cold-start-20260930",
+    "no_production_database_or_media_deleted": true,
+    "new_copy_is_valid_backup": false,
+    "code_only_release_requires_database_rollback": false
+  },
+  "bounded_capture_load": {
+    "status": "superato",
+    "encoding_start": "2026-10-01T22:38:56.976452+02:00",
+    "encoding_end": "2026-10-01T22:39:34.714673+02:00",
+    "encoding_seconds": 37.738,
+    "ffmpeg_pid": 841023,
+    "deflicker": "size=5:mode=am",
+    "frames_during_encoding": {
+      "1": "2026-10-01 22:39:28",
+      "2": "2026-10-01 22:39:29"
+    },
+    "post_restart_frame_times": {
+      "1": [
+        "22:37:57",
+        "22:38:43",
+        "22:39:28",
+        "22:40:14",
+        "22:40:59"
+      ],
+      "2": [
+        "22:38:00",
+        "22:38:44",
+        "22:39:29",
+        "22:40:15",
+        "22:41:02"
+      ]
+    },
+    "sample_report": "/home/eric/hybrid-release-load-20261001.json",
+    "sample_sha256": "7b74864c53f2b5f0b9961296b0fb7c7e6fe0f935c61a5f1876778fd715faa390",
+    "errors_in_checked_capture_log": 0,
+    "limits": "One short encoding job with concurrent captures, not a full day-end workload or a 24-hour stability test. Does not prove the earlier timeout was caused by the unread pipe."
+  },
+  "limits": [
+    "24-hour observation deferred by user.",
+    "Whole-product control matrix, receipt and clipboard gaps remain open.",
+    "Unavailable hardware/integrations are not certified.",
+    "Do not repeat same-SD online database copying during capture for this code-only rollback."
+  ]
+}
