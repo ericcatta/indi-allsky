@@ -1,0 +1,74 @@
+{
+  "date": "2026-10-01",
+  "scope": "Worker recovery after an actual isolated SQLAlchemy flush/commit failure; not external integration acceptance",
+  "defect": {
+    "before": "Both video and upload error handlers read expired task.id before rollback, causing PendingRollbackError and escaping the failure boundary.",
+    "reproduction_logs": [
+      "/home/eric/hybrid-rollback-video-before.log",
+      "/home/eric/hybrid-rollback-upload-before.log"
+    ],
+    "before_exit_codes": {
+      "video": 1,
+      "upload": 1
+    }
+  },
+  "change": "Use the queue message task_id, already captured before ORM work, when logging the original exception. Rollback, refresh and terminal-state behavior remain unchanged.",
+  "targeted_tests": {
+    "video": "Real NOT NULL violation on task.queue; original queue restored and task FAILED; next valid task succeeds.",
+    "upload": "Real NOT NULL violation from the non-network transfer fixture; adapter closed, task FAILED, duplicate execution suppressed and next valid task succeeds; source fixture bytes preserved.",
+    "after_exit_codes": {
+      "video": 0,
+      "upload": 0
+    },
+    "after_logs": [
+      "/home/eric/hybrid-rollback-video-after.log",
+      "/home/eric/hybrid-rollback-upload-after.log"
+    ]
+  },
+  "regression": {
+    "status": "passed",
+    "python_report": "/home/eric/hybrid-rollback-regression-20261001/results.json",
+    "javascript_report": "/tmp/hybrid-rollback-js-20261001.json",
+    "javascript_passed": 35,
+    "javascript_sha256": "622b2e3566ea0e85447eb2267a94577f183952171985aab462c4f2bf127232dc",
+    "local_source_manifest_sha256": "b524d1f6943e3ccd0f5dd2bc92bb1d21f0d08c5c72eec4df25ab20a230fade33",
+    "python_passed": 178,
+    "source_changed": false,
+    "python_report_sha256": "314fc5e02d2c4a6ee427e29e2c383f3f990138e37db781c9ee64cb67eb8850da",
+    "tested_source_manifest_sha256": "b524d1f6943e3ccd0f5dd2bc92bb1d21f0d08c5c72eec4df25ab20a230fade33"
+  },
+  "deployment": {
+    "status": "installed and bounded native frame recovery verified",
+    "commit": "ffb4335c",
+    "pending_tasks_before_restart": 0,
+    "config_revision": 118,
+    "backup": "/home/eric/hybrid-backups/hybrid-worker-rollback-20261001",
+    "capture_pid": 537392,
+    "capture_active_since": "2026-10-01 16:17:27 CEST",
+    "capture_automatic_restarts": 0,
+    "web_pid_unchanged": 1540,
+    "log_check": "225 lines from 16:17:27 through 16:17:48; no ERROR, CRITICAL or Traceback markers",
+    "rollback": "Restore only video.py and uploader.py from a4c84df5 or the verified backup, restart capture and verify both cameras; no database or configuration restore.",
+    "native_frames": [
+      {
+        "camera_id": 1,
+        "timestamp": "2026-10-01 16:17:54",
+        "complete": true,
+        "width": 4608,
+        "height": 2592
+      },
+      {
+        "camera_id": 2,
+        "timestamp": "2026-10-01 16:17:50",
+        "complete": true,
+        "width": 3840,
+        "height": 2160
+      }
+    ]
+  },
+  "limitations": [
+    "No malformed task or failed database write injected into production.",
+    "A persistently unavailable database cannot be made writable by rollback; this test covers a recoverable transaction failure.",
+    "No external upload destination or 24-hour observation covered."
+  ]
+}

@@ -6,7 +6,16 @@ Those activities are outside this acceptance run, not passed tests.
 
 ## Current installation and regression
 
-The latest application change is `f21f87d5`; subsequent commits add tests and evidence.
+The latest application change is `ffb4335c`; subsequent commits add evidence.
+Video/upload failure logging now uses the already captured task ID before rollback,
+so an expired ORM object cannot turn a recoverable commit failure into a second
+exception. Both failures were reproduced with real isolated database constraints.
+All 178 Python/compile and 35 JavaScript checks passed with unchanged test sources.
+After controlled capture restart at 16:17:27, both new frames decoded at
+16:17:54 / 16:17:50; capture PID 537392 is active with zero automatic restarts.
+[Recovery evidence and limits](testing/evidence/hybrid-worker-rollback-20261001.json).
+
+The preceding application change `f21f87d5` corrected Observatory disk usage.
 Observatory now reports the same disk-use percentage as Storage, excluding system-reserved
 blocks from usable capacity. Its twenty page-specific links were exercised in the
 native browser, including camera-scoped media and completed asynchronous tool loads.
@@ -30,7 +39,7 @@ subsequent work. Remote S3 deletion completes without attempting local cleanup;
 unexpected connection failures close the adapter. Real external effects remain
 unverified because integrations are disabled.
 The full regression passed again (178 Python/compile and 35 JavaScript).
-After the controlled capture restart, PID 472545 is active with zero automatic
+At that upload release, capture PID 472545 was active with zero automatic
 restarts; both cameras' new frames decoded at 15:27:37 / 15:27:32 on 1 October.
 These are bounded observations, not continuous monitoring.
 [Upload regression and deployment](testing/evidence/hybrid-upload-failure-20261001.json).

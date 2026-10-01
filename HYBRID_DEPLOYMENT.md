@@ -2,7 +2,10 @@
 
 ## Current application
 
-The latest application change deployed on 1 October is `f21f87d5`: Observatory disk usage now matches Storage and accounts for system-reserved blocks. [Verification and rollback](testing/evidence/hybrid-observatory-controls-20261001.json).
+The latest application change deployed on 1 October is `ffb4335c`: video and upload
+workers can roll back a failed commit without error logging reading an expired
+ORM object first. [Verification](testing/evidence/hybrid-worker-rollback-20261001.json).
+The previous `f21f87d5` change corrected Observatory disk usage.
 Geometry now rejects invalid azimuth before copy/review; the updated asset version is verified in production. 175 Python checks and 35 JavaScript tests passed. [Validation and deployment](testing/evidence/hybrid-geometry-validation-20261001.json).
 
 The geometry-to-Keogram link now preserves camera/profile. Its 175 Python and 34 JavaScript checks passed; native source-to-Settings navigation now passes for both cameras/profiles after network recovery. Both recent frames decoded on 1 October at 13:05:00 / 13:05:07. [Latest change](testing/evidence/hybrid-geometry-scope-20261001.json).
@@ -14,9 +17,9 @@ Classic frontend is removed. Hybrid requires login; shared backend and public
 compatibility handlers remain. Configuration revision is 118.
 
 The current application passed 178 Python/compile entrypoints and 35 JavaScript
-tests. The last deployment reloaded Gunicorn only; capture PID 472545 remained
-active with zero automatic restarts. Native Observatory/Storage capacity readings
-agree after reload. [Regression and deployment](testing/evidence/hybrid-observatory-controls-20261001.json).
+tests. The last deployment restarted capture at 16:17:27 CEST; PID 537392 is active
+with zero automatic restarts, and Gunicorn PID 1540 remained unchanged. Both new
+camera frames decoded after restart. [Regression and deployment](testing/evidence/hybrid-worker-rollback-20261001.json).
 This is bounded acceptance, not full-product or 24-hour certification.
 See [current status and open gates](HYBRID_ACCEPTANCE_STATUS.md).
 
@@ -56,6 +59,11 @@ Afterward verify installed source, authentication, the affected UI/request/effec
 and fresh decoded frames from both cameras. A running unit alone is insufficient.
 
 ## Rollback of the latest code-only changes
+
+For worker commit recovery `ffb4335c`, revert that commit or restore only
+`indi_allsky/video.py` and `indi_allsky/uploader.py` from `a4c84df5`.
+Verified copies also exist in `/home/eric/hybrid-backups/hybrid-worker-rollback-20261001`.
+Restart capture and verify both cameras. No database/configuration restore is needed.
 
 For disk usage consistency `f21f87d5`, revert that commit or restore only
 `indi_allsky/observatory_runtime.py` from `87dfc0ce`, then reload Gunicorn.
