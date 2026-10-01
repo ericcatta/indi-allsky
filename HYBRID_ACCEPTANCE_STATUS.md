@@ -6,7 +6,16 @@ Those activities are outside this acceptance run, not passed tests.
 
 ## Current installation and regression
 
-The latest application change is `ffb4335c`; subsequent commits add evidence.
+The latest application change is `db205760`; subsequent commits add evidence.
+Hybrid AWB synchronization now rejects capture-driver mode when the destination
+camera lacks that capability. Both save-and-sync and standalone sync fail without
+creating a partial revision; compatible modes and libcamera-to-libcamera sync pass.
+The full regression passed 179 Python/compile and 35 JavaScript checks. Web-only
+reload preserved capture PID 537392; both recent frames decoded at 16:59:45 / 16:59:39.
+Native confirmation-dialog acceptance remains open.
+[AWB sync evidence and limits](testing/evidence/hybrid-profile-sync-capability-20261001.json).
+
+The preceding worker recovery change is `ffb4335c`.
 Video/upload failure logging now uses the already captured task ID before rollback,
 so an expired ORM object cannot turn a recoverable commit failure into a second
 exception. Both failures were reproduced with real isolated database constraints.
@@ -31,7 +40,7 @@ The geometry-to-Keogram link now preserves camera/profile. Its 175 Python and 34
 Hybrid is the only UI and requires login. Useful shared backend, drivers, workers,
 public media URLs and integration APIs remain. Configuration revision is 118.
 
-Camera Info now handles missing sensor/lens metadata without crashing or inventing zero measurements. Partial known values remain visible. The current application passed **178 Python/compile entrypoints and 35 JavaScript tests**.
+Camera Info now handles missing sensor/lens metadata without crashing or inventing zero measurements. Partial known values remain visible. The current application passed **179 Python/compile entrypoints and 35 JavaScript tests**.
 Video task preparation now shares the effect failure boundary: malformed tasks and
 route setup errors terminate as FAILED, with rollback, while the next valid job can run.
 Upload preparation/execution now also terminates failed tasks without abandoning

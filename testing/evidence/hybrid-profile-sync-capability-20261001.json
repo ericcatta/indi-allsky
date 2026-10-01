@@ -1,0 +1,72 @@
+{
+  "date": "2026-10-01",
+  "defect": "Hybrid profile sync accepted capture_driver AWB from a libcamera source into an INDI target, despite the target editor rejecting that mode.",
+  "reproduction": {
+    "log": "/home/eric/hybrid-profile-sync-before-20261001.log",
+    "exit_code": 1,
+    "failure": "Save & Sync copied unsupported capture-driver AWB to INDI"
+  },
+  "change": "Apply the destination capability gate before mutating the target profile in the shared Hybrid sync method. Reject with an actionable message; do not silently replace the chosen mode.",
+  "targeted": {
+    "log": "/home/eric/hybrid-profile-sync-after-20261001.log",
+    "exit_code": 0,
+    "coverage": [
+      "Real isolated Flask save-and-sync and standalone-sync routes reject incompatible destination with no new revision or partial source save.",
+      "Source-only capture_driver save remains valid for libcamera.",
+      "Compatible postprocess_rgb copy preserves profile identities, acquisition, unrelated domains and global settings.",
+      "Two compatible libcamera profiles still accept capture_driver sync.",
+      "Ordinary user and missing CSRF cannot change configuration; no task is queued."
+    ]
+  },
+  "regression": {
+    "status": "passed",
+    "python_report": "/home/eric/hybrid-profile-sync-regression-20261001/results.json",
+    "javascript_passed": 35,
+    "javascript_report": "/tmp/hybrid-profile-sync-js-20261001.json",
+    "javascript_sha256": "622b2e3566ea0e85447eb2267a94577f183952171985aab462c4f2bf127232dc",
+    "local_source_manifest_sha256": "f75c0c7fbd0c479c649317ebdb917ddbcb158284b0b884cd7061fb51d5bc4c0b",
+    "python_passed": 179,
+    "source_changed": false,
+    "python_report_sha256": "dc3809333c73d6c0cb896bf7f2b8a849e0ff736a64953359213fd9265220e132",
+    "tested_source_manifest_sha256": "f75c0c7fbd0c479c649317ebdb917ddbcb158284b0b884cd7061fb51d5bc4c0b"
+  },
+  "deployment": {
+    "status": "installed; bounded native product check passed",
+    "backup": "/home/eric/hybrid-backups/hybrid-profile-sync-20261001/views.py",
+    "backup_sha256": "1a865adcc9b93d77a46815b80f8287e23d6150bfe57f39956b2ef24b42e2c8e5",
+    "commit": "db205760",
+    "web_only_reload": true,
+    "capture_pid_unchanged": 537392,
+    "web_pid_unchanged": 1540,
+    "automatic_restarts": 0,
+    "config_revision_unchanged": 118,
+    "pending_tasks": 0,
+    "installed_views_sha256": "5254f68ddb2d6264720ab66613c6829e830a5cf64426688b1bd84d9bbaacca1a",
+    "native_frames": [
+      {
+        "camera_id": 1,
+        "time": "2026-10-01 16:59:45",
+        "complete": true,
+        "width": 4608,
+        "height": 2592
+      },
+      {
+        "camera_id": 2,
+        "time": "2026-10-01 16:59:39",
+        "complete": true,
+        "width": 3840,
+        "height": 2160
+      }
+    ],
+    "rollback": "Restore only indi_allsky/flask/views.py from 457e3e21 or the verified backup, then reload Gunicorn. No capture restart or database/config restore."
+  },
+  "limits": [
+    "No production camera settings modified.",
+    "Native Save & Sync confirmation remains blocked in the browser; backend tests do not certify that interaction.",
+    "No physical AWB or external integration effects exercised."
+  ],
+  "browser_followup": {
+    "temporary_tab_absent": true,
+    "observed": "Subsequent native browser tab inventory contains only the two original user tabs. No further user cancellation is required; confirmation interaction remains unverified."
+  }
+}

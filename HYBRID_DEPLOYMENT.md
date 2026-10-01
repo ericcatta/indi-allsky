@@ -2,9 +2,10 @@
 
 ## Current application
 
-The latest application change deployed on 1 October is `ffb4335c`: video and upload
-workers can roll back a failed commit without error logging reading an expired
-ORM object first. [Verification](testing/evidence/hybrid-worker-rollback-20261001.json).
+The latest application change deployed on 1 October is `db205760`: Hybrid AWB
+sync validates the destination camera before saving either profile.
+[Verification and limits](testing/evidence/hybrid-profile-sync-capability-20261001.json).
+The preceding worker recovery change is `ffb4335c`.
 The previous `f21f87d5` change corrected Observatory disk usage.
 Geometry now rejects invalid azimuth before copy/review; the updated asset version is verified in production. 175 Python checks and 35 JavaScript tests passed. [Validation and deployment](testing/evidence/hybrid-geometry-validation-20261001.json).
 
@@ -16,10 +17,10 @@ release heading as proof of the installed version.
 Classic frontend is removed. Hybrid requires login; shared backend and public
 compatibility handlers remain. Configuration revision is 118.
 
-The current application passed 178 Python/compile entrypoints and 35 JavaScript
-tests. The last deployment restarted capture at 16:17:27 CEST; PID 537392 is active
-with zero automatic restarts, and Gunicorn PID 1540 remained unchanged. Both new
-camera frames decoded after restart. [Regression and deployment](testing/evidence/hybrid-worker-rollback-20261001.json).
+The current application passed 179 Python/compile entrypoints and 35 JavaScript
+tests. The last deployment reloaded only Gunicorn; capture PID 537392 and web
+PID 1540 remained unchanged, active, with zero automatic restarts. Both recent
+camera frames decoded after deployment. [Regression and deployment](testing/evidence/hybrid-profile-sync-capability-20261001.json).
 This is bounded acceptance, not full-product or 24-hour certification.
 See [current status and open gates](HYBRID_ACCEPTANCE_STATUS.md).
 
@@ -59,6 +60,11 @@ Afterward verify installed source, authentication, the affected UI/request/effec
 and fresh decoded frames from both cameras. A running unit alone is insufficient.
 
 ## Rollback of the latest code-only changes
+
+For AWB sync validation `db205760`, revert that commit or restore only
+`indi_allsky/flask/views.py` from `457e3e21`, then reload Gunicorn.
+The verified backup is `/home/eric/hybrid-backups/hybrid-profile-sync-20261001/views.py`.
+No capture restart or database/configuration restore is required.
 
 For worker commit recovery `ffb4335c`, revert that commit or restore only
 `indi_allsky/video.py` and `indi_allsky/uploader.py` from `a4c84df5`.

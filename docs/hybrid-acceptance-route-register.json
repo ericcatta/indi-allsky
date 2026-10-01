@@ -3755,6 +3755,12 @@
           "record": "controls[5]",
           "control": "Hybrid Save & Sync confirmation",
           "recorded_status": "bloccato"
+        },
+        {
+          "source": "testing/evidence/hybrid-profile-sync-capability-20261001.json",
+          "record": "targeted",
+          "control": "Backend AWB sync destination validation, atomic failure and compatible success; native confirmation remains open",
+          "recorded_status": "superato"
         }
       ]
     },
