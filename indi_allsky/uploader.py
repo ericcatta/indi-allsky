@@ -182,17 +182,33 @@ class FileUploader(Thread):
         # MULTI_CAMERA_PREP: passive route id; upload still loads and
         # executes the existing DB task by id.
         profile_id = self._validate_profile_id(u_dict)
-        camera_id = u_dict.get('camera_id')
-        self._set_queue_context(profile_id, camera_id=camera_id)
-        logger.debug('Upload queue route: profile=%s camera_id=%s task_id=%s', profile_id, camera_id, task_id)
-
-
         task = claim_upload_task(task_id)
         if task is None:
             logger.info('Upload task %s is absent or already claimed', task_id)
             return
 
 
+        try:
+            camera_id = u_dict.get('camera_id')
+            self._set_queue_context(profile_id, camera_id=camera_id)
+            logger.debug('Upload queue route: profile=%s camera_id=%s task_id=%s', profile_id, camera_id, task_id)
+
+
+            self._executeUpload(task)
+        except Exception as error:
+            logger.exception('Upload task %s failed', task.id)
+            db.session.rollback()
+            db.session.refresh(task)
+            if task.state == models.TaskQueueState.RUNNING:
+                task.setFailed('Upload failed ({0}); inspect destination and logs before retrying'.format(type(error).__name__))
+
+
+    def _executeUpload(self, task):
+        """Execute a claimed task; ownership and terminal recovery stay above."""
+        if not isinstance(task.data, dict):
+            raise ValueError('Upload task data must be an object')
+        entry = None
+        local_file_p = None
         action = task.data['action']
 
         local_file = task.data.get('local_file')
@@ -231,8 +247,8 @@ class FileUploader(Thread):
             local_file_p = Path(entry.getFilesystemPath())
 
         elif s3_key:
-            # This is for removing s3 entries
-            pass
+            # Remote deletion has no local asset to clean up.
+            remove_local = False
 
         elif local_file:
             # use given file name
@@ -476,7 +492,8 @@ class FileUploader(Thread):
                 expire=timedelta(hours=1),
             )
 
-            self.cleanup(local_file_p, remove_local=remove_local)
+            if local_file_p is not None:
+                self.cleanup(local_file_p, remove_local=remove_local)
 
             return
         except filetransfer.exceptions.AuthenticationFailure as e:
@@ -491,7 +508,8 @@ class FileUploader(Thread):
                 expire=timedelta(hours=1),
             )
 
-            self.cleanup(local_file_p, remove_local=remove_local)
+            if local_file_p is not None:
+                self.cleanup(local_file_p, remove_local=remove_local)
 
             return
         except filetransfer.exceptions.CertificateValidationFailure as e:
@@ -506,9 +524,15 @@ class FileUploader(Thread):
                 expire=timedelta(hours=1),
             )
 
-            self.cleanup(local_file_p, remove_local=remove_local)
+            if local_file_p is not None:
+                self.cleanup(local_file_p, remove_local=remove_local)
 
             return
+
+        except Exception:
+            # Unexpected adapter errors must release the connection too.
+            client.close()
+            raise
 
         # Upload file
         try:
@@ -525,7 +549,8 @@ class FileUploader(Thread):
                 expire=timedelta(hours=1),
             )
 
-            self.cleanup(local_file_p, remove_local=remove_local)
+            if local_file_p is not None:
+                self.cleanup(local_file_p, remove_local=remove_local)
 
             return
         except filetransfer.exceptions.AuthenticationFailure as e:
@@ -540,7 +565,8 @@ class FileUploader(Thread):
                 expire=timedelta(hours=1),
             )
 
-            self.cleanup(local_file_p, remove_local=remove_local)
+            if local_file_p is not None:
+                self.cleanup(local_file_p, remove_local=remove_local)
 
             return
         except filetransfer.exceptions.CertificateValidationFailure as e:
@@ -555,7 +581,8 @@ class FileUploader(Thread):
                 expire=timedelta(hours=1),
             )
 
-            self.cleanup(local_file_p, remove_local=remove_local)
+            if local_file_p is not None:
+                self.cleanup(local_file_p, remove_local=remove_local)
 
             return
         except filetransfer.exceptions.TransferFailure as e:
@@ -570,7 +597,8 @@ class FileUploader(Thread):
                 expire=timedelta(hours=1),
             )
 
-            self.cleanup(local_file_p, remove_local=remove_local)
+            if local_file_p is not None:
+                self.cleanup(local_file_p, remove_local=remove_local)
 
             return
         except filetransfer.exceptions.PermissionFailure as e:
@@ -585,7 +613,8 @@ class FileUploader(Thread):
                 expire=timedelta(hours=1),
             )
 
-            self.cleanup(local_file_p, remove_local=remove_local)
+            if local_file_p is not None:
+                self.cleanup(local_file_p, remove_local=remove_local)
 
             return
         finally:
@@ -629,12 +658,13 @@ class FileUploader(Thread):
 
 
         #logger.info('Remove local: %s', str(remove_local))
-        self.cleanup(local_file_p, remove_local=remove_local)
+        if local_file_p is not None:
+            self.cleanup(local_file_p, remove_local=remove_local)
 
 
         # Keep the task RUNNING until metadata, dependent uploads and local
         # cleanup are complete, so retention cannot race those final effects.
-        task.setSuccess('File uploaded')
+        task.setSuccess('Remote file deleted' if action == constants.DELETE_S3 else 'File uploaded')
 
 
         #raise Exception('Testing uncaught exception')

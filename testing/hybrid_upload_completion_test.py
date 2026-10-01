@@ -11,7 +11,7 @@ from indi_allsky import constants
 def run():
     path = Path(__file__).resolve().parents[1]/'indi_allsky/uploader.py'
     tree = ast.parse(path.read_text())
-    method = next(n for n in ast.walk(tree) if isinstance(n,ast.FunctionDef) and n.name=='processUpload')
+    method = next(n for n in ast.walk(tree) if isinstance(n,ast.FunctionDef) and n.name=='_executeUpload')
     # Execute the actual complete finalization block, after network transfer.
     first = next(i for i,n in enumerate(method.body) if isinstance(n,ast.If)
                  and ast.unparse(n.test)=='entry and action == constants.TRANSFER_UPLOAD')

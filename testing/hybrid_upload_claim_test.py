@@ -111,7 +111,7 @@ def run():
             text = ast.unparse(method)
             assert 'task = claim_upload_task(task_id)' in text
             assert 'task.setRunning()' not in text
-            assert text.index('task = claim_upload_task(task_id)') < text.index('client.connect(')
+            assert text.index('task = claim_upload_task(task_id)') < text.index('self._executeUpload(task)')
             assert 'if task is None:\n        logger.info' in text
             print('Old duplicate reproduced; 10 concurrent atomic claims, scopes, terminal states and uncertain commits: PASS')
         finally:
