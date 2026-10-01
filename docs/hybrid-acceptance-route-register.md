@@ -161,3 +161,5 @@ riferimento tecnico chiuso, distinto dai sei editor operativi.
 [Geometria → Keogram Settings, 1 ottobre](../testing/evidence/hybrid-geometry-scope-20261001.json): perdita di camera/profilo corretta; percorso nativo verificato per entrambe le camere, test isolati per entrambi i ruoli, nessun salvataggio in produzione.
 
 [FITS reali e RAW senza dati, 1 ottobre](../testing/evidence/hybrid-fits-raw-native-20261001.json): anteprime sorgente/elaborate delle due camere decodificate a piena risoluzione, validazione rotazione, reset e stati dark/BPM/RAW assenti. Ricezione download e riproduzione RAW con dati restano non verificate.
+
+Native mask downloads for both cameras were received on 1 October and match the Raspberry files by SHA-256; CSV/Excel/snapshot receipt remains unverified. See [mask download evidence](../testing/evidence/hybrid-mask-download-native-20261001.json).

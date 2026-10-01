@@ -434,6 +434,12 @@
           "record": "controls[8]",
           "control": "Both camera previews",
           "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-mask-download-native-20261001.json",
+          "record": "checks",
+          "control": "Both camera selections, full-resolution previews and received mask downloads with matching server/local hashes",
+          "recorded_status": "superato"
         }
       ]
     },

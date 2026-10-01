@@ -1,0 +1,55 @@
+{
+  "date": "2026-10-01",
+  "baseline": "da189d1e",
+  "application": "64c28b38",
+  "environment": "Production native in-app browser; authenticated administrator; desktop",
+  "checks": [
+    {
+      "page": "/modern-admin/cameras/mask-base",
+      "camera_id": 1,
+      "profile_id": "imx708-wide",
+      "control": "Camera selection, decoded preview and Download Mask Base",
+      "status": "superato",
+      "dimensions": [
+        4608,
+        2592
+      ],
+      "bytes": 6632174,
+      "sha256": "2a514561f3b24157dc718a1c1d9cb458d905f40b1f5ebf664546eaa1ecff3551",
+      "local_file": "/Users/ericcattaneo/Downloads/mask-camera-1.png",
+      "server_file": "/var/www/html/allsky/images/mask-camera-1.png",
+      "proof": "Native link click produced a new local file; independently computed local SHA-256 equals SSH server SHA-256. Browser image complete with expected natural dimensions."
+    },
+    {
+      "page": "/modern-admin/cameras/mask-base",
+      "camera_id": 2,
+      "profile_id": "asi678mc",
+      "control": "Camera selection, decoded preview and Download Mask Base",
+      "status": "superato",
+      "dimensions": [
+        3840,
+        2160
+      ],
+      "bytes": 7469167,
+      "sha256": "fefa1c61140e76875b9c28e000bef2915cc0e24c2e2d1f5f3692ee174908c420",
+      "local_file": "/Users/ericcattaneo/Downloads/mask-camera-2.png",
+      "server_file": "/var/www/html/allsky/images/mask-camera-2.png",
+      "proof": "Native link click produced a new local file; independently computed local SHA-256 equals SSH server SHA-256. Browser image complete with expected natural dimensions."
+    }
+  ],
+  "export_recheck": {
+    "status": "bloccato",
+    "controls": [
+      "Users CSV",
+      "Users Excel",
+      "Config snapshot 118 Download this snapshot"
+    ],
+    "observed": "Native clicks leave the respective page open; no new corresponding file appears in Mac Downloads. Users page reports no captured JavaScript errors. Mask downloads do arrive through the same browser.",
+    "limits": "This distinguishes working mask download links from unverified attachment exports; it does not establish an application defect or certify export receipt. Existing request for manual verification remains pending."
+  },
+  "limits": [
+    "Only administrator desktop mask previews, camera switching and file downloads verified here.",
+    "No claim of complete camera diagnostic acceptance or regeneration of masks.",
+    "No application/configuration changes; existing generated masks downloaded."
+  ]
+}
