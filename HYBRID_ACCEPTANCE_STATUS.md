@@ -83,6 +83,11 @@ The cleanup extension is included in this regression. All 719 Full Config fields
 | Hardware availability | Native GPIO and focuser controls correctly disabled with a reason when no driver is configured; no physical effects claimed | [Prerequisites](testing/evidence/hybrid-hardware-prerequisites-20260930.json) |
 | Runtime cleanup | Unreachable dashboard template/helpers and unused action catalog removed; active services and regression retained | [Entry/template](testing/evidence/hybrid-entry-retirement-20260930.json), [helpers](testing/evidence/hybrid-dashboard-helper-retirement-20260930.json), [catalog](testing/evidence/hybrid-action-catalog-retirement-20260930.json) |
 
+Both VirtualSky overlay export buttons now have native receipt evidence: the two
+896×504 PNG previews were received on the Mac, fully decoded and visually checked
+for camera frame plus sky overlay. This does not close configuration/CSV/Excel
+receipts or certify every overlay control. [VirtualSky exports](testing/evidence/hybrid-virtualsky-export-native-20261001.json).
+
 Other bounded checks—including Loop, users, notifications, observatory tools,
 mobile layouts, provider failures and operations—remain linked in the
 [route evidence register](docs/hybrid-acceptance-route-register.md).

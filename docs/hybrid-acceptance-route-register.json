@@ -3211,6 +3211,18 @@
           "record": "tests",
           "control": "Validated history controls and camera scope; bounded Loop results and per-camera aggregate delivery policies where applicable",
           "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-virtualsky-export-native-20261001.json",
+          "record": "controls[0]",
+          "control": "Download overlay PNG: received and decoded for camera 1",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-virtualsky-export-native-20261001.json",
+          "record": "controls[1]",
+          "control": "Download overlay PNG: received and decoded for camera 2",
+          "recorded_status": "superato"
         }
       ]
     },

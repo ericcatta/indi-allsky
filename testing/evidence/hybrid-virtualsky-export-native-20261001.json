@@ -1,0 +1,45 @@
+{
+  "date": "2026-10-01",
+  "installed_application": "04388e02",
+  "installed_checkout": "baca97d8",
+  "environment": "Production Raspberry, native in-app browser, authenticated administrator",
+  "route": "/modern-admin/observatory/virtualsky",
+  "controls": [
+    {
+      "control": "Download overlay PNG",
+      "camera_id": 1,
+      "profile_id": "imx708-wide",
+      "status": "superato",
+      "received_file": "/Users/ericcattaneo/Downloads/virtualsky_camera_1_1790870099.png",
+      "bytes": 903880,
+      "dimensions": [
+        896,
+        504
+      ],
+      "sha256": "a47b317e8fa9f62de469e059a9a1ebfbf1f5bd63273c6a935c9527396bbae3e6",
+      "validation": "Native button; file received on Mac, fully decoded with Pillow and visually inspected: camera frame and sky lines/star/planet labels visible."
+    },
+    {
+      "control": "Download overlay PNG",
+      "camera_id": 2,
+      "profile_id": "asi678mc",
+      "status": "superato",
+      "received_file": "/Users/ericcattaneo/Downloads/virtualsky_camera_2_1790870186.png",
+      "bytes": 717521,
+      "dimensions": [
+        896,
+        504
+      ],
+      "sha256": "141d9b40b9b20bfe3058baa6211da02ea9ba7bef83c551bc402cb7820f7c4400",
+      "validation": "Native button; file received on Mac, fully decoded with Pillow and visually inspected: camera frame and sky lines/star/planet labels visible."
+    }
+  ],
+  "config_revision_unchanged": 118,
+  "limits": [
+    "Two default-preview exports only; does not certify every overlay setting or ordinary-user export.",
+    "Exports contain the rendered 896x504 preview, not full-resolution source pixels.",
+    "No claim about original FITS/configuration/CSV/Excel download receipt.",
+    "Camera-2 role-based image locator timed out; direct read-only DOM inspection confirmed its decoded 3840x2160 source and the PNG receipt independently proved export."
+  ],
+  "cleanup": "Temporary browser tab closed. Received images remain in Downloads; no production file/config write was performed."
+}
