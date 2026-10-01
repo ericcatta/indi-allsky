@@ -3223,6 +3223,18 @@
           "record": "controls[1]",
           "control": "Download overlay PNG: received and decoded for camera 2",
           "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-export-validation-native-20261001.json",
+          "record": "controls[2]",
+          "control": "Diameter zero (1 October native check)",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-export-validation-native-20261001.json",
+          "record": "controls[3]",
+          "control": "Reset preview after invalid diameter (1 October native check)",
+          "recorded_status": "superato"
         }
       ]
     },
@@ -6605,6 +6617,18 @@
           "control": "Navigation drawer / Users",
           "recorded_status": "superato",
           "observed_page": "/modern-admin/users"
+        },
+        {
+          "source": "testing/evidence/hybrid-export-validation-native-20261001.json",
+          "record": "controls[0]",
+          "control": "CSV (1 October native check)",
+          "recorded_status": "bloccato"
+        },
+        {
+          "source": "testing/evidence/hybrid-export-validation-native-20261001.json",
+          "record": "controls[1]",
+          "control": "Excel (1 October native check)",
+          "recorded_status": "bloccato"
         }
       ]
     },

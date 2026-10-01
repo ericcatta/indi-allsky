@@ -1,0 +1,43 @@
+{
+  "date": "2026-10-01",
+  "installed_application": "04388e02",
+  "installed_checkout": "ac960e2e",
+  "environment": "Production Raspberry, native in-app browser, authenticated administrator",
+  "controls": [
+    {
+      "page": "/modern-admin/users",
+      "control": "CSV",
+      "status": "bloccato",
+      "observed": "Native click; server POST 200 at 18:00:30 +0200, logged bytes 682. No new or changed hybrid-records file in Mac Downloads."
+    },
+    {
+      "page": "/modern-admin/users",
+      "control": "Excel",
+      "status": "bloccato",
+      "observed": "Native click; server POST 200 at 18:00:51 +0200, logged bytes 2161. No new or changed hybrid-records file in Mac Downloads; no captured warning/error."
+    },
+    {
+      "page": "/modern-admin/observatory/virtualsky",
+      "camera_id": 2,
+      "profile_id": "asi678mc",
+      "control": "Diameter zero",
+      "status": "superato",
+      "observed": "Filled Diameter with 0 and blurred via Tab. Status: Image dimensions, capture time and a positive circle diameter are required. Download overlay PNG disabled."
+    },
+    {
+      "page": "/modern-admin/observatory/virtualsky",
+      "camera_id": 2,
+      "profile_id": "asi678mc",
+      "control": "Reset preview after invalid diameter",
+      "status": "superato",
+      "observed": "Clicked Reset preview. Live field value 3500, frame image complete, overlay visible, status updated, PNG export enabled."
+    }
+  ],
+  "interpretation": "Successful client-generated PNG receipt does not establish server attachment receipt. Table exports use a form POST and HTTP attachment. No application defect inferred solely from missing native receipt.",
+  "limits": [
+    "No configuration/CSV/Excel receipt is certified by this check.",
+    "VirtualSky validation covers zero diameter and recovery on camera 2 only.",
+    "No claim about every overlay setting, all roles or all export families."
+  ],
+  "cleanup": "Both temporary browser tabs closed; no configuration save or capture effect performed."
+}

@@ -88,6 +88,11 @@ Both VirtualSky overlay export buttons now have native receipt evidence: the two
 for camera frame plus sky overlay. This does not close configuration/CSV/Excel
 receipts or certify every overlay control. [VirtualSky exports](testing/evidence/hybrid-virtualsky-export-native-20261001.json).
 
+VirtualSky also rejects zero diameter with a disabled export and recovers after
+Reset preview on camera 2. CSV/Excel native clicks still return HTTP 200 without
+a verified received file; PNG success does not close that separate transport
+check. [Validation and export limits](testing/evidence/hybrid-export-validation-native-20261001.json).
+
 Other bounded checks—including Loop, users, notifications, observatory tools,
 mobile layouts, provider failures and operations—remain linked in the
 [route evidence register](docs/hybrid-acceptance-route-register.md).
