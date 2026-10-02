@@ -719,6 +719,12 @@
           "record": "controls[7]",
           "control": "Open Config History",
           "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-user-media-feedback-20261002.json",
+          "record": "checks[7]",
+          "control": "Download this snapshot: user confirms after receiving location",
+          "recorded_status": "superato"
         }
       ]
     },
@@ -5793,7 +5799,33 @@
           "source": "testing/evidence/hybrid-image-tools-native-20260930.json",
           "record": "checks",
           "control": "Native catalog choices, scoped offsets/reload and geometry fit; clipboard receipt explicitly blocked; see individual passed controls in source; aggregate incomplete",
-          "recorded_status": "bloccato"
+          "recorded_status": "bloccato",
+          "resolution": {
+            "reviewed_on": "2026-10-02",
+            "status": "superato",
+            "source": "testing/evidence/hybrid-user-media-feedback-20261002.json",
+            "records": [
+              "checks[6]"
+            ],
+            "supporting_evidence": [
+              {
+                "source": "testing/evidence/hybrid-user-confirmed-delivery-20261002.json",
+                "records": [
+                  "controls[3]"
+                ]
+              },
+              {
+                "source": "testing/evidence/hybrid-image-tools-native-20260930.json",
+                "records": [
+                  "checks[0]",
+                  "checks[1]",
+                  "checks[2]"
+                ]
+              }
+            ],
+            "scope": "Original aggregate checks are covered by native catalog/offset/fit evidence plus user-confirmed simulator copying and Geometry Copy values. Confirmation is user-reported, not a new automated clipboard comparison. The separate navigation finding and other roles/viewports remain outside this resolution.",
+            "historical_outcome_preserved": true
+          }
         },
         {
           "source": "testing/evidence/hybrid-simulator-validation-native-20261001.json",
@@ -6153,7 +6185,33 @@
           "source": "testing/evidence/hybrid-image-tools-native-20260930.json",
           "record": "checks",
           "control": "Native catalog choices, scoped offsets/reload and geometry fit; clipboard receipt explicitly blocked; see individual passed controls in source; aggregate incomplete",
-          "recorded_status": "bloccato"
+          "recorded_status": "bloccato",
+          "resolution": {
+            "reviewed_on": "2026-10-02",
+            "status": "superato",
+            "source": "testing/evidence/hybrid-user-media-feedback-20261002.json",
+            "records": [
+              "checks[6]"
+            ],
+            "supporting_evidence": [
+              {
+                "source": "testing/evidence/hybrid-user-confirmed-delivery-20261002.json",
+                "records": [
+                  "controls[3]"
+                ]
+              },
+              {
+                "source": "testing/evidence/hybrid-image-tools-native-20260930.json",
+                "records": [
+                  "checks[0]",
+                  "checks[1]",
+                  "checks[2]"
+                ]
+              }
+            ],
+            "scope": "Original aggregate checks are covered by native catalog/offset/fit evidence plus user-confirmed simulator copying and Geometry Copy values. Confirmation is user-reported, not a new automated clipboard comparison. The separate navigation finding and other roles/viewports remain outside this resolution.",
+            "historical_outcome_preserved": true
+          }
         },
         {
           "source": "testing/evidence/hybrid-geometry-scope-20261001.json",

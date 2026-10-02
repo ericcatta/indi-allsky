@@ -197,3 +197,11 @@ Discovery refreshed at `51a248ee`: 99 GET entries, 500 executed contexts (376 re
 Il 2 ottobre l’utente ha confermato download/apertura del mini-video 7 (camera 2), CSV/Excel Users e copia URL del simulatore. Tre record storici hanno una risoluzione puntuale; il vecchio download del mini-video 3 resta distinto. [Conferma e limiti](../testing/evidence/hybrid-user-confirmed-delivery-20261002.json).
 
 Il record aggregato Users «Copy, CSV, Excel» è inoltre risolto combinando la prova diretta degli appunti del 29 settembre con le due ricevute confermate il 2 ottobre. La funzione di copia è invariata; non vengono estesi gli esiti ad altre pagine o ruoli.
+
+Conferme del 2 ottobre: l’utente conferma anche Geometry Copy values e il download
+dello snapshot dopo aver ricevuto i riferimenti ai controlli. La prima conferma,
+unita alla precedente conferma della copia del simulatore e alle prove native già
+registrate, risolve i due riferimenti allo stesso aggregato storico degli strumenti
+immagine. Sono conferme dell’utente, non nuove comparazioni automatiche degli
+appunti. Non certificano altri ruoli, viewport o il distinto rilievo di navigazione.
+[Conferme](../testing/evidence/hybrid-user-media-feedback-20261002.json).
