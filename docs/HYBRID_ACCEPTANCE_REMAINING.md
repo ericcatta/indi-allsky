@@ -115,6 +115,18 @@ Formatted label replay is implemented in the candidate. Capture records the text
 actually painted and an immutable style snapshot in image metadata; replay uses
 those values rather than reevaluating live templates/sensors/hooks. Empty, disabled
 and focus modes remain distinct. Pillow/OpenCV pixel parity is tested against the
-frozen previous rendering methods; OpenCV focus coordinates are corrected. Font
-assets must still be preserved/resolved for complete historical frame replay, and
-this label component alone does not enable FITS-only archival.
+frozen previous rendering methods; OpenCV focus coordinates are corrected. This label component alone does not enable FITS-only archival.
+
+Presentation replay is implemented in the isolated candidate. Capture records the
+actual logo, moon, lightgraph, downloaded overlay pixels, font assets and orb draw
+operations for saved FITS exposures. Replay uses immutable, deduplicated assets
+and recorded clocks, without fetching current overlays or recalculating positions.
+No URL credentials or precise GPS coordinates are added to presentation metadata.
+Real-pixel comparisons cover changed/deleted original resources and all orb modes;
+missing assets fail explicitly. The source file itself remains untouched.
+
+This stage starts from an already prepared display image. Full source replay still
+needs earlier calibration/stack/AWB/detection state, the final portable recipe,
+source-aware consumers, bounded cache and asset retention, storage policy UI and
+external-volume handling. Production remains on the existing saving policy until
+those requirements are complete; this candidate must not be deployed alone.

@@ -47,11 +47,11 @@ class IndiAllSkyLightgraphOverlay(object):
         self.font_path  = base_path.joinpath('fonts')
 
 
-    def apply(self, image_data):
-        now = time.time()
-
-        if now > self.next_generate:
+    def apply(self, image_data, *, at_time=None, refresh=True):
+        if refresh and time.time() > self.next_generate:
             self.lightgraph = self.generate()
+        if self.lightgraph is None:
+            raise ValueError('Saved lightgraph is unavailable')
 
 
         #lightgraph_overlay_start = time.time()
@@ -62,7 +62,10 @@ class IndiAllSkyLightgraphOverlay(object):
         graph_height, graph_width = lightgraph.shape[:2]
 
 
-        now = datetime.now()
+        now = datetime.now() if at_time is None else at_time
+        self.last_draw_time = now
+        # The saved local clock face remains valid on hosts in another timezone.
+        now = now.replace(tzinfo=None)
         noon = datetime.strptime(now.strftime('%Y%m%d12'), '%Y%m%d%H')
 
         now_offset = int((now - noon).seconds / 60) + self.graph_border

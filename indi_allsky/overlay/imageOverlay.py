@@ -34,12 +34,12 @@ class IndiAllSkyImageOverlay(object):
         self._timeout = 10
 
 
-    def apply(self, image_data):
-        now_time = time.time()
-
-        if now_time >= self.next_load_time:
-            self.next_load_time = now_time + self.load_interval
-            self.load_image()
+    def apply(self, image_data, *, refresh=True):
+        if refresh:
+            now_time = time.time()
+            if now_time >= self.next_load_time:
+                self.next_load_time = now_time + self.load_interval
+                self.load_image()
 
 
         image_height, image_width = image_data.shape[:2]

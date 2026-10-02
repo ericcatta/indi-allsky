@@ -58,8 +58,9 @@ def run():
     class Restore(ast.NodeTransformer):
         def visit_Dict(self, node):
             for i, key in reversed(list(enumerate(node.keys))):
-                if isinstance(key, ast.Constant) and key.value == 'render_label':
-                    assert ast.dump(node.values[i]) == ast.dump(ast.parse('snapshot_label(self.image_processor)', mode='eval').body)
+                if isinstance(key, ast.Constant) and key.value in ('render_label', 'render_presentation'):
+                    expected = 'snapshot_label(self.image_processor)' if key.value == 'render_label' else 'presentation_record'
+                    assert ast.dump(node.values[i]) == ast.dump(ast.parse(expected, mode='eval').body)
                     node.keys.pop(i); node.values.pop(i)
             return self.generic_visit(node)
         def visit_Expr(self, node):
@@ -71,6 +72,18 @@ def run():
                 found.append(name)
                 return ast.parse(textwrap.dedent(FIXTURE['blocks'][name])).body
             return self.generic_visit(node)
+    context_source = (ROOT / 'indi_allsky/image.py').read_text()
+    start = context_source.index('        presentation_record = None\n')
+    end = context_source.index('\n        if images_only_diag:', start)
+    context_body = ast.parse(textwrap.dedent(context_source[start:end])).body
+    # Pin the entire exception boundary, condition and asset destination.
+    assert hashlib.sha256(ast.dump(ast.Module(body=context_body, type_ignores=[])).encode()).hexdigest() == '5d045234e2af91fc3a35158fd048890c538fd3a89632f812c60f4c5ffbfac0f2'
+    indices = [i for i,n in enumerate(method.body) if isinstance(n,ast.Assign)
+               and isinstance(n.targets[0],ast.Name) and n.targets[0].id == 'presentation_record']
+    assert len(indices) == 1
+    index = indices[0]
+    assert ast.dump(ast.Module(body=method.body[index:index+2],type_ignores=[])) == ast.dump(ast.Module(body=context_body,type_ignores=[]))
+    del method.body[index:index+2]
     method = Restore().visit(method)
     assert found == list(FIXTURE['blocks'])
     assert hashlib.sha256(ast.dump(method, include_attributes=False).encode()).hexdigest() == FIXTURE['processImage_ast_sha256']

@@ -19,6 +19,18 @@ The user confirmed mini-video 7 download/opening, Users CSV and Excel receipt,
 and simulator link copying on 2 October. These are user-reported outcomes, not
 automated byte-integrity checks. Other export families retain their own evidence scopes. [Confirmation](testing/evidence/hybrid-user-confirmed-delivery-20261002.json).
 
+## Source archive candidate — not deployed
+
+The requested default (night FITS-only, day JPEG-only) is not active yet.
+The candidate now preserves presentation assets and actual overlay drawing context
+for saved FITS exposures. Replay of the prepared display image retains identical
+pixels after font/logo deletion and live time/settings changes. Earlier source
+processing, bounded cache/asset retention, media consumers and configurable
+local/external storage still need completion before activating this policy.
+All 188 Python/compile and 35 JavaScript checks pass; tested sources match the
+candidate and remained unchanged throughout the regression.
+[Scoped evidence](testing/evidence/hybrid-presentation-replay-20261002.json).
+
 ## Current installation and regression
 
 Latest application `994ac136` is deployed: FITS previews use recorded exposure

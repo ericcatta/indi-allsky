@@ -15,6 +15,7 @@ class IndiAllskyOrbGenerator(object):
 
     def __init__(self, config):
         self.config = config
+        self.draw_operations = []
 
         self._sun_alt_deg = -6.0
         self._azimuth_offset = 0.0
@@ -835,6 +836,7 @@ class IndiAllskyOrbGenerator(object):
 
 
     def drawEdgeCircle_opencv(self, data_bytes, pt, color_bgr):
+        self.draw_operations.append(dict(kind='circle', point=list(pt), color=list(color_bgr)))
         if self.config['TEXT_PROPERTIES']['FONT_OUTLINE']:
             cv2.circle(
                 img=data_bytes,
@@ -854,6 +856,7 @@ class IndiAllskyOrbGenerator(object):
 
 
     def drawEdgeLine_opencv(self, data_bytes, pt, color_bgr):
+        self.draw_operations.append(dict(kind='line', point=list(pt), color=list(color_bgr)))
         lineType = getattr(cv2, self.config['TEXT_PROPERTIES']['FONT_AA'])
 
         image_height, image_width = data_bytes.shape[:2]

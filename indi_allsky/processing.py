@@ -3167,6 +3167,7 @@ class ImageProcessor(object):
 
         i_ref = self.getLatestImage()
 
+        self._orb.draw_operations = []
         self._image_orb_opencv(i_ref)
 
 
@@ -3855,7 +3856,7 @@ class ImageProcessor(object):
         self._moon_overlay.apply(self.image, self.astrometric_data['moon_cycle'], self.astrometric_data['moon_phase'])
 
 
-    def lightgraph_overlay(self):
+    def lightgraph_overlay(self, *, at_time=None, refresh=True):
         if self.focus_mode:
             return
 
@@ -3863,10 +3864,10 @@ class ImageProcessor(object):
         if not self.config.get('LIGHTGRAPH_OVERLAY', {}).get('ENABLE', True):
             return
 
-        self._lightgraph_overlay.apply(self.image)
+        self._lightgraph_overlay.apply(self.image, at_time=at_time, refresh=refresh)
 
 
-    def image_overlay(self):
+    def image_overlay(self, *, refresh=True):
         if self.focus_mode:
             return
 
@@ -3874,7 +3875,7 @@ class ImageProcessor(object):
         if not self.config.get('IMAGE_OVERLAY', {}).get('ENABLE', True):
             return
 
-        self._image_overlay_o.apply(self.image)
+        self._image_overlay_o.apply(self.image, refresh=refresh)
 
 
     def add_border(self):

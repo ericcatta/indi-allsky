@@ -54,6 +54,8 @@ from .sky_condition import compute_sky_condition_from_frame
 
 from .image_rendering import render_tone, render_geometry_and_color, render_presentation
 from .image_labels import snapshot_label
+from .image_presentation import snapshot_presentation
+from .render_assets import RenderAssetStore
 from .image_publication import publish_image_file
 from .processing import ImageProcessor
 from .miscUpload import miscUpload
@@ -2965,6 +2967,18 @@ class ImageWorker(Process):
 
         render_presentation(self.image_processor, i_ref.binning)
 
+        presentation_record = None
+        if fits_result:
+            try:
+                presentation_record = snapshot_presentation(
+                    self.image_processor, i_ref.binning,
+                    RenderAssetStore(self.image_dir / '.render-assets'),
+                )
+            except Exception:
+                # Preserve the exposure and processed image if optional archival
+                # context fails; a missing record cannot claim exact replay.
+                logger.exception('Unable to preserve source presentation context')
+
         if images_only_diag:
             self._images_only_diag(profile_id, camera_id, 'IMAGE_POST_PROCESS_END')
 
@@ -3113,6 +3127,7 @@ class ImageWorker(Process):
 
             image_add_data = {
                 'render_label'      : snapshot_label(self.image_processor),
+                'render_presentation': presentation_record,
                 'uptime'            : i_ref.uptime,
                 'kpindex'           : i_ref.kpindex,
                 'ovation_max'       : i_ref.ovation_max,

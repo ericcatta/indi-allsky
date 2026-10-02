@@ -1,0 +1,36 @@
+{
+  "date": "2026-10-02",
+  "baseline": "d102ecd2",
+  "change": "Capture and replay immutable presentation assets and actual overlay draw context for exposures with a saved FITS source.",
+  "tests": {
+    "targeted": [
+      "hybrid_render_assets_test.py",
+      "hybrid_presentation_replay_test.py",
+      "hybrid_image_rendering_test.py"
+    ],
+    "proof": [
+      "Prepared display pixels replay identically after original font/logo deletion and live settings changes.",
+      "Replay does not regenerate lightgraph, fetch network overlays or consult current drawing time.",
+      "Orb hour-angle, azimuth and altitude modes replay recorded drawing operations without precise location metadata.",
+      "Identical asset arrays deduplicate; typed arrays retain exact precision; missing/corrupt/oversized assets fail explicitly.",
+      "Original worker ordering is preserved by the historical whole-method fingerprint with the explicit optional snapshot boundary."
+    ],
+    "status": "passed",
+    "report": "/home/eric/hybrid-presentation-regression-20261002/results.json",
+    "javascript": 35,
+    "javascript_status": "passed",
+    "javascript_report": "/tmp/hybrid-presentation-js.json",
+    "javascript_sha256": "2b0254c3a4a7323939145c45cba327c558e93a854df6115451280f46aeaba8b8",
+    "python": 188,
+    "source_changed": false,
+    "report_sha256": "e695c8f774b3a6f2fabfef319c28cfe0e067cdb3a08e1eec13c6bece01c3af5b",
+    "source_manifest_sha256": "362d0c4d929342969b0d17cc2a419586b708ac502b6c39263bd20095ba7012b7"
+  },
+  "deployment": "Not deployed. Production remains 0cf2de6e/application 994ac136. No capture restart or archive-format change.",
+  "limits": [
+    "Replay begins with the prepared display image, not raw FITS pixels.",
+    "Calibration/stack/AWB/detection replay, complete portable recipe and source-aware readers remain incomplete.",
+    "Asset lifecycle, bounded derivative cache, day/night storage UI, forecast and external mount handling must be completed before deployment.",
+    "Source-only night capture is not activated; this component does not complete the user request."
+  ]
+}
