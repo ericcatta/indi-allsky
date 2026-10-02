@@ -43,6 +43,7 @@ from .frame_metadata import FrameMetadataWriter
 from .frame_metadata import default_frame_metadata_dir
 from .frame_quality import compute_frame_quality
 from .fits_schedule import FitsSchedule
+from .fits_context import capture_context, with_context
 from .cloud_detection import classify_cloud_condition
 from .event_candidate import default_event_candidate_dir
 from .event_candidate import default_event_candidate_runtime_path
@@ -3678,11 +3679,24 @@ class ImageWorker(Process):
         image_height, image_width = data.shape[-2:]
 
 
+        try:
+            source_context = capture_context(
+                self.config, i_ref, profile_id=getattr(self, 'profile_id', 'default'),
+                night=self.night_av[constants.NIGHT_NIGHT],
+                moonmode=self.night_av[constants.NIGHT_MOONMODE],
+            )
+            output_hdus = with_context(i_ref.hdulist, source_context)
+        except (ValueError, TypeError, OverflowError):
+            # Metadata must never discard a scientific exposure. A missing context
+            # remains detectable by readers and is not a complete replay recipe.
+            logger.exception('Unable to serialize FITS context; preserving source without context')
+            output_hdus = i_ref.hdulist
+
         if self.config.get('IMAGE_SAVE_FITS_COMPRESSED'):
             import gzip
 
             fits_image_buffer = io.BytesIO()
-            i_ref.hdulist.writeto(fits_image_buffer)
+            output_hdus.writeto(fits_image_buffer)
 
             f_tmpfile = tempfile.NamedTemporaryFile(mode='w+b', delete=False, suffix='.fit.gz')
             f_tmpfile.write(gzip.compress(fits_image_buffer.getbuffer()))
@@ -3690,7 +3704,7 @@ class ImageWorker(Process):
             fits_ext = 'fit.gz'
         else:
             f_tmpfile = tempfile.NamedTemporaryFile(mode='w+b', delete=False, suffix='.fit')
-            i_ref.hdulist.writeto(f_tmpfile)
+            output_hdus.writeto(f_tmpfile)
 
             fits_ext = 'fit'
 

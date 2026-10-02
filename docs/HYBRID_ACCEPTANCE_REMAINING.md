@@ -41,9 +41,9 @@ this table alone does not certify all discovered controls.
 
 Use the [route register](hybrid-acceptance-route-register.json) and its linked
 control discovery, retaining role, camera/profile, prerequisites, expected
-request/effect and source revision. There are 25 historical blocked/defect
+request/effect and source revision. There are 23 historical blocked/defect
 records without a fully passed resolution after the scoped resolutions, including three user-confirmed CSV/Excel and simulator results on 2 October and the combined Users Copy/CSV/Excel record. That number is not
-25 current product defects: some combine scopes, refer to older controls, or
+23 current product defects: some combine scopes, refer to older controls, or
 already have narrower later evidence. The 7,369 static identities likewise are
 not 7,369 independently failed functions.
 
@@ -100,3 +100,13 @@ and real 8/16-bit day/night pixel comparisons including an alpha overlay. This
 separates rendering from capture effects but does not yet provide archived-context
 replay: calibration/stack/AWB context, label inputs, reusable source access, caching
 and consumers still need completion before source-only storage is activated.
+
+FITS serialization now attaches a versioned `HYBRID_CTX` extension containing
+camera/profile, exposure timestamp and offset, gain/binning, night/moon mode,
+calibration phase and an explicit whitelist of rendering settings. The primary
+pixels and other FITS extensions are preserved. Plain/gzip round trips and writer
+integration are covered. Unknown credentials/configuration sections are excluded;
+metadata serialization failure preserves the exposure without context and logs the
+failure. `complete_render_recipe` is explicitly false: this source-save snapshot
+must not be mistaken for the later stack/AWB/detection/label replay context. This
+change remains in the isolated candidate until the archive release is ready.

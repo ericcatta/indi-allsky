@@ -286,3 +286,8 @@ Shared capture rendering stages are implemented and pass 184 Python/compile plus
 35 JavaScript checks, including frozen-worker AST and real pixel parity. This
 candidate is not deployed and does not enable source-only archival.
 [Evidence](testing/evidence/hybrid-shared-rendering-20261002.json).
+
+Portable FITS acquisition context is implemented in the candidate, with 185
+Python/compile and 35 JavaScript checks passed. It preserves scientific pixels and
+excludes credential-bearing configuration sections. It is not a complete replay
+recipe and is not deployed. [Evidence](testing/evidence/hybrid-fits-context-20261002.json).

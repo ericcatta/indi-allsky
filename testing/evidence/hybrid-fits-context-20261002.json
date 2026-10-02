@@ -1,0 +1,35 @@
+{
+  "date": "2026-10-02",
+  "baseline": "53d5f5bc",
+  "change": "FITS writer records a versioned HYBRID_CTX extension with source-save acquisition context and explicitly selected rendering parameters. Primary pixels and other extensions are preserved; no credential-bearing configuration sections are copied.",
+  "scope": [
+    "Camera/profile identity, exposure timestamp and UTC offset, gain/binning, day/night/moon mode, calibration phase and rendering parameter snapshot.",
+    "Metadata serialization failure logs the error and preserves the scientific exposure without the optional context.",
+    "Context reader rejects unsupported versions, duplicate extensions, invalid JSON/nonfinite values and oversized or malformed context arrays.",
+    "complete_render_recipe remains false: later stack/AWB/detection/label context is not captured by this source-save snapshot."
+  ],
+  "tests": {
+    "targeted": [
+      "hybrid_fits_context_test.py",
+      "hybrid_fits_dimensions_test.py",
+      "hybrid_image_rendering_test.py"
+    ],
+    "assertions": [
+      "Mono/RGB integer and floating pixel values preserved; other HDUs and live source HDU list unchanged.",
+      "Plain and gzip writer integration, stored file size and database dimensions preserved.",
+      "Camera/profile/time isolation, explicit UTC offset, credential exclusion and immutable configuration snapshot.",
+      "Injected serialization failure still saves original source pixels."
+    ],
+    "python": 185,
+    "javascript": 35,
+    "status": "passed",
+    "source_changed": false,
+    "report": "/home/eric/hybrid-fits-metadata-regression-20261002/results.json",
+    "report_sha256": "6699c4649f01adad8a5a82fd9b2471e4f8cc059d2c5e30b5b535210547a07ac0",
+    "source_manifest_sha256": "4cae8457d1fe6dbfccc91ca2cab2860d9b3d04cdc7d7bd05cb6c93d2e4d71504",
+    "javascript_report": "/tmp/hybrid-fits-metadata-js-20261002.json",
+    "javascript_sha256": "ea5d64e2dc830c28341d35678db7c53de60532c8b427ee2edec1d9785bce34fd"
+  },
+  "deployment": "Not deployed. Production remains 0cf2de6e/application 994ac136. No capture restart, format-policy change or media deletion.",
+  "remaining": "Full replay context and source-backed consumers/cache/settings are still required for FITS-night/JPEG-day archival."
+}

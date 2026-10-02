@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """Persist real mono/RGB FITS files and verify dimensions, pixels and Hybrid UI."""
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 from types import SimpleNamespace
+from unittest.mock import patch
 
 import numpy as np
 from astropy.io import fits
@@ -13,6 +14,7 @@ from hybrid_runtime_fixture import isolated_app, login_client
 with isolated_app(multi_camera=True) as app, app.app_context():
     from indi_allsky.image import ImageWorker
     from indi_allsky.fits_schedule import FitsSchedule
+    from indi_allsky.fits_context import read_context
     from indi_allsky.flask.miscDb import miscDb
     from indi_allsky.flask.models import IndiAllSkyDbFitsImageTable
 
@@ -53,9 +55,25 @@ with isolated_app(multi_camera=True) as app, app.app_context():
                 assert (uploads[-1]['width'], uploads[-1]['height']) == (64, 48)
                 with fits.open(result['path']) as saved:
                     assert saved[0].data.shape == shape
+                    context = read_context(saved)
+                    assert context['camera_id'] == camera_id
+                    assert context['profile_id'] == worker.profile_id
+                    assert context['exposure_time'] == captured.isoformat()
+                    assert context['night'] is True
+                    assert context['complete_render_recipe'] is False
+                    assert context['stage'] == 'post_calibration'
+                    assert len(hdulist) == 1, 'Saving context must not append to the live source HDU list'
                     np.testing.assert_array_equal(saved[0].data, pixels)
                     assert (saved[0].header['NAXIS1'], saved[0].header['NAXIS2']) == (64, 48)
                 assert entry.fileSize == Path(result['path']).stat().st_size > 0
+
+            # Optional metadata failure must not lose the source exposure.
+            ref.exp_date += timedelta(minutes=1)
+            with patch('indi_allsky.image.capture_context', side_effect=ValueError('invalid metadata')):
+                fallback = ImageWorker.write_fit(worker, ref, None)
+            with fits.open(fallback['path']) as saved:
+                assert read_context(saved) is None
+                np.testing.assert_array_equal(saved[0].data, pixels)
 
     client = login_client(app, 1)
     for camera_id in (1, 2):
