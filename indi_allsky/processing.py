@@ -143,6 +143,7 @@ class ImageProcessor(object):
         self.stack_method = self.config.get('IMAGE_STACK_METHOD', 'maximum')
         self.stack_count = self.config.get('IMAGE_STACK_COUNT', 1)
 
+        self.last_label_text = None
         self._text_color_rgb = [0, 0, 0]
         self._text_xy = [0, 0]
         self._text_anchor_pillow = 'la'
@@ -3114,9 +3115,12 @@ class ImageProcessor(object):
         return image_label
 
 
-    def label_image(self, adsb_aircraft_list=[], custom_hook_data={}):
+    def label_image(self, adsb_aircraft_list=[], custom_hook_data={}, *, label_text=None):
         # this needs to be enabled during focus mode
 
+
+        # Never carry a previous camera/frame's text through disabled/focus modes.
+        self.last_label_text = None
 
         # set initial values
         self.text_color_rgb = list(self.config['TEXT_PROPERTIES']['FONT_COLOR'])
@@ -3132,9 +3136,9 @@ class ImageProcessor(object):
         image_label_system = self.config.get('IMAGE_LABEL_SYSTEM', 'pillow')
 
         if image_label_system == 'opencv':
-            self._label_image_opencv(i_ref, adsb_aircraft_list, custom_hook_data)
+            self._label_image_opencv(i_ref, adsb_aircraft_list, custom_hook_data, label_text=label_text)
         elif image_label_system == 'pillow':
-            self._label_image_pillow(i_ref, adsb_aircraft_list, custom_hook_data)
+            self._label_image_pillow(i_ref, adsb_aircraft_list, custom_hook_data, label_text=label_text)
         else:
             logger.warning('Image labels disabled')
             return
@@ -3211,7 +3215,7 @@ class ImageProcessor(object):
             logger.error('Unknown orb display mode: %s', orb_mode)
 
 
-    def _label_image_opencv(self, i_ref, adsb_aircraft_list, custom_hook_data):
+    def _label_image_opencv(self, i_ref, adsb_aircraft_list, custom_hook_data, *, label_text=None):
         image_height, image_width = self.image.shape[:2]
 
 
@@ -3223,22 +3227,23 @@ class ImageProcessor(object):
             self.drawText_opencv(
                 self.image,
                 'Focus Mode',
-                tuple(self.image_xy),
+                tuple(self.text_xy),
                 tuple(self.text_color_bgr),
             )
 
-            self.image_xy = [image_width - 250, image_height - 10]
+            self.text_xy = [image_width - 250, image_height - 10]
             self.drawText_opencv(
                 self.image,
                 i_ref.exp_date.strftime('%H:%M:%S'),
-                tuple(self.image_xy),
+                tuple(self.text_xy),
                 tuple(self.text_color_bgr),
             )
 
             return
 
 
-        image_label = self.get_image_label(i_ref, adsb_aircraft_list, custom_hook_data)
+        image_label = self.get_image_label(i_ref, adsb_aircraft_list, custom_hook_data) if label_text is None else label_text
+        self.last_label_text = image_label
 
 
         for line in image_label.split('\n'):
@@ -3284,7 +3289,7 @@ class ImageProcessor(object):
         )
 
 
-    def _label_image_pillow(self, i_ref, adsb_aircraft_list, custom_hook_data):
+    def _label_image_pillow(self, i_ref, adsb_aircraft_list, custom_hook_data, *, label_text=None):
         img_rgb = Image.fromarray(cv2.cvtColor(self.image, cv2.COLOR_BGR2RGB))
         image_width, image_height  = img_rgb.size  # backwards from opencv
 
@@ -3330,7 +3335,8 @@ class ImageProcessor(object):
             return
 
 
-        image_label = self.get_image_label(i_ref, adsb_aircraft_list, custom_hook_data)
+        image_label = self.get_image_label(i_ref, adsb_aircraft_list, custom_hook_data) if label_text is None else label_text
+        self.last_label_text = image_label
 
 
         for line in image_label.split('\n'):

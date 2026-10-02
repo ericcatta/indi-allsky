@@ -53,6 +53,7 @@ from .multicamera_diag import write_multicamera_diag
 from .sky_condition import compute_sky_condition_from_frame
 
 from .image_rendering import render_tone, render_geometry_and_color, render_presentation
+from .image_labels import snapshot_label
 from .image_publication import publish_image_file
 from .processing import ImageProcessor
 from .miscUpload import miscUpload
@@ -3111,6 +3112,7 @@ class ImageWorker(Process):
 
 
             image_add_data = {
+                'render_label'      : snapshot_label(self.image_processor),
                 'uptime'            : i_ref.uptime,
                 'kpindex'           : i_ref.kpindex,
                 'ovation_max'       : i_ref.ovation_max,

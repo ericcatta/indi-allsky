@@ -110,3 +110,11 @@ metadata serialization failure preserves the exposure without context and logs t
 failure. `complete_render_recipe` is explicitly false: this source-save snapshot
 must not be mistaken for the later stack/AWB/detection/label replay context. This
 change remains in the isolated candidate until the archive release is ready.
+
+Formatted label replay is implemented in the candidate. Capture records the text
+actually painted and an immutable style snapshot in image metadata; replay uses
+those values rather than reevaluating live templates/sensors/hooks. Empty, disabled
+and focus modes remain distinct. Pillow/OpenCV pixel parity is tested against the
+frozen previous rendering methods; OpenCV focus coordinates are corrected. Font
+assets must still be preserved/resolved for complete historical frame replay, and
+this label component alone does not enable FITS-only archival.

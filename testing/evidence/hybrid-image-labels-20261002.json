@@ -1,0 +1,30 @@
+{
+  "date": "2026-10-02",
+  "baseline": "6af27cb1",
+  "change": "Capture records formatted label text and immutable style in image metadata. Label replay accepts saved text without reevaluating live labels and restores the processor configuration after success/failure. OpenCV focus labels now use initialized text_xy coordinates.",
+  "tests": {
+    "targeted": "hybrid_image_labels_test.py",
+    "proof": [
+      "Normal Pillow/OpenCV output matches frozen baseline methods pixel-for-pixel.",
+      "Replay retains identical pixels after live text/style changes; a fail-on-call mock proves no live label evaluation.",
+      "Empty text is distinct from missing text; disabled/focus states clear stale text.",
+      "Focus OpenCV no longer reads uninitialized image_xy; focus output replays identically.",
+      "Invalid/incomplete snapshots are rejected; original configuration/focus restored after rendering failure."
+    ],
+    "python": 186,
+    "javascript": 35,
+    "status": "passed",
+    "source_changed": false,
+    "report": "/home/eric/hybrid-image-labels-regression-20261002/results.json",
+    "report_sha256": "17c5029f739fdd13e8e1709e58f3b7e83e45e63d64439dbc1dbefb7f8c610aa0",
+    "source_manifest_sha256": "d42d75dd2779fdd32b6f2bf4d5948df7cd929cfbf012ca894efaf1be2c6ce4b3",
+    "javascript_report": "/tmp/hybrid-image-labels-js-20261002.json",
+    "javascript_sha256": "ea5d64e2dc830c28341d35678db7c53de60532c8b427ee2edec1d9785bce34fd"
+  },
+  "deployment": "Not deployed. Production remains 0cf2de6e/application 994ac136; no capture restart or format-policy change.",
+  "limits": [
+    "Label replay requires the recorded font asset and original exposure time for focus mode.",
+    "This does not implement full FITS replay, source cache, source-aware media generators or day/night archival settings.",
+    "Label metadata currently persists with the image record; complete portable post-processing context still needs integration."
+  ]
+}

@@ -56,6 +56,12 @@ def run():
     method = next(n for n in ast.walk(tree) if isinstance(n, ast.FunctionDef) and n.name == 'processImage')
     found = []
     class Restore(ast.NodeTransformer):
+        def visit_Dict(self, node):
+            for i, key in reversed(list(enumerate(node.keys))):
+                if isinstance(key, ast.Constant) and key.value == 'render_label':
+                    assert ast.dump(node.values[i]) == ast.dump(ast.parse('snapshot_label(self.image_processor)', mode='eval').body)
+                    node.keys.pop(i); node.values.pop(i)
+            return self.generic_visit(node)
         def visit_Expr(self, node):
             if isinstance(node.value, ast.Call) and isinstance(node.value.func, ast.Name) and node.value.func.id in FIXTURE['blocks']:
                 name = node.value.func.id

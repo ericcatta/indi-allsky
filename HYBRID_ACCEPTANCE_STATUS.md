@@ -291,3 +291,8 @@ Portable FITS acquisition context is implemented in the candidate, with 185
 Python/compile and 35 JavaScript checks passed. It preserves scientific pixels and
 excludes credential-bearing configuration sections. It is not a complete replay
 recipe and is not deployed. [Evidence](testing/evidence/hybrid-fits-context-20261002.json).
+
+Formatted label capture/replay is implemented in the candidate and passes 186
+Python/compile and 35 JavaScript checks. Normal Pillow/OpenCV output retains pixel
+parity; OpenCV Focus no longer reads an uninitialized coordinate. This is not yet
+deployed or a complete source archive. [Evidence](testing/evidence/hybrid-image-labels-20261002.json).
