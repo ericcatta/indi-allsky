@@ -1,6 +1,6 @@
 # Hybrid acceptance status
 
-Updated 1 October 2026. **Classic frontend removal is deployed. Whole-product acceptance is not complete.**
+Updated 2 October 2026. **Classic frontend removal is deployed. Whole-product acceptance is not complete.**
 The user deferred the separate 24-hour day/night test and detector/AI implementation.
 Those activities are outside this acceptance run, not passed tests.
 
@@ -14,6 +14,11 @@ Production archive checks now cover both camera listings and decoded details,
 pagination with exact return, empty search and filter recovery in the native
 administrator session. Ordinary-user live scope and sustained performance remain
 separate. [Archive evidence](testing/evidence/hybrid-archive-production-20261001.json).
+
+The user confirmed mini-video 7 download/opening, Users CSV and Excel receipt,
+and simulator link copying on 2 October. These are user-reported outcomes, not
+automated byte-integrity checks. Other export families and Geometry copy remain
+separate. [Confirmation](testing/evidence/hybrid-user-confirmed-delivery-20261002.json).
 
 ## Current installation and regression
 

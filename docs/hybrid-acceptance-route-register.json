@@ -3604,6 +3604,12 @@
           "control": "Navigation drawer / Output",
           "recorded_status": "superato",
           "observed_page": "/modern-admin/output"
+        },
+        {
+          "source": "testing/evidence/hybrid-user-confirmed-delivery-20261002.json",
+          "record": "controls[0]",
+          "control": "User-confirmed mini-video 7 camera 2 download and opening; historical camera 1 output 3 receipt remains separate",
+          "recorded_status": "superato"
         }
       ]
     },
@@ -5775,7 +5781,17 @@
           "source": "testing/evidence/hybrid-simulator-validation-native-20261001.json",
           "record": "controls[5]",
           "control": "Copy simulation link",
-          "recorded_status": "bloccato"
+          "recorded_status": "bloccato",
+          "resolution": {
+            "reviewed_on": "2026-10-02",
+            "status": "superato",
+            "source": "testing/evidence/hybrid-user-confirmed-delivery-20261002.json",
+            "records": [
+              "controls[3]"
+            ],
+            "scope": "User confirms pasting after Copy simulation link produces an URL. User-confirmed; browser/role/camera variants and byte equality not independently verified.",
+            "historical_outcome_preserved": true
+          }
         }
       ]
     },
@@ -6872,13 +6888,33 @@
           "source": "testing/evidence/hybrid-export-validation-native-20261001.json",
           "record": "controls[0]",
           "control": "CSV (1 October native check)",
-          "recorded_status": "bloccato"
+          "recorded_status": "bloccato",
+          "resolution": {
+            "reviewed_on": "2026-10-02",
+            "status": "superato",
+            "source": "testing/evidence/hybrid-user-confirmed-delivery-20261002.json",
+            "records": [
+              "controls[1]"
+            ],
+            "scope": "User confirms file is saved and readable. User-confirmed; browser/role/camera variants and byte equality not independently verified.",
+            "historical_outcome_preserved": true
+          }
         },
         {
           "source": "testing/evidence/hybrid-export-validation-native-20261001.json",
           "record": "controls[1]",
           "control": "Excel (1 October native check)",
-          "recorded_status": "bloccato"
+          "recorded_status": "bloccato",
+          "resolution": {
+            "reviewed_on": "2026-10-02",
+            "status": "superato",
+            "source": "testing/evidence/hybrid-user-confirmed-delivery-20261002.json",
+            "records": [
+              "controls[2]"
+            ],
+            "scope": "User confirms file is saved and readable. User-confirmed; browser/role/camera variants and byte equality not independently verified.",
+            "historical_outcome_preserved": true
+          }
         }
       ]
     },

@@ -16,6 +16,10 @@ must not be represented as sustained worst-case-load certification. A same-SD
 backup caused overlapping filesystem waits and was interrupted; its incomplete
 copy is not a usable backup. Rollback uses retained code files, not the old DB.
 
+On 2 October the user confirmed mini-video 7 downloads and opens, both Users CSV/Excel
+files save and are readable, and the simulator copies an URL. [Confirmation and
+limits](../testing/evidence/hybrid-user-confirmed-delivery-20261002.json).
+
 ## Named interaction gaps
 
 These are known gaps in addition to the complete matrix reconciliation. Closing
@@ -23,10 +27,10 @@ this table alone does not certify all discovered controls.
 
 | Page or flow | Missing proof or remaining scope |
 | --- | --- |
-| Settings export, Users/Notifications CSV and Excel, Tasks CSV | Received file with expected content. HTTP 200 and completed click are insufficient. Preserve the existing failed/inconclusive receipt observations. |
-| Source media and Output downloads | Original FITS, the previously checked mini-timelapse output and Highlights delivery remain separate from the successfully received camera-2 panorama video and FITS preview exports. |
+| Settings export, Notifications CSV and Excel, Tasks CSV | Received file with expected content. HTTP 200 and completed click are insufficient. Preserve the existing failed/inconclusive receipt observations. |
+| Source media and Output downloads | Original FITS, historical camera-1 mini-video 3 and Highlights delivery remain separate from the successfully received camera-2 panorama video and FITS preview exports. |
 | Camera profiles | Native Save & Sync confirmation and result; [capability gating](../testing/evidence/hybrid-profile-sync-capability-20261001.json) is already covered separately. |
-| Camera Simulator and Geometry | Actual clipboard contents after copy. A success message alone did not establish delivery. Preserve the successful geometry scope correction and numeric-validation evidence. |
+| Geometry | Actual clipboard contents after copy remain unverified. Simulator link copying was confirmed by the user on 2 October; this does not certify Geometry. |
 | Generated-media pages | Exact footer links and per-row downloads still require reconciliation with current templates. Old “Open read-only” observations must be mapped to the current controls, not blindly repeated or marked passed from a different Library link. |
 | Account | Admin and ordinary-user save/login flows have [isolated native evidence](../testing/evidence/hybrid-account-native-20260914.json). This does not imply a production password change was performed; do not repeat destructive credential changes merely to erase a historical record. |
 | Restore | All four reset/flush combinations now pass real HTTP persistence/cleanup on disposable fixtures. Native destructive confirmation and post-key-reset login remain separate; production keys/history were not changed. |
@@ -37,9 +41,9 @@ this table alone does not certify all discovered controls.
 
 Use the [route register](hybrid-acceptance-route-register.json) and its linked
 control discovery, retaining role, camera/profile, prerequisites, expected
-request/effect and source revision. There are 32 historical blocked/defect
-records without a fully passed resolution after resolving the four exact generator links and two Users controls. That number is not
-32 current product defects: some combine scopes, refer to older controls, or
+request/effect and source revision. There are 29 historical blocked/defect
+records without a fully passed resolution after the scoped resolutions, including three user-confirmed CSV/Excel and simulator results on 2 October. That number is not
+29 current product defects: some combine scopes, refer to older controls, or
 already have narrower later evidence. The 7,369 static identities likewise are
 not 7,369 independently failed functions.
 

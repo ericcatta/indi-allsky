@@ -193,3 +193,5 @@ Camera Info now tolerates missing driver/lens metadata. Isolated role/camera tes
 History input admission and aggregate Loop delivery policies are verified by [history query evidence](../testing/evidence/hybrid-history-query-20261001.json), including native Loop interval/camera controls and explicit browser limitations.
 
 Discovery refreshed at `51a248ee`: 99 GET entries, 500 executed contexts (376 rendered, 124 blocked), seven non-template entries left to dedicated tests, 43,978 control occurrences and 7,369 exact identities. No functional passes are inferred. Four actual FITS preview downloads and source-integrity checks are recorded in [preview receipt evidence](../testing/evidence/hybrid-fits-preview-receipt-20261001.json).
+
+Il 2 ottobre l’utente ha confermato download/apertura del mini-video 7 (camera 2), CSV/Excel Users e copia URL del simulatore. Tre record storici hanno una risoluzione puntuale; il vecchio download del mini-video 3 resta distinto. [Conferma e limiti](../testing/evidence/hybrid-user-confirmed-delivery-20261002.json).

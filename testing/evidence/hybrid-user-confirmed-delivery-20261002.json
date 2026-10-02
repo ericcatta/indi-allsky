@@ -1,0 +1,39 @@
+{
+  "date": "2026-10-02",
+  "method": "User confirmation in this conversation: tre si!, responding to the three numbered checks. Not an automated browser or byte-integrity test.",
+  "reported_browser": "Not specified",
+  "controls": [
+    {
+      "control": "Mini timelapse Download original",
+      "page": "/modern-admin/output?kind=mini-video&id=7&camera_id=2",
+      "status": "superato",
+      "observed": "User confirms the requested mini timelapse downloads and the received file opens.",
+      "scope": "Requested output 7, camera 2; no hash comparison or other output certified."
+    },
+    {
+      "control": "Users CSV",
+      "page": "/modern-admin/users",
+      "status": "superato",
+      "observed": "User confirms file is saved and readable."
+    },
+    {
+      "control": "Users Excel",
+      "page": "/modern-admin/users",
+      "status": "superato",
+      "observed": "User confirms file is saved and readable."
+    },
+    {
+      "control": "Copy simulation link",
+      "page": "/modern-admin/tools/camera-simulator",
+      "status": "superato",
+      "observed": "User confirms pasting after Copy simulation link produces an URL.",
+      "scope": "No explicit camera/profile or exact URL comparison reported."
+    }
+  ],
+  "limits": [
+    "Does not certify Notifications/Tasks exports, Settings export, original FITS, Highlights or another mini-video.",
+    "Geometry clipboard and Save & Sync confirmation remain separate.",
+    "No private file contents, clipboard text or credentials collected.",
+    "Whole-product acceptance is not concluded by these confirmations."
+  ]
+}
