@@ -376,10 +376,10 @@ class ImageProcessor(object):
         return self._camera_sqm_raw_mag
 
 
-    def post_init(self):
+    def post_init(self, *, detection_mask=None):
         # binning_av needs to be populated before running this
 
-        self._detection_mask_dict = self._load_detection_mask()
+        self._detection_mask_dict = self._load_detection_mask() if detection_mask is None else detection_mask
         self._adu_mask_dict = dict()
 
         self._sqm = IndiAllskySqm(self.config, self.gain_av, mask=self._detection_mask_dict)
@@ -1816,7 +1816,14 @@ class ImageProcessor(object):
 
 
     def _denoise(self, denoise_function):
-        return denoise_function(self.image)
+        image = denoise_function(self.image)
+        if numpy.issubdtype(image.dtype, numpy.integer):
+            # Luminance compensation can overshoot a 10/12/14-bit camera's
+            # range while still fitting uint16. Stretch LUTs use effective
+            # camera depth, so retain that range in the display pipeline.
+            maximum = min(numpy.iinfo(image.dtype).max, (1 << self.max_bit_depth) - 1)
+            image = numpy.clip(image, 0, maximum).astype(image.dtype, copy=False)
+        return image
 
 
     def scnr(self):

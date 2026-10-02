@@ -22,14 +22,26 @@ automated byte-integrity checks. Other export families retain their own evidence
 ## Source archive candidate — not deployed
 
 The requested default (night FITS-only, day JPEG-only) is not active yet.
-The candidate now preserves presentation assets and actual overlay drawing context
-for saved FITS exposures. Replay of the prepared display image retains identical
-pixels after font/logo deletion and live time/settings changes. Earlier source
-processing, bounded cache/asset retention, media consumers and configurable
-local/external storage still need completion before activating this policy.
-All 188 Python/compile and 35 JavaScript checks pass; tested sources match the
-candidate and remained unchanged throughout the regression.
-[Scoped evidence](testing/evidence/hybrid-presentation-replay-20261002.json).
+The isolated candidate now reconstructs display pixels from a saved FITS and its
+recorded rendering recipe, including tone, geometry, AWB/CCM, detection drawings,
+masking, presentation and labels. Calibrated single frames use the source directly;
+pre-calibration and stacked sources also retain a lossless prepared basis. These
+extra scientific arrays must be included in storage estimates and retention.
+
+The authenticated FITS preview can use this recipe even without a permanent JPEG.
+Missing/corrupt/ambiguous context fails explicitly while the original stays
+downloadable. Full-frame pixel checks and HTTP role checks are recorded in the
+[scoped evidence](testing/evidence/hybrid-source-rendering-20261002.json).
+190 Python/compile checks pass across the full run and one targeted guard recheck;
+35 JavaScript checks pass. Application sources are unchanged between those runs,
+and final source hashes match the candidate. The original guard failure is retained
+in the evidence, with the historical fingerprint unchanged.
+A discovered denoise overshoot beyond effective camera bit depth is corrected in
+the display pipeline; scientific FITS pixels are not modified.
+
+Bounded preview caching, asset retention, source-aware generated-media consumers,
+portable recipe publication and configurable local/external storage still need
+completion before deploying and activating this policy.
 
 ## Current installation and regression
 

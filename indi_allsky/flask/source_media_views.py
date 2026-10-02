@@ -3,9 +3,12 @@ import io
 import time
 from sqlalchemy.orm.exc import NoResultFound
 from ..processing import ImageProcessor
+from ..source_rendering import render_source
+from ..render_assets import RenderAssetStore
 from ..modern_admin_media_runtime import ModernAdminMediaAccessAdapter, ModernAdminMediaUrlNormalizer
 from pathlib import Path
 from urllib.parse import urlsplit
+from zipfile import BadZipFile
 from flask import abort, current_app as app, redirect, send_file, request, Response
 from flask_login import login_required
 from .base_views import BaseView
@@ -121,6 +124,34 @@ class Fits2JpegView(BaseView):
         if not local_source_allowed(fits_entry.camera, self.verify_admin_network):
             abort(403, description='Local FITS previews are unavailable under this camera storage policy.')
         filename_p = source_file_path(fits_entry, self.indi_allsky_config)
+
+        # Resolve the recipe only for this camera/exposure; never substitute an
+        # adjacent frame or silently discard a damaged archival recipe.
+        images = IndiAllSkyDbImageTable.query.filter_by(
+            camera_id=fits_entry.camera_id, createDate=fits_entry.createDate,
+        ).limit(2).all()
+        recipes = [(entry.data or {}).get('render_source') for entry in images]
+        if any(record is not None for record in recipes):
+            if len(images) != 1:
+                abort(422, description='The source rendering context is ambiguous.')
+            recipe = recipes[0]
+            root = self.indi_allsky_config.get('IMAGE_FOLDER') or app.config['INDI_ALLSKY_IMAGE_FOLDER']
+            try:
+                pixels = render_source(filename_p, recipe,
+                    RenderAssetStore(Path(root) / '.render-assets'),
+                    camera_id=fits_entry.camera_id, source_id=fits_entry.id)
+                quality = int(recipe['jpeg_quality'])
+                if not 0 <= quality <= 100:
+                    raise ValueError('Invalid archived JPEG quality')
+                encoded, jpeg = cv2.imencode('.jpg', pixels, [cv2.IMWRITE_JPEG_QUALITY, quality])
+                if not encoded:
+                    raise ValueError('JPEG encoding failed')
+            except (OSError, ValueError, TypeError, KeyError, IndexError, AttributeError, BadZipFile, EOFError, cv2.error):
+                app.logger.exception('Unable to replay FITS exposure %s', fits_entry.id)
+                abort(422, description='The saved preview cannot be reconstructed. The original FITS remains available for download.')
+            response = Response(jpeg.tobytes(), mimetype='image/jpeg')
+            response.cache_control.private = True
+            return response
 
 
         p_config = self.indi_allsky_config.copy()

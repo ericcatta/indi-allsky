@@ -54,6 +54,8 @@ from .sky_condition import compute_sky_condition_from_frame
 
 from .image_rendering import render_tone, render_geometry_and_color, render_presentation
 from .image_labels import snapshot_label
+from .image_awb import apply_rgb_gains
+from .source_rendering import snapshot_source_basis, snapshot_source_recipe
 from .image_presentation import snapshot_presentation
 from .render_assets import RenderAssetStore
 from .image_publication import publish_image_file
@@ -1812,6 +1814,7 @@ class ImageWorker(Process):
 
 
     def apply_hybrid_awb(self, profile_id, camera_id):
+        self.image_processor.render_awb_gains = None
         if not self._hybrid_awb_enabled():
             return
 
@@ -1864,30 +1867,12 @@ class ImageWorker(Process):
                 self._hybrid_awb_postprocess_skip(profile_id, camera_id, 'not_initialized')
                 return
 
-            corrected_image = image.astype(numpy.float32, copy=True)
-            corrected_image[:, :, 0] *= blue_gain
-            corrected_image[:, :, 2] *= red_gain
-
-            if numpy.issubdtype(image.dtype, numpy.integer):
-                max_value = numpy.iinfo(image.dtype).max
-                corrected_image = numpy.clip(corrected_image, 0, max_value).astype(image.dtype)
-            elif numpy.issubdtype(image.dtype, numpy.floating):
-                finite_max = float(numpy.nanmax(image))
-                if not numpy.isfinite(finite_max) or finite_max <= 1.5:
-                    max_value = 1.0
-                elif finite_max <= 255.0:
-                    max_value = 255.0
-                elif finite_max <= 65535.0:
-                    max_value = 65535.0
-                else:
-                    max_value = finite_max
-
-                corrected_image = numpy.clip(corrected_image, 0.0, max_value).astype(image.dtype, copy=False)
-            else:
+            if not (numpy.issubdtype(image.dtype, numpy.integer) or numpy.issubdtype(image.dtype, numpy.floating)):
                 self._hybrid_awb_postprocess_skip(profile_id, camera_id, 'unsupported-dtype')
                 return
-
+            corrected_image = apply_rgb_gains(image, red_gain, blue_gain)
             self.image_processor.image = corrected_image
+            self.image_processor.render_awb_gains = [red_gain, blue_gain]
             _multi_camera_diag(
                 '[HYBRID_AWB][%s][camera_id=%s] backend=postprocess_rgb applied_red=%0.4f applied_blue=%0.4f sample_count=%d',
                 profile_id,
@@ -2678,6 +2663,16 @@ class ImageWorker(Process):
 
         self.image_processor.stack()  # populates self.image
 
+        source_basis = None
+        if fits_result:
+            try:
+                source_basis = snapshot_source_basis(
+                    self.image_processor, fits_result,
+                    RenderAssetStore(self.image_dir / '.render-assets'),
+                )
+            except Exception:
+                logger.exception('Unable to preserve source processing basis')
+
 
         image_height, image_width = self.image_processor.image.shape[:2]
         logger.info('Image: %d x %d', image_width, image_height)
@@ -3128,6 +3123,7 @@ class ImageWorker(Process):
             image_add_data = {
                 'render_label'      : snapshot_label(self.image_processor),
                 'render_presentation': presentation_record,
+                'render_source': self._source_render_recipe(source_basis, presentation_record, libcamera_ccm),
                 'uptime'            : i_ref.uptime,
                 'kpindex'           : i_ref.kpindex,
                 'ovation_max'       : i_ref.ovation_max,
@@ -3674,6 +3670,20 @@ class ImageWorker(Process):
         }
 
         return stars_data
+
+
+    def _source_render_recipe(self, basis, presentation, libcamera_ccm):
+        if basis is None or presentation is None:
+            return None
+        try:
+            return snapshot_source_recipe(
+                self.image_processor, basis, presentation,
+                RenderAssetStore(self.image_dir / '.render-assets'),
+                ccm=libcamera_ccm if self.libcamera_raw and libcamera_ccm else None,
+            )
+        except Exception:
+            logger.exception('Unable to preserve complete source rendering recipe')
+            return None
 
 
     def write_fit(self, i_ref, camera):

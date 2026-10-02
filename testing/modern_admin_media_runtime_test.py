@@ -674,6 +674,17 @@ def test_fits_preview_extraction_preserves_class_and_shared_handler_boundary():
         i, node = nodes[0]
         assert ast.dump(node) == ast.dump(ast.parse(current).body[0])
         dispatch.body[i] = ast.parse(historical).body[0]
+    # New archived-context branch executes only after source policy/path checks.
+    # Its HTTP behavior has independent pixel/auth/error tests; normalize only
+    # this exact reviewed branch so the historical handler hash stays unchanged.
+    indices = [i for i,node in enumerate(dispatch.body) if isinstance(node,ast.Assign)
+               and isinstance(node.targets[0],ast.Name) and node.targets[0].id == 'images']
+    assert len(indices) == 1
+    i = indices[0]
+    assert ast.dump(dispatch.body[i-1]) == ast.dump(ast.parse('filename_p = source_file_path(fits_entry, self.indi_allsky_config)').body[0])
+    branch = ast.Module(body=dispatch.body[i:i+3],type_ignores=[])
+    assert hashlib.sha256(ast.dump(branch).encode()).hexdigest() == '7914eede1172cf4610a53f703bf6194153cb678558a8ebfd9a6e663b4536c260'
+    del dispatch.body[i:i+3]
     # Snapshot captured from the complete pre-extraction class. This checks
     # statement/order parity, not a claim of hardware or image-output acceptance.
     canonical = ast.dump(ast.Module(body=[handler], type_ignores=[]), include_attributes=False)

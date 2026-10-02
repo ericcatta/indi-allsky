@@ -130,3 +130,25 @@ needs earlier calibration/stack/AWB/detection state, the final portable recipe,
 source-aware consumers, bounded cache and asset retention, storage policy UI and
 external-volume handling. Production remains on the existing saving policy until
 those requirements are complete; this candidate must not be deployed alone.
+
+The source-rendering candidate now connects the shared stages into a complete
+FITS-to-display renderer and the authenticated FITS preview route. It records
+actual AWB gains, CCM, effective bit depth, denoise time gate, cached LUTs, masks,
+detection drawings, presentation and formatted labels. The final display digest
+and source-file digest guard against mismatched or non-identical reconstruction.
+FITS primary pixels remain byte-preserved; no live calibration/provider lookup is
+performed on read. The final recipe currently persists with the matching image
+record, not yet as a complete portable FITS extension.
+
+For ordinary post-calibration single exposures no extra full-frame basis is saved.
+Pre-calibration FITS and multi-frame stacks retain their prepared linear array as a
+lossless asset, preserving their actual calibration/registration result without
+recomputing it against today's dark files or stacking history. This increases
+storage for these optional modes and must be counted by forecasting/retention;
+those assets cannot be treated as evictable JPEG cache. Shared resources/LUTs are
+deduplicated. Lifecycle and the remaining consumers/settings remain required.
+
+The full replay test exposed denoise luminance compensation exceeding the physical
+12-bit range (4096+), causing the stretch LUT to fail. Display denoise now clamps
+integer output to effective camera bit depth; in-range values retain the previous
+result. This is an intentional correction, distinct from capture/replay parity.

@@ -224,6 +224,9 @@ class IndiAllskyDenoise(object):
         easy to override during tests without touching the global
         ``datetime`` module (which is immutable).
         """
+        override = getattr(self, 'star_mask_time_override', None)
+        if override is not None:
+            return bool(override)
         now = datetime.datetime.now()
         return (now.hour >= 17) or (now.hour < 5)
 
@@ -234,7 +237,8 @@ class IndiAllskyDenoise(object):
         the denoised image is returned unchanged.
         """
         # daytime gating: only apply star protection during the night window.
-        if not self._is_star_mask_time():
+        self.last_star_mask_time = self._is_star_mask_time()
+        if not self.last_star_mask_time:
             return denoised
 
         if not bool(self.config.get('DENOISE_PROTECT_STARS', True)):

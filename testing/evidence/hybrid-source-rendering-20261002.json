@@ -1,0 +1,47 @@
+{
+  "date": "2026-10-02",
+  "baseline": "6018b17e",
+  "change": "FITS-to-display replay from recorded processing context, used by authenticated FITS preview when a matching complete image recipe is present.",
+  "tests": {
+    "status": "passed_after_guard_recheck",
+    "report": "/home/eric/hybrid-source-rendering-regression-20261002/results.json",
+    "targeted": [
+      "hybrid_source_awb_test.py",
+      "hybrid_source_rendering_test.py",
+      "hybrid_image_rendering_test.py"
+    ],
+    "proof": [
+      "96 full-frame pixel comparisons across two camera identities, uint8 RGB/uint16 CFA/float32 FITS, day/night, calibrated/pre-dark/stack/focus and all four supported stretch variants.",
+      "AWB numerical behavior compared with the frozen pre-extraction method across integer/floating types, ranges and initialization states.",
+      "Saved actual AWB/CCM, denoise gate, cached LUTs, masks, detections, presentation and labels reproduce captured pixels; source file bytes remain unchanged.",
+      "Gzip representation produces identical display pixels.",
+      "Actual Flask preview requires login and returns the expected encoded JPEG for admin and ordinary user without a permanent JPEG file.",
+      "Wrong camera/source, changed source bytes, corrupt assets and ambiguous matching image records are rejected. FITS original download still succeeds after recipe failure."
+    ],
+    "javascript": 35,
+    "javascript_status": "passed",
+    "javascript_report": "/tmp/hybrid-source-rendering-js.json",
+    "javascript_sha256": "2b0254c3a4a7323939145c45cba327c558e93a854df6115451280f46aeaba8b8",
+    "python": 190,
+    "full_run_status": "failed_only_legacy_preview_guard",
+    "application_sources_unchanged": true,
+    "full_report_sha256": "32e9768338149efbf5b57f4b6239df5a706283e8cb7ec5be049bf3c7334897e5",
+    "reconciled_report": "/home/eric/hybrid-source-rendering-regression-20261002/reconciled-results.json",
+    "reconciled_report_sha256": "805a688fe081d75a793245229d5008e9a4ecadf57156bd115bde4ca77a44475b",
+    "rechecked_case": "testing/modern_admin_media_runtime_test.py",
+    "recheck_log_sha256": "3ea96d84514a29931be104177aea0384837c2042e0d7b44f9f837d50e6fdce21",
+    "source_manifest_sha256": "775f1ff86074ebff4abd1c5dbe483270a3aa13feb9eed1a1bdadf50292c8d16a",
+    "explanation": "The full 190-case run used unchanged application sources. One historical whole-class fingerprint rejected the intentional new preview branch. Only that test was updated to pin and normalize the new branch, preserving its original legacy fingerprint; its entire entrypoint then passed. Hash comparison proves this test is the sole source difference. The original failed report is preserved."
+  },
+  "intentional_correction": {
+    "problem": "Real 12-bit denoise output exceeded 4095 and mode-1 stretch failed with an out-of-bounds LUT index.",
+    "behavior": "Display denoise clamps integer results to effective camera bit depth. In-range pixels are unchanged; FITS scientific data is not modified."
+  },
+  "storage_tradeoff": "Ordinary calibrated single frames use their FITS directly. Pre-calibration and stacked modes retain a lossless prepared scientific array; forecast and retention must account for these non-evictable dependencies.",
+  "deployment": "Not deployed. Production stays 0cf2de6e/application 994ac136, with its current capture/storage policy.",
+  "limits": [
+    "The final recipe currently resides on the matching image database record; portable FITS recipe publication is not complete.",
+    "Bounded derivative caching, asset lifecycle, generated-media readers, configurable day/night policy, external mounts and storage forecast remain required before activation.",
+    "This isolated verification is not live production acceptance and does not complete the overall migration/acceptance goal."
+  ]
+}

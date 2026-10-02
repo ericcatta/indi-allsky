@@ -58,8 +58,9 @@ def run():
     class Restore(ast.NodeTransformer):
         def visit_Dict(self, node):
             for i, key in reversed(list(enumerate(node.keys))):
-                if isinstance(key, ast.Constant) and key.value in ('render_label', 'render_presentation'):
-                    expected = 'snapshot_label(self.image_processor)' if key.value == 'render_label' else 'presentation_record'
+                if isinstance(key, ast.Constant) and key.value in ('render_label', 'render_presentation', 'render_source'):
+                    expected = {'render_label':'snapshot_label(self.image_processor)', 'render_presentation':'presentation_record',
+                                'render_source':'self._source_render_recipe(source_basis, presentation_record, libcamera_ccm)'}[key.value]
                     assert ast.dump(node.values[i]) == ast.dump(ast.parse(expected, mode='eval').body)
                     node.keys.pop(i); node.values.pop(i)
             return self.generic_visit(node)
@@ -83,6 +84,16 @@ def run():
     assert len(indices) == 1
     index = indices[0]
     assert ast.dump(ast.Module(body=method.body[index:index+2],type_ignores=[])) == ast.dump(ast.Module(body=context_body,type_ignores=[]))
+    del method.body[index:index+2]
+    start = context_source.index('        source_basis = None\n')
+    end = context_source.index('\n\n        image_height, image_width', start)
+    basis_body = ast.parse(textwrap.dedent(context_source[start:end])).body
+    assert hashlib.sha256(ast.dump(ast.Module(body=basis_body,type_ignores=[])).encode()).hexdigest() == 'c16387007811621b80999370822d44e01fd0058cc6afe02d79e6ef33759206a6'
+    indices = [i for i,n in enumerate(method.body) if isinstance(n,ast.Assign)
+               and isinstance(n.targets[0],ast.Name) and n.targets[0].id == 'source_basis']
+    assert len(indices) == 1
+    index = indices[0]
+    assert ast.dump(ast.Module(body=method.body[index:index+2],type_ignores=[])) == ast.dump(ast.Module(body=basis_body,type_ignores=[]))
     del method.body[index:index+2]
     method = Restore().visit(method)
     assert found == list(FIXTURE['blocks'])
