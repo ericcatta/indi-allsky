@@ -6660,7 +6660,28 @@
           "source": "testing/evidence/hybrid-native-users-2026-09-08.json",
           "record": "cases[14]",
           "control": "Copy, CSV, Excel",
-          "recorded_status": "bloccato"
+          "recorded_status": "bloccato",
+          "resolution": {
+            "reviewed_on": "2026-10-02",
+            "status": "superato",
+            "source": "testing/evidence/hybrid-user-confirmed-delivery-20261002.json",
+            "records": [
+              "controls[1]",
+              "controls[2]"
+            ],
+            "additional_sources": [
+              {
+                "source": "testing/evidence/hybrid-users-clipboard-live-20260929.json",
+                "records": [
+                  "controls[0]",
+                  "controls[1]",
+                  "controls[2]"
+                ]
+              }
+            ],
+            "scope": "Combined evidence for the original Copy/CSV/Excel aggregate: native admin clipboard comparisons on 29 September and user-confirmed file receipt on 2 October. Copy implementation unchanged; subsequent table change only avoids duplicate filter redraws. No other page export or ordinary-user certification.",
+            "historical_outcome_preserved": true
+          }
         },
         {
           "source": "testing/evidence/hybrid-native-users-2026-09-08.json",

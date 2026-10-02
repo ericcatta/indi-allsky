@@ -195,3 +195,5 @@ History input admission and aggregate Loop delivery policies are verified by [hi
 Discovery refreshed at `51a248ee`: 99 GET entries, 500 executed contexts (376 rendered, 124 blocked), seven non-template entries left to dedicated tests, 43,978 control occurrences and 7,369 exact identities. No functional passes are inferred. Four actual FITS preview downloads and source-integrity checks are recorded in [preview receipt evidence](../testing/evidence/hybrid-fits-preview-receipt-20261001.json).
 
 Il 2 ottobre l’utente ha confermato download/apertura del mini-video 7 (camera 2), CSV/Excel Users e copia URL del simulatore. Tre record storici hanno una risoluzione puntuale; il vecchio download del mini-video 3 resta distinto. [Conferma e limiti](../testing/evidence/hybrid-user-confirmed-delivery-20261002.json).
+
+Il record aggregato Users «Copy, CSV, Excel» è inoltre risolto combinando la prova diretta degli appunti del 29 settembre con le due ricevute confermate il 2 ottobre. La funzione di copia è invariata; non vengono estesi gli esiti ad altre pagine o ruoli.

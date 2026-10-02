@@ -41,9 +41,9 @@ this table alone does not certify all discovered controls.
 
 Use the [route register](hybrid-acceptance-route-register.json) and its linked
 control discovery, retaining role, camera/profile, prerequisites, expected
-request/effect and source revision. There are 29 historical blocked/defect
-records without a fully passed resolution after the scoped resolutions, including three user-confirmed CSV/Excel and simulator results on 2 October. That number is not
-29 current product defects: some combine scopes, refer to older controls, or
+request/effect and source revision. There are 28 historical blocked/defect
+records without a fully passed resolution after the scoped resolutions, including three user-confirmed CSV/Excel and simulator results on 2 October and the combined Users Copy/CSV/Excel record. That number is not
+28 current product defects: some combine scopes, refer to older controls, or
 already have narrower later evidence. The 7,369 static identities likewise are
 not 7,369 independently failed functions.
 
