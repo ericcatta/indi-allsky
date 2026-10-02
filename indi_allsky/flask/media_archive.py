@@ -126,3 +126,28 @@ class ModernAdminMediaArchive:
             'preview_url': preview, 'video': video,
             'download_url': url_for('indi_allsky.modern_admin_source_download_view', kind=self.kind,
                 camera_id=entry.camera_id, media_id=entry.id)}
+
+
+def exposure_source_downloads(entries):
+    """Match saved source products by exact exposure time AND camera.
+
+    Never substitute the nearest exposure or another camera. Ambiguous records
+    are omitted rather than presenting an arbitrary source as the original.
+    """
+    result = {entry.id: {} for entry in entries}
+    if not entries:
+        return result
+    for kind in ('fits', 'raw'):
+        model = MEDIA_DOWNLOAD_MODELS[kind]
+        predicates = [and_(model.camera_id == entry.camera_id,
+                           model.createDate == entry.createDate) for entry in entries]
+        matches = {}
+        for source in model.query.filter(or_(*predicates)).all():
+            matches.setdefault((source.camera_id, source.createDate), []).append(source)
+        for entry in entries:
+            sources = matches.get((entry.camera_id, entry.createDate), [])
+            if len(sources) == 1:
+                result[entry.id][kind] = url_for(
+                    'indi_allsky.modern_admin_source_download_view', kind=kind,
+                    camera_id=entry.camera_id, media_id=sources[0].id)
+    return result

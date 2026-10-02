@@ -7773,10 +7773,14 @@ class ModernAdminHighlightsView(ModernAdminMediaBrowseView, TemplateView):
             entries = query.order_by(IndiAllSkyDbImageTable.detections.desc(),
                 IndiAllSkyDbImageTable.stars.desc(), IndiAllSkyDbImageTable.sqm.desc(),
                 IndiAllSkyDbImageTable.createDate.desc(), IndiAllSkyDbImageTable.id.desc()).limit(8).all()
+            from .media_archive import exposure_source_downloads
+            sources = exposure_source_downloads(entries)
             archive = ModernAdminMediaArchive('image', selected.get('camera_id'), self.verify_admin_network)
             for entry in entries:
                 item = archive.item(entry)
-                item.update(detections=entry.detections, stars=entry.stars, sqm=entry.sqm)
+                item.update(detections=entry.detections, stars=entry.stars, sqm=entry.sqm,
+                            source_downloads=sources[entry.id],
+                            processed_format={'.jpg': 'JPEG', '.jpeg': 'JPEG'}.get(Path(entry.filename).suffix.lower(), Path(entry.filename).suffix.lstrip('.').upper()))
                 items.append(item)
         except SQLAlchemyError:
             db.session.rollback()
