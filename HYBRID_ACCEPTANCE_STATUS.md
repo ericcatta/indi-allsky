@@ -266,7 +266,10 @@ The user requests a source for every exposure, with previews and overlay exports
 as derivatives. This is not yet implemented or enabled. Measurements on one
 recent FITS per camera suggest about 163 GB/day at the observed 15-second cadence
 using lossless gzip level 1, versus about 10 GB/day for current JPEGs. These are
-sample-based estimates, not a full-day benchmark. Retention duration or additional
-storage must be selected before enabling this volume. Existing timelapse readers
+sample-based estimates, not a full-day benchmark. The user subsequently selected configurable per-period storage, defaulting to
+FITS-only at night and JPEG-only by day, with optional external storage. Previews
+and exports must preserve the current rendered appearance without modifying the
+source samples. This choice is accepted but not implemented; the all-day estimate
+is not a forecast for that mixed policy. Existing timelapse readers
 still require processed files; deleting them before migrating readers would break
 supported functionality. [Measurements](testing/evidence/hybrid-source-storage-sizing-20261002.json).

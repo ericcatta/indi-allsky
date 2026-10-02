@@ -74,3 +74,21 @@ removing them to make the project look smaller.
 The user revoked the 20:00 deadline on 1 October and authorized continuing to
 completion. Deploy and bounded live checks can resume; the separate 24-hour
 observation remains excluded. Do not request the expired window again.
+
+## Accepted archive change — 2 October (not implemented)
+
+The user selected configurable day/night storage, defaulting to JPEG-only by day
+and FITS-only for every retained exposure at night, with optional external storage.
+FITS samples must remain untouched by preview/export stretch and overlays. The
+rendered result must preserve the current appearance, not the existing simplified
+FITS preview. This supersedes the pending retention-choice question.
+
+Completion requires one shared capture/replay rendering path with recorded
+processing settings and acquisition/overlay context; bounded derivative caching;
+source-aware Library, Loop, downloads and all generated-media readers; configurable
+local/external roots with missing-mount handling; retention/forecast accounting for
+sources and cache; and tests for byte-preserved FITS, matching rendered output,
+per-camera isolation, day/night transitions, cache eviction/regeneration and output
+generation after cached previews are removed. Existing media remain readable.
+Do not activate source-only capture while any supported consumer still requires a
+permanent JPEG, or count the preview timestamp fix as completing this change.

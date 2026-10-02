@@ -1,7 +1,6 @@
 """Hybrid original media downloads, independent of UI compatibility routes."""
 import io
 import time
-from datetime import datetime
 from sqlalchemy.orm.exc import NoResultFound
 from ..processing import ImageProcessor
 from ..modern_admin_media_runtime import ModernAdminMediaAccessAdapter, ModernAdminMediaUrlNormalizer
@@ -144,7 +143,7 @@ class Fits2JpegView(BaseView):
         binning_av = Array('i', [binning])
         sensors_temp_av = Array('f', [fits_metadata['sensor_temp']])
         sensors_user_av = Array('f', [fits_metadata['sensor_temp'], 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
-        night_av = Array('i', [1, 0])  # using night values for processing
+        night_av = Array('i', [int(fits_entry.night), int(bool((fits_entry.data or {}).get('moonmode', False)))])
         astro_av = Array('f', [0.0, 0.0, 0.0])
 
         image_processor = ImageProcessor(
@@ -162,8 +161,8 @@ class Fits2JpegView(BaseView):
         processing_start = time.time()
 
 
-        # use mtime for date
-        image_date = datetime.fromtimestamp(media_access_adapter.resolve_file_mtime(filename_p))
+        # A copy/restore can change file mtime; use the recorded exposure time.
+        image_date = fits_entry.createDate
 
 
         image_processor.update_astrometric_data(image_date)

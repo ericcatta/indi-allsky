@@ -649,7 +649,8 @@ def test_fits_preview_extraction_preserves_class_and_shared_handler_boundary():
     tree = ast.parse(source)
     handler = next(node for node in tree.body if isinstance(node, ast.ClassDef)
                    and node.name == 'Fits2JpegView')
-    # The sole post-extraction change rejects IDs SQLite cannot represent.
+    # Explicit post-extraction changes reject unrepresentable IDs and use
+    # recorded acquisition time/day/night instead of filesystem/default state.
     # Check that exact guard and its position, then retain the original class
     # fingerprint for every remaining statement, including image processing.
     dispatch = next(node for node in handler.body if isinstance(node, ast.FunctionDef)
@@ -659,6 +660,20 @@ def test_fits_preview_extraction_preserves_class_and_shared_handler_boundary():
     assert len(parse_try.body) == 2
     assert ast.dump(ast.Module(body=parse_try.body, type_ignores=[]), include_attributes=False) == ast.dump(expected, include_attributes=False)
     parse_try.body.pop(1)
+    # Normalize only the two reviewed context fixes back to the historical AST;
+    # all other processing statements retain the original fingerprint.
+    replacements = {
+        'night_av': ("night_av = Array('i', [int(fits_entry.night), int(bool((fits_entry.data or {}).get('moonmode', False)))])", "night_av = Array('i', [1, 0])"),
+        'image_date': ('image_date = fits_entry.createDate', 'image_date = datetime.fromtimestamp(media_access_adapter.resolve_file_mtime(filename_p))'),
+    }
+    for name, (current, historical) in replacements.items():
+        nodes = [(i, node) for i, node in enumerate(dispatch.body)
+                 if isinstance(node, ast.Assign) and isinstance(node.targets[0], ast.Name)
+                 and node.targets[0].id == name]
+        assert len(nodes) == 1
+        i, node = nodes[0]
+        assert ast.dump(node) == ast.dump(ast.parse(current).body[0])
+        dispatch.body[i] = ast.parse(historical).body[0]
     # Snapshot captured from the complete pre-extraction class. This checks
     # statement/order parity, not a claim of hardware or image-output acceptance.
     canonical = ast.dump(ast.Module(body=[handler], type_ignores=[]), include_attributes=False)
@@ -681,12 +696,13 @@ def test_fits_preview_route_delegates_header_metadata_to_media_access_adapter():
     assert_true('hdulist[0].header' not in body, 'FITS preview route must not own direct FITS header parsing')
 
 
-def test_fits_preview_route_delegates_file_mtime_to_media_access_adapter():
+def test_fits_preview_uses_recorded_exposure_time():
     source = (REPO_ROOT / 'indi_allsky' / 'flask' / 'source_media_views.py').read_text(encoding='utf-8')
     start = source.index('class Fits2JpegView')
     body = source[start:]
 
-    assert_true('.resolve_file_mtime(filename_p)' in body, 'FITS preview file mtime should go through Hybrid media access adapter')
+    assert_true('image_date = fits_entry.createDate' in body, 'FITS preview must use recorded exposure time')
+    assert_true('resolve_file_mtime' not in body, 'Copy/restore timestamps must not change exposure context')
     assert_true('filename_p.stat().st_mtime' not in body, 'FITS preview route must not own direct file metadata reads')
 
 
@@ -951,7 +967,7 @@ def run_tests():
     test_fits_preview_route_delegates_path_resolution_to_media_access_adapter()
     test_fits_preview_extraction_preserves_class_and_shared_handler_boundary()
     test_fits_preview_route_delegates_header_metadata_to_media_access_adapter()
-    test_fits_preview_route_delegates_file_mtime_to_media_access_adapter()
+    test_fits_preview_uses_recorded_exposure_time()
     test_dark_library_delegates_read_only_media_access_to_adapter()
     test_modern_mask_delegates_file_metadata_to_media_access_adapter()
     test_preview_metadata_lookup_shapes_thumbnail_url()

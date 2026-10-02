@@ -2,9 +2,9 @@
 """Exercise real source downloads and FITS previews with Classic import forbidden."""
 import argparse
 import io
-from datetime import date
+from datetime import date, datetime
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import patch, Mock
 from tempfile import TemporaryDirectory
 from hybrid_runtime_fixture import isolated_app, login_client
 from hybrid_source_media_fixture import seed_source_media
@@ -17,8 +17,23 @@ def run(runtime_config):
         from astropy.io import fits
         from indi_allsky.flask import db
         from indi_allsky.flask.models import IndiAllSkyDbCameraTable, IndiAllSkyDbFitsImageTable, IndiAllSkyDbRawImageTable, IndiAllSkyDbTaskQueueTable, IndiAllSkyDbConfigTable
-        from indi_allsky.flask.source_media_views import ModernAdminSourceDownloadView
+        from indi_allsky.flask.source_media_views import ModernAdminSourceDownloadView, ImageProcessor
         root = Path(app.config['INDI_ALLSKY_IMAGE_FOLDER'])
+        captured = {cid: datetime(2020, 1, cid, 12, 34, 56) for cid in (1, 2)}
+        with app.app_context():
+            for cid in (1, 2):
+                entry = db.session.get(IndiAllSkyDbFitsImageTable, cid)
+                entry.createDate = captured[cid]
+                entry.data = {'moonmode': True} if cid == 1 else None
+            db.session.commit()
+        preview_contexts = []
+        processors = []
+        def processor_with_context(*args, **kwargs):
+            processor = ImageProcessor(*args, **kwargs)
+            preview_contexts.append(list(args[6]))  # actual shared night/moon array
+            processor.add = Mock(wraps=processor.add)
+            processors.append(processor)
+            return processor
         for uid in (1, 2):
             client = login_client(app, uid)
             # Both URL components and FITS query IDs must fit the database integer.
@@ -46,7 +61,11 @@ def run(runtime_config):
                     assert partial.status_code==206 and partial.data==path.read_bytes()[:10]
                     assert client.get(url.replace('/'+str(cid)+'/'+str(cid)+'/', '/'+str(3-cid)+'/'+str(cid)+'/')).status_code==404
                 original=(root/('ccd_test-camera-'+str(cid))/('source-camera-'+str(cid)+'.fit')).read_bytes()
-                jpeg=client.get('/indi-allsky/fits2jpeg?id='+str(cid))
+                with patch('indi_allsky.flask.source_media_views.ImageProcessor', side_effect=processor_with_context):
+                    jpeg=client.get('/indi-allsky/fits2jpeg?id='+str(cid))
+                assert preview_contexts[-1] == ([1, 1] if cid == 1 else [0, 0])
+                assert processors[-1].add.call_args.args[4] == captured[cid]
+
                 assert jpeg.status_code==200, (jpeg.status_code,jpeg.text[:200])
                 assert jpeg.mimetype=='image/jpeg'
                 with Image.open(io.BytesIO(jpeg.data)) as image:
