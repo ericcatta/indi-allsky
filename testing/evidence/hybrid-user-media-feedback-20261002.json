@@ -34,13 +34,21 @@
     },
     {
       "control": "Geometry Copy values",
-      "status": "bloccato",
-      "proof": "User cannot find control; direct Image Circle Helper route and button name supplied."
+      "status": "superato",
+      "proof": "User confirms after receiving the direct route/control guidance: per geometry: si; per snapshot: si. User-reported outcome; no automated clipboard or downloaded-byte comparison.",
+      "previous_result": {
+        "status": "bloccato",
+        "proof": "User cannot find control; direct Image Circle Helper route and button name supplied."
+      }
     },
     {
       "control": "Settings snapshot download",
-      "status": "bloccato",
-      "proof": "User cannot find snapshot; Config History > revision number > Download this snapshot guidance supplied."
+      "status": "superato",
+      "proof": "User confirms after receiving the direct route/control guidance: per geometry: si; per snapshot: si. User-reported outcome; no automated clipboard or downloaded-byte comparison.",
+      "previous_result": {
+        "status": "bloccato",
+        "proof": "User cannot find snapshot; Config History > revision number > Download this snapshot guidance supplied."
+      }
     }
   ],
   "live_config": {

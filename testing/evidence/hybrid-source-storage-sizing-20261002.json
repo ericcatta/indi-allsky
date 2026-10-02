@@ -1,0 +1,42 @@
+{
+  "date": "2026-10-02",
+  "method": "Read-only production SQLite queries and in-memory gzip compression of one existing FITS per camera; no media, configuration or service changes.",
+  "samples": [
+    {
+      "camera_id": 1,
+      "exposure": "2026-10-02 12:39:21",
+      "fits_bytes": 35835840,
+      "gzip_level_1_bytes": 14232323,
+      "compression_seconds": 0.627,
+      "recent_100_jpeg_mean_bytes": 1127873,
+      "recent_100_median_interval_seconds": 15
+    },
+    {
+      "camera_id": 2,
+      "exposure": "2026-10-02 12:39:22",
+      "fits_bytes": 16594560,
+      "gzip_level_1_bytes": 14039847,
+      "compression_seconds": 0.631,
+      "recent_100_jpeg_mean_bytes": 624811,
+      "recent_100_median_interval_seconds": 15
+    }
+  ],
+  "projected_combined_decimal_GB_per_day": {
+    "gzip_fits": 162.8476992,
+    "jpeg": 10.09545984
+  },
+  "filesystem_df_h": {
+    "size": "117G",
+    "used": "106G",
+    "available": "6.4G",
+    "usage": "95%"
+  },
+  "limits": [
+    "One source sample per camera; scene noise, exposure and day/night change compression ratios.",
+    "Projection assumes constant 15-second cadence; excludes outputs, thumbnails, database and filesystem overhead.",
+    "Compression timing is one run, not a sustained performance or capture-stability test.",
+    "Existing FITS may be calibrated; a future authoritative source must preserve original samples before calibration.",
+    "All-exposure source retention is not enabled. Pending choice between short retention and additional storage.",
+    "Current JPEG-dependent consumers must be migrated before source-only archival can safely replace them."
+  ]
+}

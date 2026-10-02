@@ -17,8 +17,7 @@ separate. [Archive evidence](testing/evidence/hybrid-archive-production-20261001
 
 The user confirmed mini-video 7 download/opening, Users CSV and Excel receipt,
 and simulator link copying on 2 October. These are user-reported outcomes, not
-automated byte-integrity checks. Other export families and Geometry copy remain
-separate. [Confirmation](testing/evidence/hybrid-user-confirmed-delivery-20261002.json).
+automated byte-integrity checks. Other export families retain their own evidence scopes. [Confirmation](testing/evidence/hybrid-user-confirmed-delivery-20261002.json).
 
 ## Current installation and regression
 
@@ -29,7 +28,8 @@ matching and ambiguity rejection passed isolated Flask tests for both roles.
 All 182 Python/compile and 35 JavaScript checks passed. Only Gunicorn reloaded;
 capture PID 840928 stayed active. [Release evidence](testing/evidence/hybrid-highlights-sources-release-20261002.json).
 The user also confirmed Notifications/Tasks exports, FITS, IMX708 mini-video and
-Highlights receipts; snapshot and Geometry locations were supplied and verified.
+Highlights receipts, then explicitly confirmed Geometry Copy values and Settings
+snapshot download after receiving their locations. These are user-reported outcomes.
 [User report](testing/evidence/hybrid-user-media-feedback-20261002.json).
 
 
@@ -259,3 +259,14 @@ chronological status document is preserved at `a2d53040`:
 `git show a2d53040:HYBRID_ACCEPTANCE_STATUS.md`.
 Its historical process IDs, counts and intermediate open/closed states must not
 be read as the current installation status.
+
+## Source archive request — 2 October
+
+The user requests a source for every exposure, with previews and overlay exports
+as derivatives. This is not yet implemented or enabled. Measurements on one
+recent FITS per camera suggest about 163 GB/day at the observed 15-second cadence
+using lossless gzip level 1, versus about 10 GB/day for current JPEGs. These are
+sample-based estimates, not a full-day benchmark. Retention duration or additional
+storage must be selected before enabling this volume. Existing timelapse readers
+still require processed files; deleting them before migrating readers would break
+supported functionality. [Measurements](testing/evidence/hybrid-source-storage-sizing-20261002.json).
