@@ -1,0 +1,24 @@
+{
+  "date": "2026-10-02",
+  "baseline": "0cf2de6e",
+  "change": "Capture delegates tone, geometry/color and presentation rendering to shared stages at exactly the original positions. Capture metering, detection, outputs and labels retain their order.",
+  "parity": {
+    "fixture": "testing/fixtures/image_rendering_legacy.json",
+    "guard": "Whole processImage AST equals baseline after replacing the three validated delegation statements with their captured bodies.",
+    "trace": "Day/night and 8/16-bit CLAHE decisions, missing configuration keys, order and exceptions at every invoked stage operation match baseline.",
+    "pixels": "Real ImageProcessor rendering from 8/16-bit FITS, day/night, both CLAHE paths, stretch, rotation, scale, border and synthetic alpha logo matches baseline pixel-for-pixel. Source bytes unchanged. External moon/lightgraph/image assets disabled in fixture; their call order is covered by trace parity."
+  },
+  "regression": {
+    "python": 184,
+    "python_status": "passed",
+    "source_changed": false,
+    "report": "/home/eric/hybrid-rendering-regression-20261002/results.json",
+    "report_sha256": "c501a2dd42ff394fed139a810083f687d4c905eff0d5d55965c44f7ad24efa48",
+    "source_manifest_sha256": "a4d2e11fdd5198b38e5d561ce5df7470b95af76c5e8ab4eed269a0f59e84bc59",
+    "javascript": 35,
+    "javascript_report": "/tmp/hybrid-rendering-js-20261002.json",
+    "javascript_sha256": "ea5d64e2dc830c28341d35678db7c53de60532c8b427ee2edec1d9785bce34fd"
+  },
+  "deployment": "Not deployed; production remains 0cf2de6e / application 994ac136. No capture restart or saved-format change.",
+  "remaining": "Recorded rendering context and source-backed consumers/cache/settings are required before the user-selected FITS-night/JPEG-day default can be enabled. This extraction is a prerequisite, not completion of archive migration."
+}

@@ -92,3 +92,11 @@ per-camera isolation, day/night transitions, cache eviction/regeneration and out
 generation after cached previews are removed. Existing media remain readable.
 Do not activate source-only capture while any supported consumer still requires a
 permanent JPEG, or count the preview timestamp fix as completing this change.
+
+The first implementation step extracts capture's tone, geometry/color and
+presentation stages into `indi_allsky/image_rendering.py`. Their original worker
+positions are protected by a whole-method AST fingerprint, plus call/error parity
+and real 8/16-bit day/night pixel comparisons including an alpha overlay. This
+separates rendering from capture effects but does not yet provide archived-context
+replay: calibration/stack/AWB context, label inputs, reusable source access, caching
+and consumers still need completion before source-only storage is activated.

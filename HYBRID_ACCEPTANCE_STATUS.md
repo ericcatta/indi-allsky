@@ -281,3 +281,8 @@ source samples. This choice is accepted but not implemented; the all-day estimat
 is not a forecast for that mixed policy. Existing timelapse readers
 still require processed files; deleting them before migrating readers would break
 supported functionality. [Measurements](testing/evidence/hybrid-source-storage-sizing-20261002.json).
+
+Shared capture rendering stages are implemented and pass 184 Python/compile plus
+35 JavaScript checks, including frozen-worker AST and real pixel parity. This
+candidate is not deployed and does not enable source-only archival.
+[Evidence](testing/evidence/hybrid-shared-rendering-20261002.json).

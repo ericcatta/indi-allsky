@@ -51,6 +51,7 @@ from .event_candidate import persist_event_candidates_shadow
 from .multicamera_diag import write_multicamera_diag
 from .sky_condition import compute_sky_condition_from_frame
 
+from .image_rendering import render_tone, render_geometry_and_color, render_presentation
 from .image_publication import publish_image_file
 from .processing import ImageProcessor
 from .miscUpload import miscUpload
@@ -2835,21 +2836,7 @@ class ImageWorker(Process):
         # adu value may be updated below
 
 
-        self.image_processor.denoise()
-
-        self.image_processor.stretch()
-
-
-        if self.config.get('CONTRAST_ENHANCE_16BIT'):
-            if not self.night_av[constants.NIGHT_NIGHT] and self.config['DAYTIME_CONTRAST_ENHANCE']:
-                # Contrast enhancement during the day
-                self.image_processor.contrast_clahe_16bit()
-            elif self.night_av[constants.NIGHT_NIGHT] and self.config['NIGHT_CONTRAST_ENHANCE']:
-                # Contrast enhancement during night
-                self.image_processor.contrast_clahe_16bit()
-
-
-        self.image_processor.convert_16bit_to_8bit()
+        render_tone(self.image_processor, self.config, self.night_av)
 
         #################################################################
         ### Image data at this stage will be uint8 (grayscale or BGR) ###
@@ -2920,54 +2907,7 @@ class ImageWorker(Process):
             self.image_processor.drawDetections()
 
 
-        # rotation
-        self.image_processor.rotate_90()
-        self.image_processor.rotate_angle()
-
-
-        # verticle flip
-        self.image_processor.flip_v()
-
-        # horizontal flip
-        self.image_processor.flip_h()
-
-
-        # crop
-        self.image_processor.crop_image()
-
-
-        # green removal
-        self.image_processor.scnr()
-
-
-        # white balance
-        self.image_processor.white_balance_mtf()
-        self.image_processor.white_balance_manual_bgr()
-        self.image_processor.white_balance_auto_bgr()
-
-
-        # saturation
-        self.image_processor.saturation_adjust()
-
-
-        # gamma correction
-        self.image_processor.apply_gamma_correction()
-
-
-        # sharpening (unsharp mask)
-        self.image_processor.sharpen()
-
-
-        if not self.config.get('CONTRAST_ENHANCE_16BIT'):
-            if not self.night_av[constants.NIGHT_NIGHT] and self.config['DAYTIME_CONTRAST_ENHANCE']:
-                # Contrast enhancement during the day
-                self.image_processor.contrast_clahe()
-            elif self.night_av[constants.NIGHT_NIGHT] and self.config['NIGHT_CONTRAST_ENHANCE']:
-                # Contrast enhancement during night
-                self.image_processor.contrast_clahe()
-
-
-        self.image_processor.colorize()
+        render_geometry_and_color(self.image_processor, self.config, self.night_av)
 
         ##################################################
         ### Image data at this stage will be uint8 BGR ###
@@ -3021,23 +2961,7 @@ class ImageWorker(Process):
         if images_only_diag:
             self._processor_cache_diag(profile_id, camera_id, 'IMAGE_PROCESSOR_CACHE_BEFORE_LOGO', i_ref.binning)
 
-        self.image_processor.apply_logo_overlay(i_ref.binning)
-
-
-        self.image_processor.scale_image()
-
-
-        self.image_processor.add_border()
-
-        self.image_processor.moon_overlay()
-
-        self.image_processor.lightgraph_overlay()
-
-        self.image_processor.image_overlay()
-
-        self.image_processor.orb_image()
-
-        self.image_processor.cardinal_dirs_label()
+        render_presentation(self.image_processor, i_ref.binning)
 
         if images_only_diag:
             self._images_only_diag(profile_id, camera_id, 'IMAGE_POST_PROCESS_END')
