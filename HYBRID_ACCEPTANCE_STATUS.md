@@ -21,7 +21,15 @@ automated byte-integrity checks. Other export families retain their own evidence
 
 ## Current installation and regression
 
-Latest application `dda3eeff` is deployed: Highlights distinguishes processed
+Latest application `994ac136` is deployed: FITS previews use recorded exposure
+context instead of file mtime and forced night mode. Both real-camera previews
+decoded after web-only reload; capture remained active with unchanged PID.
+182 Python checks pass across the full run and two targeted rechecks after
+removing transfer-only AppleDouble files; 35 JS checks pass. Application/test
+source hashes match the tested candidate. This is not source-only archive support.
+[Evidence and rollback](testing/evidence/hybrid-fits-preview-context-20261002.json).
+
+Application `dda3eeff` is deployed: Highlights distinguishes processed
 JPEG from matching saved FITS/RAW products. Both camera labels and unavailable
 states were verified natively; source attachment delivery, exact camera/time
 matching and ambiguity rejection passed isolated Flask tests for both roles.

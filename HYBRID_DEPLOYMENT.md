@@ -195,3 +195,13 @@ configured drivers and unavailable external integrations remain explicitly
 untested; do not enable them merely to manufacture a passed test.
 The 24-hour observation and detector/AI work are deferred by the user.
 [Status and evidence](HYBRID_ACCEPTANCE_STATUS.md) are authoritative for these limits.
+
+## FITS preview context — 2 October 2026
+
+Application `994ac136` was fast-forwarded to production with an exact tested-source
+manifest match and web-only reload. Capture PID 840928 stayed active. Both camera
+FITS previews decoded in the native administrator browser. Configuration and media
+were unchanged. For this code-only release, rollback is the retained
+`/home/eric/hybrid-backups/hybrid-fits-context-20261002/source_media_views.py` copied
+back to `indi_allsky/flask/source_media_views.py`, followed by a Gunicorn reload.
+No old database restore is needed. [Test/deploy evidence](testing/evidence/hybrid-fits-preview-context-20261002.json).

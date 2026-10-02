@@ -12,9 +12,34 @@
     "javascript_count": 35,
     "javascript_report": "/tmp/hybrid-fits-context-js-20261002.json",
     "javascript_sha256": "ea5d64e2dc830c28341d35678db7c53de60532c8b427ee2edec1d9785bce34fd",
-    "historical_processing_fingerprint": "Unchanged; only explicitly asserted timestamp/night assignments normalized to historical statements."
+    "historical_processing_fingerprint": "Unchanged; only explicitly asserted timestamp/night assignments normalized to historical statements.",
+    "recheck_sha256": "d5ff05008eef6182caf8e05f894520b9e969a5f7f0001762573e172af9a8d0c7"
   },
-  "deployment": "Pending web-only deployment after commit. Capture service/configuration are unchanged.",
+  "deployment": {
+    "application_commit": "994ac136",
+    "source_manifest_matches_tested": true,
+    "web_reload": "gunicorn-indi-allsky.service active; MainPID 1540",
+    "capture": "indi-allsky.service active; MainPID 840928 unchanged; NRestarts 0",
+    "backup": "/home/eric/hybrid-backups/hybrid-fits-context-20261002/source_media_views.py",
+    "rollback": "Restore backed-up source_media_views.py to indi_allsky/flask/source_media_views.py and reload only gunicorn-indi-allsky.service. No database/config rollback required.",
+    "native_previews": [
+      {
+        "camera_id": 1,
+        "fits_id": 960,
+        "complete": true,
+        "width": 4608,
+        "height": 2592
+      },
+      {
+        "camera_id": 2,
+        "fits_id": 961,
+        "complete": true,
+        "width": 3840,
+        "height": 2160
+      }
+    ],
+    "native_limit": "Authenticated admin production browser; verifies decode, not full stretch/overlay parity. Agent-created tab closed."
+  },
   "limits": [
     "This does not implement source-only storage or full stretch/overlay replay.",
     "New user default is configurable FITS-only nights / JPEG-only days with optional external storage.",
