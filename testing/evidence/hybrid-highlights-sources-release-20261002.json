@@ -1,0 +1,51 @@
+{
+  "date": "2026-10-02",
+  "application": "dda3eeff",
+  "problem": "Highlights called the processed image original and did not offer related saved source products.",
+  "change": "Explicit processed format label; FITS/RAW links only for an unambiguous exact camera and exposure timestamp. Existing protected download handlers retained. Two bounded queries for at most eight images; no nearest-time substitution.",
+  "source_hashes": {
+    "indi_allsky/flask/media_archive.py": "132385dff84af4919b5b47865058b329604d2d6501cea16fb072e86e4b371559",
+    "indi_allsky/flask/views.py": "1479018e9f5dcb469f2b6800b042e70610dc3f03117c67ec0e05bcced937a064",
+    "indi_allsky/flask/templates/modern_admin/highlights.html": "7c9ac33934111a504c8e8de9fc7c3fedcc51766e777e211daf3f2447900c9741",
+    "testing/hybrid_highlights_flow_test.py": "0e1e2c3ffc421c3ae475f236904fda3f52df3af74f41e0ae33b9b9b76b26da72"
+  },
+  "regression": {
+    "python_entries": 182,
+    "failures": 0,
+    "source_changed": false,
+    "source_manifest_sha256": "d6e7e993a06eb12d6987b20f9c0bc5f338579206db87a581430f78ac246901fd",
+    "report": "/home/eric/hybrid-highlights-sources-regression-20261002/results.json",
+    "report_sha256": "9ea3d8f146aac261cdd2406f699f068689c5350cbedb40dbc29be2b98641c76f",
+    "javascript_entries": 35,
+    "javascript_failures": 0,
+    "javascript_report_sha256": "ba57c80af45f2176c8c61f2755d8baa7391e9df65ba9711a9a05a78a1820f0ed"
+  },
+  "targeted": "Real isolated Flask, both roles: correct paired downloads return attachments with real files; same-time other-camera sources excluded; absent and ambiguous FITS omitted; ranking, context, auth and error tests retained.",
+  "deployment": {
+    "method": "Fast-forward pull; exact production source manifest matched tested source; Gunicorn reload only.",
+    "capture_pid_unchanged": 840928,
+    "capture_restarts": 0,
+    "web_pid": 1540,
+    "services_active": true,
+    "rollback_directory": "/home/eric/hybrid-backups/hybrid-highlights-sources-20261002",
+    "rollback": "Restore three backed-up application files and reload Gunicorn. No data/configuration migration or capture restart."
+  },
+  "native": {
+    "role": "production administrator",
+    "camera_profiles": [
+      "1/imx708-wide",
+      "2/asi678mc"
+    ],
+    "observed": "Download processed JPEG on both cameras. Current eight selected images per camera have no matching FITS/RAW and show unavailable messages. Positive source links are verified on real isolated fixtures, not by inventing production source data.",
+    "tool_issue": "Initial tab creation timed out; same tab subsequently loaded correctly. No duplicate request required for recovery.",
+    "snapshot_navigation": "Config Restore Detail 118 exposes Download this snapshot linking to /indi-allsky/config/download?id=118. No restore submitted.",
+    "geometry_navigation": "Image Circle Helper exposes Copy values. No claim of clipboard receipt.",
+    "cleanup": "Agent-created tab closed."
+  },
+  "limits": [
+    "No source reconstruction for unsaved exposures.",
+    "FITS interval remains 7200 seconds; RAW export remains disabled.",
+    "No new native download receipt claimed; prior user-confirmed processed-image receipt retained.",
+    "Whole-product acceptance, unavailable hardware and deferred 24-hour observation remain separate."
+  ]
+}

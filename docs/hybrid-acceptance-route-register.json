@@ -921,6 +921,24 @@
           "control": "Navigation drawer / Highlights",
           "recorded_status": "superato",
           "observed_page": "/modern-admin/highlights"
+        },
+        {
+          "source": "testing/evidence/hybrid-user-media-feedback-20261002.json",
+          "record": "checks[5]",
+          "control": "Processed JPEG labeled Download original; source format options requested",
+          "recorded_status": "difetto",
+          "resolution": {
+            "reviewed_on": "2026-10-02",
+            "status": "superato",
+            "source": "testing/evidence/hybrid-highlights-sources-release-20261002.json",
+            "records": [
+              "targeted",
+              "native",
+              "deployment"
+            ],
+            "scope": "Processed/source labels fixed and deployed, native labels verified both cameras; actual FITS/RAW link delivery and isolation verified on disposable fixtures. No unavailable production source invented.",
+            "historical_outcome_preserved": true
+          }
         }
       ]
     },
@@ -2566,13 +2584,33 @@
           "source": "testing/evidence/hybrid-notification-live-20260921.json",
           "record": "controls[26]",
           "control": "CSV",
-          "recorded_status": "bloccato"
+          "recorded_status": "bloccato",
+          "resolution": {
+            "reviewed_on": "2026-10-02",
+            "status": "superato",
+            "source": "testing/evidence/hybrid-user-media-feedback-20261002.json",
+            "records": [
+              "checks[0]"
+            ],
+            "scope": "User confirms the requested manual export check. Exact bytes, browser and alternate scopes not independently inspected.",
+            "historical_outcome_preserved": true
+          }
         },
         {
           "source": "testing/evidence/hybrid-notification-live-20260921.json",
           "record": "controls[27]",
           "control": "Excel",
-          "recorded_status": "bloccato"
+          "recorded_status": "bloccato",
+          "resolution": {
+            "reviewed_on": "2026-10-02",
+            "status": "superato",
+            "source": "testing/evidence/hybrid-user-media-feedback-20261002.json",
+            "records": [
+              "checks[0]"
+            ],
+            "scope": "User confirms the requested manual export check. Exact bytes, browser and alternate scopes not independently inspected.",
+            "historical_outcome_preserved": true
+          }
         },
         {
           "source": "testing/evidence/hybrid-notifications-mobile-20260929.json",
@@ -5501,7 +5539,17 @@
           "source": "testing/evidence/hybrid-download-delivery-post-classic-20260921.json",
           "record": "controls[1]",
           "control": "CSV with zero filtered results",
-          "recorded_status": "bloccato"
+          "recorded_status": "bloccato",
+          "resolution": {
+            "reviewed_on": "2026-10-02",
+            "status": "superato",
+            "source": "testing/evidence/hybrid-user-media-feedback-20261002.json",
+            "records": [
+              "checks[1]"
+            ],
+            "scope": "User confirms the requested manual export check. Exact bytes, browser and alternate scopes not independently inspected.",
+            "historical_outcome_preserved": true
+          }
         },
         {
           "source": "testing/evidence/hybrid-download-delivery-post-classic-20260921.json",

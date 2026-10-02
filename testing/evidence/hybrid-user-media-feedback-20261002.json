@@ -1,0 +1,58 @@
+{
+  "date": "2026-10-02",
+  "method": "User report responding to manual checks A\u2013F",
+  "checks": [
+    {
+      "control": "Notifications CSV and Excel",
+      "status": "superato",
+      "proof": "User: notifications e task si; confirms requested export receipt/readability."
+    },
+    {
+      "control": "Tasks CSV including empty search",
+      "status": "superato",
+      "proof": "User confirms Tasks check from A\u2013F request; no byte comparison."
+    },
+    {
+      "control": "Original FITS download",
+      "status": "superato",
+      "proof": "User: download fits si; notes source files approximately every two hours per camera."
+    },
+    {
+      "control": "IMX708 mini timelapse download",
+      "status": "superato",
+      "proof": "User confirms camera IMX708 mini TL download; exact record ID not specified."
+    },
+    {
+      "control": "Highlights download receipt",
+      "status": "superato",
+      "proof": "User confirms download; received processed JPEG with overlays."
+    },
+    {
+      "control": "Highlights download label/source choices",
+      "status": "difetto",
+      "proof": "Download original is misleading for processed JPEG; user requests separate FITS/RAW and processed image options."
+    },
+    {
+      "control": "Geometry Copy values",
+      "status": "bloccato",
+      "proof": "User cannot find control; direct Image Circle Helper route and button name supplied."
+    },
+    {
+      "control": "Settings snapshot download",
+      "status": "bloccato",
+      "proof": "User cannot find snapshot; Config History > revision number > Download this snapshot guidance supplied."
+    }
+  ],
+  "live_config": {
+    "revision": 118,
+    "IMAGE_SAVE_FITS": true,
+    "IMAGE_SAVE_FITS_PERIOD": 7200,
+    "IMAGE_EXPORT_RAW": "",
+    "method": "Read-only query of production config on 2 October; no settings changed."
+  },
+  "limits": [
+    "User-reported receipt; browser and exact filenames not specified.",
+    "No claim that FITS exists for every JPEG or that processed images can be reconstructed without overlays.",
+    "New Highlights source choices remain under validation; not deployed at record creation."
+  ]
+}

@@ -2,6 +2,19 @@
 
 ## Current application
 
+On 2 October `dda3eeff` added exposure-matched FITS/RAW options to Highlights
+and renamed the processed download accurately. All 182 Python/compile and 35
+JavaScript tests passed; installed source hashes match. Gunicorn was reloaded;
+capture PID 840928 continued without restart. Native labels and absent-source
+states passed for both cameras. FITS saving remains every 7200 seconds; RAW
+export remains disabled. [Evidence](testing/evidence/hybrid-highlights-sources-release-20261002.json).
+Rollback: restore the three application files preserved with their paths in
+`/home/eric/hybrid-backups/hybrid-highlights-sources-20261002`, then reload
+Gunicorn. No database/configuration restoration or capture restart is needed.
+
+Previous deployment:
+
+
 On 1 October at 22:37 local time, checkout `48c2eddb` was deployed after the
 user revoked the 20:00 cutoff. Its application changes are `05d6e7d6` (libcamera
 child output uses an anonymous temporary file for every profile) and `584f066f`

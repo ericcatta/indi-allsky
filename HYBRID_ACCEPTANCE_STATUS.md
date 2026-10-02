@@ -22,6 +22,17 @@ separate. [Confirmation](testing/evidence/hybrid-user-confirmed-delivery-2026100
 
 ## Current installation and regression
 
+Latest application `dda3eeff` is deployed: Highlights distinguishes processed
+JPEG from matching saved FITS/RAW products. Both camera labels and unavailable
+states were verified natively; source attachment delivery, exact camera/time
+matching and ambiguity rejection passed isolated Flask tests for both roles.
+All 182 Python/compile and 35 JavaScript checks passed. Only Gunicorn reloaded;
+capture PID 840928 stayed active. [Release evidence](testing/evidence/hybrid-highlights-sources-release-20261002.json).
+The user also confirmed Notifications/Tasks exports, FITS, IMX708 mini-video and
+Highlights receipts; snapshot and Geometry locations were supplied and verified.
+[User report](testing/evidence/hybrid-user-media-feedback-20261002.json).
+
+
 Checkout `48c2eddb` was deployed on 1 October at 22:37 local time, after the user
 revoked the 20:00 cutoff. The combined candidate passed **182 Python/compile
 entrypoints and 35 JavaScript tests**, with unchanged sources and an exact
