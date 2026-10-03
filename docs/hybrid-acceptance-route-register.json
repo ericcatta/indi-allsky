@@ -5601,7 +5601,12 @@
           "source": "testing/evidence/hybrid-download-delivery-post-classic-20260921.json",
           "record": "latest_native_recheck",
           "control": "CSV after Search12729",
-          "recorded_status": "bloccato"
+          "recorded_status": "bloccato",
+          "additional_evidence": {
+            "source": "testing/evidence/hybrid-acceptance-followup-20261003.json",
+            "record": "controls[0]",
+            "scope": "Current read-only recheck; historical aggregate status retained. Exact limits in source."
+          }
         },
         {
           "source": "testing/evidence/hybrid-task-table-native-20260929.json",
@@ -6088,7 +6093,12 @@
           "source": "testing/evidence/hybrid-generation-2026-09-06.json",
           "record": "controls[10]",
           "control": "Worker execution",
-          "recorded_status": "bloccato"
+          "recorded_status": "bloccato",
+          "additional_evidence": {
+            "source": "testing/evidence/hybrid-acceptance-followup-20261003.json",
+            "record": "controls[1]",
+            "scope": "Current read-only recheck; historical aggregate status retained. Exact limits in source."
+          }
         },
         {
           "source": "testing/evidence/hybrid-keogram-encoding-2026-09-08.json",

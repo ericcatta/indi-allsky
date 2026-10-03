@@ -1,0 +1,82 @@
+{
+  "date": "2026-10-03",
+  "scope": "Production read-only acceptance follow-up; no new tasks or configuration changes",
+  "controls": [
+    {
+      "route": "/modern-admin/tasks",
+      "control": "Search then CSV",
+      "role": "administrator",
+      "filter": "14509",
+      "visible_rows": 1,
+      "visible_action": "storagePressureCleanup",
+      "visible_state": "SUCCESS",
+      "native_csv_clicked": true,
+      "browser_errors": [],
+      "download_received": false,
+      "status": "bloccato",
+      "reason": "No matching received CSV in Mac Downloads. Browser click alone does not prove delivery. Historical task 12729 is outside the current three-day listing; a currently visible task was used."
+    },
+    {
+      "route": "/modern-admin/tools/generate",
+      "control": "Existing real worker outputs",
+      "status": "superato",
+      "proof": "Read-only production database SUCCESS records and existing nonempty files; ffprobe returned zero for all four videos. This is metadata validation, not a new full decode or source-only archive test.",
+      "remote_report": "/home/eric/hybrid-generation-current-20261003.json",
+      "tasks": [
+        {
+          "id": 14450,
+          "camera_id": 1,
+          "action": "generateVideo",
+          "bytes": 21563025,
+          "dimensions": [
+            4608,
+            2592
+          ],
+          "frames": 906
+        },
+        {
+          "id": 14451,
+          "camera_id": 1,
+          "action": "generatePanoramaVideo",
+          "bytes": 10985181,
+          "dimensions": [
+            4712,
+            750
+          ],
+          "frames": 451
+        },
+        {
+          "id": 14455,
+          "camera_id": 2,
+          "action": "generateVideo",
+          "bytes": 24063717,
+          "dimensions": [
+            3840,
+            2160
+          ],
+          "frames": 907
+        },
+        {
+          "id": 14456,
+          "camera_id": 2,
+          "action": "generatePanoramaVideo",
+          "bytes": 12764867,
+          "dimensions": [
+            4712,
+            750
+          ],
+          "frames": 452
+        }
+      ]
+    }
+  ],
+  "services": {
+    "capture": "active",
+    "web": "active"
+  },
+  "limits": [
+    "CSV client delivery remains unverified.",
+    "Does not close external uploads, new source-only generation, physical hardware recovery or the overall goal.",
+    "24-hour test remains deferred."
+  ]
+}
