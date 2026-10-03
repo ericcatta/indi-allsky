@@ -1,0 +1,54 @@
+{
+  "date": "2026-10-03",
+  "application": "3d87c9aa",
+  "scope": "Production administrator, actual FITS from both cameras; no configuration saves.",
+  "controls": [
+    {
+      "control": "Process preview and Download preview",
+      "camera_id": 1,
+      "profile_id": "imx708-wide",
+      "fits_id": 986,
+      "format": "png",
+      "dimensions": [
+        4608,
+        2592
+      ],
+      "render_seconds": 1.349,
+      "download_filename": "camera-1-light-986.png",
+      "download_bytes": 6879731,
+      "download_sha256": "2d8c9a0ac05e0eae5c7c7fbc2e7fcc9ba6a0b721265047f190333e88451a10f8",
+      "proof": "Native browser processing; decoded preview complete=true; native download click; actual file received in Mac Downloads and encoding/dimensions checked with file.",
+      "status": "superato"
+    },
+    {
+      "control": "Process preview and Download preview",
+      "camera_id": 2,
+      "profile_id": "asi678mc",
+      "fits_id": 987,
+      "format": "jpg",
+      "dimensions": [
+        3840,
+        2160
+      ],
+      "render_seconds": 1.048,
+      "download_filename": "camera-2-light-987.jpg",
+      "download_bytes": 690034,
+      "download_sha256": "b3d4de9dfc517688ce17020eefdd30ee980deffde8ed2e70b361c9a734a67395",
+      "proof": "Native browser processing; decoded preview complete=true; native download click; actual file received in Mac Downloads and encoding/dimensions checked with file.",
+      "status": "superato"
+    }
+  ],
+  "invariants": {
+    "source_fits_sha256_unchanged": {
+      "986": true,
+      "987": true
+    },
+    "configuration_revision_after": 118,
+    "hash_baseline": "/home/eric/hybrid-process-fits-originals-20261003.json"
+  },
+  "limits": [
+    "Does not certify production ordinary-user download receipt or every processing parameter combination.",
+    "Archive format policy remains inactive pending retention choice."
+  ],
+  "regression": "Evidence-only update; application unchanged from 198 Python/compile and 35 JavaScript passing checks."
+}

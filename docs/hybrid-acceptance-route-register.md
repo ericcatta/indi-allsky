@@ -214,3 +214,11 @@ decodificate; il video ha raggiunto la fine senza errori. Questa risoluzione non
 certifica altri ruoli/camere o la ricezione dei download. È stata verificata anche
 l'apertura del mini timelapse già collaudato.
 [Evidenze puntuali](../testing/evidence/hybrid-generated-open-links-20261003.json).
+
+
+Process FITS verified in production on 3 October: administrator generated and
+downloaded camera 1 PNG (4608×2592) and camera 2 JPEG (3840×2160). Both files
+were received on the Mac; original FITS hashes and configuration 118 are unchanged.
+This resolves the historical production preview and download-receipt gaps for
+this exact scope, not every role or parameter combination.
+[Evidence](../testing/evidence/hybrid-process-fits-production-20261003.json).

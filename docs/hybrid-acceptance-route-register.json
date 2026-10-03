@@ -6455,7 +6455,18 @@
           "source": "testing/evidence/hybrid-fits-processing-2026-09-06.json",
           "record": "controls[5]",
           "control": "processing-download",
-          "recorded_status": "bloccato"
+          "recorded_status": "bloccato",
+          "resolution": {
+            "reviewed_on": "2026-10-03",
+            "status": "superato",
+            "source": "testing/evidence/hybrid-process-fits-production-20261003.json",
+            "records": [
+              "controls[0]",
+              "controls[1]"
+            ],
+            "scope": "Production administrator: full-resolution processing and received PNG camera 1 / imx708-wide and JPEG camera 2 / asi678mc; original FITS hashes unchanged. No claim about ordinary-user production downloads.",
+            "historical_outcome_preserved": true
+          }
         },
         {
           "source": "testing/evidence/hybrid-fits-processing-2026-09-06.json",
@@ -6479,7 +6490,18 @@
           "source": "testing/evidence/hybrid-fits-processing-2026-09-06.json",
           "record": "controls[9]",
           "control": "production FITS preview",
-          "recorded_status": "bloccato"
+          "recorded_status": "bloccato",
+          "resolution": {
+            "reviewed_on": "2026-10-03",
+            "status": "superato",
+            "source": "testing/evidence/hybrid-process-fits-production-20261003.json",
+            "records": [
+              "controls[0]",
+              "controls[1]"
+            ],
+            "scope": "Production administrator: full-resolution processing and received PNG camera 1 / imx708-wide and JPEG camera 2 / asi678mc; original FITS hashes unchanged. No claim about ordinary-user production downloads.",
+            "historical_outcome_preserved": true
+          }
         },
         {
           "source": "testing/evidence/hybrid-fits-raw-native-20261001.json",
