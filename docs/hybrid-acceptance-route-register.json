@@ -4056,7 +4056,12 @@
           "source": "testing/evidence/hybrid-profile-saves-native-20261001.json",
           "record": "controls[5]",
           "control": "Hybrid Save & Sync confirmation",
-          "recorded_status": "bloccato"
+          "recorded_status": "bloccato",
+          "additional_evidence": {
+            "source": "testing/evidence/hybrid-acceptance-followup-20261003.json",
+            "record": "controls[2]",
+            "scope": "Native dialog still inaccessible; isolated revision unchanged. User handoff pending."
+          }
         },
         {
           "source": "testing/evidence/hybrid-profile-sync-capability-20261001.json",

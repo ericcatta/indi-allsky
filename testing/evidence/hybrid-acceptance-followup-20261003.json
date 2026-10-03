@@ -68,6 +68,18 @@
           "frames": 452
         }
       ]
+    },
+    {
+      "route": "/modern-admin/settings/cameras",
+      "control": "Hybrid Save & Sync confirmation",
+      "environment": "Disposable isolated server localhost:18121, file-backed synthetic database; service and external effects blocked",
+      "role": "administrator fixture session",
+      "camera_id": 2,
+      "profile_id": "test-profile-2",
+      "action": "Select Hybrid and Post-process RGB, click Save & Sync",
+      "status": "bloccato",
+      "observed": "Native click timed out in input dispatch; dialog API exposed no dialog. Isolated database still has exactly its initial config revision, so no save occurred. User asked to cancel any visible confirmation.",
+      "cleanup": "Server PID 1633635 and SSH tunnel stopped; exact synthetic temporary database directory removed. No production configuration or capture services modified."
     }
   ],
   "services": {
