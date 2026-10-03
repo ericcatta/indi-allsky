@@ -332,3 +332,14 @@ with matching source hashes ([evidence](../testing/evidence/hybrid-archive-volum
 Native Settings saves and the no-UUID error were verified on an isolated database.
 No production storage policy or archive format has changed. External setup and recovery instructions are
 in HYBRID_DEPLOYMENT.md.
+
+
+Every-frame FITS and complete context publication now use lossless gzip level 1.
+On temporary copies of actual Raspberry FITS, publication fell from 9.18 to 1.87
+seconds for camera 1 and 1.83 to 1.43 seconds for camera 2. Scientific digests were
+unchanged. Camera 1's compressed file grew from 12.44 to 14.47 MB; camera 2's
+became slightly smaller. These are daytime samples, not proof of night capacity or
+full capture cadence. All 198 Python/compile and 35 JavaScript checks passed with
+matching source hashes ([evidence](../testing/evidence/hybrid-fast-fits-20261003.json)).
+Legacy scheduled compression remains unchanged. Deployment and live acceptance
+are still required before closing the archive change.

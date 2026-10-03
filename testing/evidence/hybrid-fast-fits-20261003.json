@@ -1,0 +1,62 @@
+{
+  "date": "2026-10-03",
+  "baseline": "918d7690",
+  "status": "passed",
+  "change": "Use lossless gzip level 1 for every-frame FITS capture and complete source-context publication. Legacy scheduled FITS compression stays at level 9.",
+  "tests": {
+    "python_compile": 198,
+    "javascript": 35,
+    "status": "passed",
+    "report": "/home/eric/hybrid-fast-fits-regression-20261003/results.json",
+    "report_sha256": "4e7cace916985985d4033ad176544a70243375763905fdf70f2e6c003787f737",
+    "source_manifest_sha256": "0bfb7883eda11fd357426a63eb80d28b855a5d0e3319620183aa3bbf581b9599",
+    "source_changed": false,
+    "javascript_report_sha256": "69ed8deb39684ab34a08c877ac39cff3d2f7523d7f6ad3fec10eb966f7ce31a1",
+    "targeted": [
+      "hybrid_source_publication_test.py",
+      "hybrid_fits_dimensions_test.py"
+    ],
+    "integrity": "Typed pixels, additional science HDUs, context, timestamps, atomic failure recovery and rendered output preserved."
+  },
+  "benchmark": {
+    "scope": "Actual Raspberry; temporary copies of two real daytime FITS, one timing per level for full publication. Original files untouched.",
+    "report": "/home/eric/hybrid-fits-publication-benchmark-20261003.json",
+    "results": [
+      {
+        "camera_id": 1,
+        "fits_id": 985,
+        "level": 9,
+        "seconds": 9.177639569010353,
+        "bytes": 12443755
+      },
+      {
+        "camera_id": 1,
+        "fits_id": 985,
+        "level": 1,
+        "seconds": 1.8685742990055587,
+        "bytes": 14465393
+      },
+      {
+        "camera_id": 2,
+        "fits_id": 984,
+        "level": 9,
+        "seconds": 1.8255698819993995,
+        "bytes": 14560315
+      },
+      {
+        "camera_id": 2,
+        "fits_id": 984,
+        "level": 1,
+        "seconds": 1.4279268439859152,
+        "bytes": 14043060
+      }
+    ],
+    "scientific_digest_unchanged": true,
+    "compression_only_report": "/home/eric/hybrid-fits-compression-benchmark-20261003.json"
+  },
+  "limits": [
+    "Not a whole-pipeline cadence test",
+    "Daytime sample sizes do not establish night retention capacity",
+    "Not deployed or activated"
+  ]
+}

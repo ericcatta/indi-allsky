@@ -1,5 +1,6 @@
 """Atomic publication of a complete display recipe alongside FITS science data."""
 from copy import deepcopy
+import gzip
 import hashlib
 import json
 import os
@@ -71,7 +72,15 @@ def publish_source_recipe(path, recipe):
             suffix = '.fit.gz' if path.name.endswith('.gz') else '.fit'
             with tempfile.NamedTemporaryFile(dir=path.parent, suffix=suffix, delete=False) as output:
                 pending = Path(output.name)
-            with_context(hdus, context).writeto(pending, overwrite=True)
+            published = with_context(hdus, context)
+            if suffix.endswith('.gz'):
+                # Recompressing each exposure at level 9 can consume most of a
+                # capture interval. Stream the same FITS bytes at fast level 1.
+                with pending.open('wb') as stream:
+                    with gzip.GzipFile(fileobj=stream, mode='wb', compresslevel=1, mtime=0) as compressed:
+                        published.writeto(compressed)
+            else:
+                published.writeto(pending, overwrite=True)
         if scientific_digest(pending) != science:
             raise ValueError('Context publication changed scientific data')
         pending.chmod(stat.S_IMODE(before.st_mode))

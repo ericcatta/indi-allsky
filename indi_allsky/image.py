@@ -3788,7 +3788,10 @@ class ImageWorker(Process):
                 output_hdus.writeto(fits_image_buffer)
 
                 f_tmpfile = tempfile.NamedTemporaryFile(mode='w+b', delete=False, suffix='.fit.gz')
-                f_tmpfile.write(gzip.compress(fits_image_buffer.getbuffer()))
+                # Every-frame archival prioritizes capture cadence; both levels
+                # preserve identical FITS bytes after decompression.
+                f_tmpfile.write(gzip.compress(fits_image_buffer.getbuffer(),
+                                             compresslevel=1 if every_frame else 9))
 
                 fits_ext = 'fit.gz'
             else:
