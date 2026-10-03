@@ -345,6 +345,10 @@ with isolated_app(multi_camera=True) as app:
         assert not db.session.get(IndiAllSkyDbImageTable,image_id).validateFile()
     assert reader.get(display_url).status_code==404
     with app.app_context():
+        fits_entry=db.session.get(IndiAllSkyDbFitsImageTable,cid)
         fits_entry.camera_id=cid;db.session.commit()
     assert source.read_bytes()==stable, 'All display/download requests preserve the FITS'
+    with app.app_context():
+        from source_upload_checks import check_source_upload
+        check_source_upload(db.session.get(IndiAllSkyDbImageTable,image_id), source, root, expected)
 print('Full source replay: exact display pixels, original FITS unchanged, calibrated/raw/stack/focus, two cameras, day/night, all stretch modes, AWB/CCM, masks and saved labels: PASS')

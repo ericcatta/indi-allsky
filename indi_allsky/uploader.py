@@ -537,7 +537,18 @@ class FileUploader(Thread):
 
         # Upload file
         try:
-            response = client.put(**put_kwargs)
+            if (isinstance(entry, models.IndiAllSkyDbImageTable)
+                    and (entry.data or {}).get('storage_format') == 'fits'
+                    and action != constants.DELETE_S3):
+                from .source_upload import source_upload_file
+                with source_upload_file(entry, self.image_dir, metadata) as (display_file, metadata):
+                    put_kwargs['local_file'] = display_file
+                    for metadata_key in ('metadata', 'mq_data'):
+                        if metadata_key in put_kwargs:
+                            put_kwargs[metadata_key] = metadata
+                    response = client.put(**put_kwargs)
+            else:
+                response = client.put(**put_kwargs)
         except filetransfer.exceptions.ConnectionFailure as e:
             logger.error('Connection failure: %s', e)
             client.close()

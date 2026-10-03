@@ -1,0 +1,27 @@
+{
+  "date": "2026-10-03",
+  "baseline": "2771e9ae",
+  "status": "passed",
+  "change": "Source-only image uploads materialize a temporary display derivative, preserve remote keys and export independent metadata.",
+  "tests": {
+    "targeted": "Actual FITS replay plus real upload worker methods passed for JPEG/PNG/WebP/TIFF, FTP/S3/Sync/MQTT, transfer failures, invalid source references and duplicate claims.",
+    "report": "/home/eric/hybrid-source-upload-regression-20261003/results.json",
+    "expected_source_manifest_sha256": "fc8dc2c61bf35ff6f52a519783640a1692dfff2b0eaf16a68124d7ec43113a4b",
+    "javascript": 35,
+    "javascript_status": "passed",
+    "javascript_report": "/tmp/hybrid-source-upload-js.json",
+    "javascript_sha256": "2b0254c3a4a7323939145c45cba327c558e93a854df6115451280f46aeaba8b8",
+    "python_compile": 193,
+    "python_compile_status": "passed",
+    "source_changed": false,
+    "report_sha256": "581789e5a6f8e10708c9bd4d88787118569fefee549e7a07b843229dc485f1bf"
+  },
+  "scope": "Isolated real image encoding and worker boundaries with non-network transfer adapters; external destinations are not live-tested.",
+  "deployment": "Not deployed; no source-only capture defaults activated.",
+  "remaining": [
+    "Capture policy and Settings",
+    "Archive assets lifecycle and space accounting",
+    "External-volume safety",
+    "Deployment and live acceptance"
+  ]
+}

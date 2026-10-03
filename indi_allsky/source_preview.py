@@ -9,6 +9,16 @@ from .source_rendering import render_source
 
 
 def source_preview_jpeg(path, recipe, *, camera_id, source_id, media_root, cache=None):
+    return source_display_bytes(path, recipe, camera_id=camera_id, source_id=source_id,
+                                media_root=media_root, cache=cache)
+
+
+def source_display_bytes(path, recipe, *, camera_id, source_id, media_root,
+                         file_type='jpg', cache=None):
+    """Encode frozen display pixels in the requested archive/upload format."""
+    file_type = {'jpeg': 'jpg', 'tif': 'tiff'}.get(file_type, file_type)
+    if file_type not in ('jpg', 'png', 'webp', 'tiff'):
+        raise ValueError('Unsupported display format')
     basis = recipe.get('basis', {})
     if basis.get('camera_id') != camera_id or basis.get('source_id') != source_id:
         raise ValueError('Source recipe identity mismatch')
@@ -22,6 +32,8 @@ def source_preview_jpeg(path, recipe, *, camera_id, source_id, media_root, cache
         'device': st.st_dev, 'inode': st.st_ino, 'size': st.st_size,
         'mtime_ns': st.st_mtime_ns, 'ctime_ns': st.st_ctime_ns,
     }
+    if file_type != 'jpg':
+        identity['format'] = file_type
     key = hashlib.sha256(json.dumps(identity, sort_keys=True, allow_nan=False,
                                    separators=(',', ':')).encode()).hexdigest()
     assets = RenderAssetStore(Path(media_root) / '.render-assets')
@@ -31,9 +43,21 @@ def source_preview_jpeg(path, recipe, *, camera_id, source_id, media_root, cache
     def render():
         import cv2
         pixels = render_source(path, recipe, assets, camera_id=camera_id, source_id=source_id)
-        encoded, jpeg = cv2.imencode('.jpg', pixels, [cv2.IMWRITE_JPEG_QUALITY, quality])
-        if not encoded:
-            raise ValueError('JPEG encoding failed')
-        return jpeg.tobytes()
+        if file_type in ('jpg', 'png'):
+            options = ([cv2.IMWRITE_JPEG_QUALITY, quality] if file_type == 'jpg'
+                       else [cv2.IMWRITE_PNG_COMPRESSION, 3])
+            encoded, data = cv2.imencode('.' + file_type, pixels, options)
+            if not encoded:
+                raise ValueError('Display encoding failed')
+            return data.tobytes()
+        import io
+        from PIL import Image
+        with io.BytesIO() as stream:
+            image = Image.fromarray(cv2.cvtColor(pixels, cv2.COLOR_BGR2RGB))
+            if file_type == 'webp':
+                image.save(stream, format='WEBP', quality=90, lossless=False)
+            else:
+                image.save(stream, format='TIFF', compression='tiff_lzw')
+            return stream.getvalue()
 
     return cache.get_or_create(key, render)

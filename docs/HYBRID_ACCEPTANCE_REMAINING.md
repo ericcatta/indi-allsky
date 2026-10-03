@@ -255,3 +255,16 @@ acceptance. All 193 Python/compile and 35 JavaScript checks pass with unchanged 
 ([evidence](../testing/evidence/hybrid-source-display-20261003.json)). No capture defaults are activated;
 source-aware upload effects, asset lifecycle, storage policy and external-volume
 safety remain unfinished.
+
+
+The next working candidate supplies a short-lived rendered file to image upload
+adapters when an Image record explicitly uses FITS storage. FTP, S3, Sync and MQTT
+retain their existing destination and task-completion paths. The filename suffix
+selects real JPEG, PNG, WebP or TIFF encoding; PNG/TIFF preserve rendered pixels.
+Temporary files are removed after success or failure, and remote metadata omits
+local source IDs and rendering assets. S3 keys remain based on the logical archive
+path. Tests exercise actual FITS reconstruction and upload worker methods with
+isolated non-network adapters. All 193 Python/compile and 35 JavaScript checks pass with unchanged source hashes
+([evidence](../testing/evidence/hybrid-source-upload-20261003.json)). No production
+policy is enabled by this work. Reconstructed display files do not yet recreate the
+legacy JPEG/WebP EXIF block; acquisition metadata remains in the original FITS.
