@@ -1,6 +1,6 @@
 # Hybrid acceptance status
 
-Updated 2 October 2026. **Classic frontend removal is deployed. Whole-product acceptance is not complete.**
+Updated 3 October 2026. **Classic frontend removal is deployed. Whole-product acceptance is not complete.**
 The user deferred the separate 24-hour day/night test and detector/AI implementation.
 Those activities are outside this acceptance run, not passed tests.
 
@@ -39,7 +39,13 @@ in the evidence, with the historical fingerprint unchanged.
 A discovered denoise overshoot beyond effective camera bit depth is corrected in
 the display pipeline; scientific FITS pixels are not modified.
 
-Bounded preview caching, asset retention, source-aware generated-media consumers,
+A bounded disposable cache now supports FITS previews in the candidate; repeated
+requests reuse verified JPEG bytes and evicted entries regenerate from the source.
+191 Python/compile checks and 35 JavaScript checks pass with unchanged sources.
+On isolated copies from both cameras, cold reconstruction took 3.70/2.04 seconds
+and cached reads 1.5/1.2 milliseconds, with identical JPEG bytes and unchanged FITS.
+[Cache evidence](testing/evidence/hybrid-preview-cache-20261003.json).
+Scientific asset retention, source-aware generated-media consumers,
 portable recipe publication and configurable local/external storage still need
 completion before deploying and activating this policy.
 

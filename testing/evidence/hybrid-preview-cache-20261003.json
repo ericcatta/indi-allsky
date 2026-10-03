@@ -1,0 +1,81 @@
+{
+  "date": "2026-10-03",
+  "baseline": "4706f4a1",
+  "change": "Bounded disposable cache for FITS preview JPEGs, with process-safe deduplicated reconstruction and no source/asset eviction.",
+  "tests": {
+    "status": "passed",
+    "report": "/home/eric/hybrid-preview-cache-final-regression-20261003/results.json",
+    "targeted": [
+      "hybrid_preview_cache_test.py",
+      "hybrid_source_rendering_test.py",
+      "modern_admin_media_runtime_test.py"
+    ],
+    "proof": [
+      "Four independent processes requesting one key invoke the producer once and receive identical complete bytes.",
+      "Byte and entry limits evict least-recently-accessed derivatives; oversized responses bypass persistence.",
+      "Corrupt/partial cached content regenerates; invalid keys and symlink entries cannot read or delete the original source.",
+      "Renderer errors propagate without publishing cache content; cache write failure still serves valid reconstructed bytes.",
+      "Real HTTP cache hit does not call the renderer; eviction regenerates identical JPEG bytes with no permanent JPEG available.",
+      "Source bytes remain unchanged and cache clearing never traverses scientific asset storage.",
+      "Different cold keys serialize across independent processes; a cached key on the same lock stripe responds while a cold render is deliberately blocked."
+    ],
+    "javascript": 35,
+    "javascript_status": "passed",
+    "javascript_report": "/tmp/hybrid-preview-cache-final-js.json",
+    "javascript_sha256": "2b0254c3a4a7323939145c45cba327c558e93a854df6115451280f46aeaba8b8",
+    "python_compile_checks": 191,
+    "source_changed": false,
+    "source_manifest_sha256": "38df00ca278beda81cfe62702beb3905f283f0ba08389ea2cbc84bc68cf7412a",
+    "report_sha256": "f71a8a386d6408abb00fa17fe30a36e380ac1c3779212a06125642ede66b32a0"
+  },
+  "benchmark": {
+    "status": "passed",
+    "script_path": "/tmp/hybrid_preview_benchmark.py",
+    "script_sha256": "cf644bba36914e923ccfbc2ce8e5baecfc7f3a738d09015d0191e118d2dd0395",
+    "scope": "Isolated copies of actual camera FITS with fixed reproducible display settings, not a live production rollout or sustained load test.",
+    "prelimit_report": "/home/eric/hybrid-preview-cache-benchmark-prelimit-20261003.json",
+    "memory_note": "Peak RSS is for the complete benchmark process, including the reference frame preparation and replay, not the isolated memory usage of one production HTTP request.",
+    "report": "/home/eric/hybrid-preview-cache-benchmark-20261003.json",
+    "report_sha256": "70d9625b26dc1af8f693d8eabcf32792b4a9cdf235aaf0e3c36b97eb85dbbe82",
+    "process_peak_rss_kib": 1313824,
+    "results": [
+      {
+        "camera_id": 1,
+        "source_id": 981,
+        "shape": [
+          2592,
+          4608,
+          3
+        ],
+        "source_bytes": 35835840,
+        "jpeg_bytes": 854833,
+        "cold_seconds": 3.6966,
+        "cached_seconds": 0.0015,
+        "identical_bytes": true,
+        "production_source_unchanged": true
+      },
+      {
+        "camera_id": 2,
+        "source_id": 980,
+        "shape": [
+          2160,
+          3840,
+          3
+        ],
+        "source_bytes": 16594560,
+        "jpeg_bytes": 609558,
+        "cold_seconds": 2.0417,
+        "cached_seconds": 0.0012,
+        "identical_bytes": true,
+        "production_source_unchanged": true
+      }
+    ]
+  },
+  "deployment": "Not deployed. Production remains 0cf2de6e/application 994ac136. Capture PID 840928 remains active with NRestarts=0; no archive policy change.",
+  "limits": [
+    "Only authenticated FITS previews currently use the cache; generated-media consumers and broader source-only readers still require integration.",
+    "Default service bounds are 512 MiB / 1024 entries; Settings integration is still pending.",
+    "The cache evicts disposable JPEG bytes only; lossless processing assets still need separate retention tied to source lifetime.",
+    "Portable recipe publication, configurable night/day formats and external storage remain incomplete."
+  ]
+}

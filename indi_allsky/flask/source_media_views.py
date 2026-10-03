@@ -3,8 +3,7 @@ import io
 import time
 from sqlalchemy.orm.exc import NoResultFound
 from ..processing import ImageProcessor
-from ..source_rendering import render_source
-from ..render_assets import RenderAssetStore
+from ..source_preview import source_preview_jpeg
 from ..modern_admin_media_runtime import ModernAdminMediaAccessAdapter, ModernAdminMediaUrlNormalizer
 from pathlib import Path
 from urllib.parse import urlsplit
@@ -137,19 +136,13 @@ class Fits2JpegView(BaseView):
             recipe = recipes[0]
             root = self.indi_allsky_config.get('IMAGE_FOLDER') or app.config['INDI_ALLSKY_IMAGE_FOLDER']
             try:
-                pixels = render_source(filename_p, recipe,
-                    RenderAssetStore(Path(root) / '.render-assets'),
-                    camera_id=fits_entry.camera_id, source_id=fits_entry.id)
-                quality = int(recipe['jpeg_quality'])
-                if not 0 <= quality <= 100:
-                    raise ValueError('Invalid archived JPEG quality')
-                encoded, jpeg = cv2.imencode('.jpg', pixels, [cv2.IMWRITE_JPEG_QUALITY, quality])
-                if not encoded:
-                    raise ValueError('JPEG encoding failed')
+                jpeg = source_preview_jpeg(filename_p, recipe,
+                    camera_id=fits_entry.camera_id, source_id=fits_entry.id,
+                    media_root=root)
             except (OSError, ValueError, TypeError, KeyError, IndexError, AttributeError, BadZipFile, EOFError, cv2.error):
                 app.logger.exception('Unable to replay FITS exposure %s', fits_entry.id)
                 abort(422, description='The saved preview cannot be reconstructed. The original FITS remains available for download.')
-            response = Response(jpeg.tobytes(), mimetype='image/jpeg')
+            response = Response(jpeg, mimetype='image/jpeg')
             response.cache_control.private = True
             return response
 

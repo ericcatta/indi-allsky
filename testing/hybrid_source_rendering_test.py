@@ -149,11 +149,21 @@ with isolated_app(multi_camera=True) as app:
         image_id=image_entry.id
     url='/indi-allsky/fits2jpeg?id='+str(cid)
     assert app.test_client().get(url).status_code in (302,401)
+    from indi_allsky.preview_cache import PreviewCache
+    preview_cache=PreviewCache(root/'.render-cache')
     for uid in (1,2):
         client=login_client(app,uid)
-        response=client.get(url)
+        if uid==2:
+            with patch('indi_allsky.source_preview.render_source',side_effect=AssertionError('Cache hit should not render')):
+                response=client.get(url)
+        else:
+            response=client.get(url)
         assert response.status_code==200, response.text[:500]
         assert response.data==jpeg.tobytes() and response.cache_control.private
+    preview_cache.clear()
+    assert client.get(url).data==jpeg.tobytes(), 'Evicted preview must regenerate without archived JPEG'
+    assert source.read_bytes()==original
+    preview_cache.clear()
     asset_path=assets.root/(recipe['presentation']['config']['font']+'.npz')
     preserved_asset=asset_path.read_bytes()
     asset_path.write_bytes(b'broken archive')

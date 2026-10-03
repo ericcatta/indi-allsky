@@ -152,3 +152,34 @@ The full replay test exposed denoise luminance compensation exceeding the physic
 12-bit range (4096+), causing the stretch LUT to fail. Display denoise now clamps
 integer output to effective camera bit depth; in-range values retain the previous
 result. This is an intentional correction, distinct from capture/replay parity.
+
+The candidate now has a bounded disposable JPEG cache for authenticated FITS
+previews (512 MiB and 1024 entries by default in the cache service). It keys the
+entire recipe and source file identity, validates cached bytes, serializes identical
+reconstructions across processes, and evicts by last access. Responses own their
+bytes, so eviction does not invalidate an in-flight HTTP response. Failed cache
+writes do not prevent serving a successfully reconstructed image. Source files and
+lossless rendering assets live outside this eviction scope.
+
+HTTP tests cover a cache hit without calling the renderer, eviction followed by
+identical reconstruction without a permanent JPEG, and explicit recipe/asset
+errors on reconstruction. Cache capacity controls still need the storage Settings
+UI. Streaming/task consumers, scientific asset retention and format-policy
+activation remain separate unfinished work; cache support does not enable nightly
+FITS-only capture by itself.
+
+Real-resolution measurements showed that cache misses are memory-intensive. Cold
+reconstruction is therefore serialized across processes sharing the cache, even
+when persistence is disabled; existing cache hits do not wait for the reconstruction
+slot. A failed reconstruction lock produces an explicit error rather than bypassing
+the memory bound. Tests exercise distinct simultaneous keys and an immediate warm
+read sharing a lock stripe with a blocked cold request. Cache byte-write failure
+still permits delivery once rendering has completed successfully.
+
+Generator integration must not pass ordinary evictable cache paths to FFmpeg's
+long-lived symlink sequence: eviction could invalidate a running job. Use an
+explicit frame reader/stream (or a bounded lease), preserving exposure timestamps
+from the database rather than cache access times. `getFilesystemPath()` must remain
+free of rendering effects because delete/validation paths also call it. Test video
+and keogram/startrail generation after eviction, plus missing-source failures,
+before enabling source-only capture.
