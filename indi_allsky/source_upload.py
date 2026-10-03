@@ -39,8 +39,9 @@ def source_upload_file(entry, media_root, metadata):
     if exported is not None:
         if not isinstance(exported, dict):
             raise ValueError('Upload metadata must be an object')
-        exported['fileSize'] = len(content)
-        exported['file_size'] = len(content)
+        if 'type' in exported or 'fileSize' in exported:
+            exported['fileSize'] = len(content)
+            exported['file_size'] = len(content)
         # The receiver owns a display file, not this database's scientific source.
         if isinstance(exported.get('data'), dict):
             for key in ('storage_format', 'source_fits_id', 'render_source'):

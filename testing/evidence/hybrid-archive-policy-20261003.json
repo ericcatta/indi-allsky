@@ -1,0 +1,48 @@
+{
+  "date": "2026-10-03",
+  "baseline": "aa6af524",
+  "status": "passed",
+  "change": "Configurable day/night archive modes, every-frame FITS for both cameras, source-only display retention and model-based MQTT queues.",
+  "tests": {
+    "targeted": [
+      "hybrid_archive_policy_test.py",
+      "hybrid_storage_settings_flow_test.py",
+      "hybrid_fits_dimensions_test.py",
+      "hybrid_image_rendering_test.py",
+      "hybrid_source_rendering_test.py"
+    ],
+    "targeted_status": "passed",
+    "report": "/home/eric/hybrid-archive-policy-final-regression-20261003/results.json",
+    "expected_source_manifest_sha256": "4e89c89cd1e5fb0f0d6604c0fdd0fde1637892c72ef955696ef2aa334534bfb5",
+    "javascript": 35,
+    "javascript_status": "passed",
+    "javascript_report": "/tmp/hybrid-archive-policy-final-js.json",
+    "javascript_sha256": "2b0254c3a4a7323939145c45cba327c558e93a854df6115451280f46aeaba8b8",
+    "initial_regression": {
+      "python_compile": 196,
+      "status": "passed",
+      "source_changed": false,
+      "report": "/home/eric/hybrid-archive-policy-regression-20261003/results.json",
+      "sha256": "0c2d9caa1eb4c3adf0fcd4e9ad937b6f46473c36d3f7797782ec2e85254bb351"
+    },
+    "exif_targeted": "Actual FITS publication and reconstructed JPEG/WebP retain exposure/model EXIF, empty GPS stays empty, JPEG decoded pixels and scientific HDUs unchanged. Passed.",
+    "python_compile": 196,
+    "python_compile_status": "passed",
+    "source_changed": false,
+    "report_sha256": "40e511edaf6fdf8b11f99dd2688c4365a9dfc4c705ee1943ec6aee63530ea4d8"
+  },
+  "proof": [
+    "Storage settings preserve unrelated config, role/CSRF/revision checks and camera/profile navigation.",
+    "FITS scheduling bypass writes actual mono/RGB FITS for both cameras before the legacy interval expires.",
+    "The display file is removed only after complete scientific publication; incomplete source or unlink failure retains it.",
+    "Frozen processing fingerprint remains unchanged after explicit archive-hook normalization.",
+    "MQTT queues source-backed image identities and preserves its flat metadata payload.",
+    "Capture EXIF is frozen in FITS context and replayed into JPEG/WebP exports without changing scientific pixels or JPEG decoded pixels."
+  ],
+  "deployment": "Not deployed or activated. Existing configs without IMAGE_ARCHIVE retain detailed output behavior; form recommendations are FITS at night, processed images (current JPEG format) by day, compressed FITS. Save plus capture restart activates the choice.",
+  "remaining": [
+    "External-volume safety and UI",
+    "Capacity/retention preflight on the actual SD card",
+    "Production deployment and live acceptance"
+  ]
+}

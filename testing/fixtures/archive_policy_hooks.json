@@ -1,0 +1,26 @@
+[
+  {
+    "new": "if archive_policy.mode == 'fits':\n    from .archive_policy import retain_scientific_only\n    from .flask import models\n    if retain_scientific_only(image_entry, fits_result, source_recipe, db.session, models):\n        image_metadata['data'] = image_entry.data\n        image_metadata['fileSize'] = image_entry.fileSize\n    else:\n        logger.warning('Scientific archive incomplete; keeping processed image %s', image_entry.id)",
+    "old": ""
+  },
+  {
+    "new": "from .archive_policy import ArchivePolicy",
+    "old": ""
+  },
+  {
+    "new": "archive_policy = ArchivePolicy.from_config(self.config, bool(self.night_av[constants.NIGHT_NIGHT]))",
+    "old": ""
+  },
+  {
+    "new": "fits_result = self._write_archive_fit(i_ref, camera, archive_policy)",
+    "old": "fits_result = self.write_fit(i_ref, camera)"
+  },
+  {
+    "new": "self._miscUpload.mqtt_publish_image(upload_filename, mq_topic_latest, mqtt_data, image_entry=image_entry)",
+    "old": "self._miscUpload.mqtt_publish_image(upload_filename, mq_topic_latest, mqtt_data)"
+  },
+  {
+    "new": "source_recipe = self._finalize_fits_source(fits_result, source_basis, presentation_record, libcamera_ccm, upload=not images_only and profile_outputs.get(\"extra_uploads\", True), jpeg_exif=jpeg_exif)",
+    "old": "source_recipe = self._finalize_fits_source(fits_result, source_basis, presentation_record, libcamera_ccm)"
+  }
+]

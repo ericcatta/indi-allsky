@@ -926,7 +926,7 @@ class miscUpload(object):
         self._queue_upload_task(upload_task)
 
 
-    def mqtt_publish_image(self, upload_filename, image_topic, mq_data):
+    def mqtt_publish_image(self, upload_filename, image_topic, mq_data, *, image_entry=None):
         if not self.config.get('MQTTPUBLISH', {}).get('ENABLE'):
             #logger.warning('MQ publishing disabled')
             return
@@ -938,6 +938,10 @@ class miscUpload(object):
             'image_topic' : image_topic,
             'metadata'    : mq_data,
         }
+
+        if image_entry is not None and (image_entry.data or {}).get('storage_format') == 'fits':
+            jobdata.pop('local_file')
+            jobdata.update(model=type(image_entry).__name__, id=image_entry.id)
 
         mqtt_task = IndiAllSkyDbTaskQueueTable(
             queue=TaskQueueQueue.UPLOAD,

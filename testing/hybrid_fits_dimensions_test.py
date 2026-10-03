@@ -72,6 +72,19 @@ with isolated_app(multi_camera=True) as app, app.app_context():
                     assert (saved[0].header['NAXIS1'], saved[0].header['NAXIS2']) == (64, 48)
                 assert entry.fileSize == Path(result['path']).stat().st_size > 0
 
+            # Archive mode bypasses the legacy 2-hour schedule for both cameras.
+            worker.config['IMAGE_SAVE_FITS_PERIOD']=7200
+            ref.exp_date += timedelta(seconds=5)
+            worker.fits_schedule.mark_written(worker.fits_schedule.key(worker.profile_id,camera_id),7200)
+            assert ImageWorker.write_fit(worker,ref,None) is None
+            forced=ImageWorker.write_fit(worker,ref,None,every_frame=True)
+            assert forced and Path(forced['path']).is_file()
+            before_uploads=len(uploads)
+            ImageWorker._finalize_fits_source(worker,forced,None,None,None,upload=False)
+            assert len(uploads)==before_uploads
+            worker.config['IMAGE_SAVE_FITS_PERIOD']=0
+            worker.fits_schedule=FitsSchedule()
+
             # Optional metadata failure must not lose the source exposure.
             ref.exp_date += timedelta(minutes=1)
             with patch('indi_allsky.image.capture_context', side_effect=ValueError('invalid metadata')):

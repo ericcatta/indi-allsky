@@ -868,6 +868,9 @@ class ModernAdminSettingsConfigValidationService:
         from .capture_cadence import validate_capture_cadence
         try:
             validate_capture_cadence(config)
+            if 'IMAGE_ARCHIVE' in config:
+                from .archive_policy import validate_archive_config
+                validate_archive_config(config['IMAGE_ARCHIVE'])
         except (TypeError, ValueError) as error:
             raise ConfigSaveException(str(error)) from error
         return True

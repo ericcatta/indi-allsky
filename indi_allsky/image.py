@@ -2603,13 +2603,15 @@ class ImageWorker(Process):
             self.start_image_save_pre_hook(exposure, gain, binning)
 
 
+        from .archive_policy import ArchivePolicy
+        archive_policy = ArchivePolicy.from_config(self.config, bool(self.night_av[constants.NIGHT_NIGHT]))
         fits_result = None
         raw_result = None
 
-        if not images_only and self.config.get('IMAGE_SAVE_FITS'):
+        if archive_policy.save_fits(self.config, images_only):
             if self.config.get('IMAGE_SAVE_FITS_PRE_DARK'):
                 logger.warning('Saving FITS without dark frame calibration')
-                fits_result = self.write_fit(i_ref, camera)
+                fits_result = self._write_archive_fit(i_ref, camera, archive_policy)
 
 
         # use original value if not defined
@@ -2642,9 +2644,9 @@ class ImageWorker(Process):
             self._processor_cache_diag(profile_id, camera_id, 'IMAGE_PROCESSOR_CACHE_AFTER_CALIBRATE', binning)
 
 
-        if not images_only and self.config.get('IMAGE_SAVE_FITS'):
+        if archive_policy.save_fits(self.config, images_only):
             if not self.config.get('IMAGE_SAVE_FITS_PRE_DARK'):
-                fits_result = self.write_fit(i_ref, camera)
+                fits_result = self._write_archive_fit(i_ref, camera, archive_policy)
 
 
         self.image_processor.calculateJankySqm()
@@ -2815,7 +2817,7 @@ class ImageWorker(Process):
                 self.image_processor.apply_color_correction_matrix(libcamera_ccm)
 
 
-        if not images_only and self.config.get('IMAGE_EXPORT_RAW'):
+        if archive_policy.save_raw(self.config, images_only):
             raw_result = self.export_raw_image(i_ref, camera, jpeg_exif=jpeg_exif)
 
 
@@ -3019,6 +3021,8 @@ class ImageWorker(Process):
 
         source_recipe = self._finalize_fits_source(
             fits_result, source_basis, presentation_record, libcamera_ccm,
+            upload=not images_only and profile_outputs.get('extra_uploads', True),
+            jpeg_exif=jpeg_exif,
         )
 
         processing_elapsed_s = time.time() - processing_start
@@ -3255,6 +3259,14 @@ class ImageWorker(Process):
             # wait on the post-hook to finish
             if not images_only:
                 self.wait_image_save_post_hook()
+            if archive_policy.mode == 'fits':
+                from .archive_policy import retain_scientific_only
+                from .flask import models
+                if retain_scientific_only(image_entry, fits_result, source_recipe, db.session, models):
+                    image_metadata['data'] = image_entry.data
+                    image_metadata['fileSize'] = image_entry.fileSize
+                else:
+                    logger.warning('Scientific archive incomplete; keeping processed image %s', image_entry.id)
         else:
             # images not being saved
             reason = 'not_saved'
@@ -3458,7 +3470,7 @@ class ImageWorker(Process):
 
                 self._miscUpload.syncapi_image(image_entry, image_metadata)  # syncapi before s3
                 self._miscUpload.s3_upload_image(image_entry, image_metadata)
-                self._miscUpload.mqtt_publish_image(upload_filename, mq_topic_latest, mqtt_data)
+                self._miscUpload.mqtt_publish_image(upload_filename, mq_topic_latest, mqtt_data, image_entry=image_entry)
                 self._miscUpload.upload_image(image_entry)
 
                 self.upload_metadata(i_ref, adu, adu_average)
@@ -3694,12 +3706,14 @@ class ImageWorker(Process):
             return None
 
 
-    def _finalize_fits_source(self, result, basis, presentation, libcamera_ccm):
+    def _finalize_fits_source(self, result, basis, presentation, libcamera_ccm, *, upload=True, jpeg_exif=None):
         if result is None:
             return None
         recipe = self._source_render_recipe(basis, presentation, libcamera_ccm)
         if recipe is not None:
             try:
+                if jpeg_exif is not None:
+                    recipe = dict(recipe, export_exif=bytes(jpeg_exif).hex())
                 recipe = publish_source_recipe(result['path'], recipe)
             except Exception:
                 # Keep the source and processed JPEG if exact replay publication
@@ -3713,18 +3727,30 @@ class ImageWorker(Process):
         db.session.commit()
         metadata = dict(result['metadata'], fileSize=entry.fileSize, data=entry.data)
         # Queue uploads only after the final context and its size are persisted.
-        self._miscUpload.s3_upload_fits(entry, metadata)
-        self._miscUpload.upload_fits_image(entry)
+        if upload:
+            self._miscUpload.s3_upload_fits(entry, metadata)
+            self._miscUpload.upload_fits_image(entry)
         return recipe
 
 
-    def write_fit(self, i_ref, camera):
+    def _write_archive_fit(self, i_ref, camera, policy):
+        if not policy.every_frame:
+            return self.write_fit(i_ref, camera)
+        try:
+            return self.write_fit(i_ref, camera, every_frame=True)
+        except Exception:
+            db.session.rollback()
+            logger.exception('Scientific source could not be saved; retaining processed image')
+            return None
+
+
+    def write_fit(self, i_ref, camera, *, every_frame=False):
         now_time = time.time()
         fits_schedule_key = self.fits_schedule.key(
             getattr(self, 'profile_id', 'default'),
             getattr(self, 'current_camera_id', None) or getattr(i_ref, 'camera_id', None),
         )
-        if not self.fits_schedule.is_due(fits_schedule_key, now=now_time):
+        if not every_frame and not self.fits_schedule.is_due(fits_schedule_key, now=now_time):
             return None
 
 
@@ -3751,118 +3777,124 @@ class ImageWorker(Process):
             logger.exception('Unable to serialize FITS context; preserving source without context')
             output_hdus = i_ref.hdulist
 
-        if self.config.get('IMAGE_SAVE_FITS_COMPRESSED'):
-            import gzip
+        f_tmpfile = None
+        try:
+            if self.config.get('IMAGE_SAVE_FITS_COMPRESSED'):
+                import gzip
 
-            fits_image_buffer = io.BytesIO()
-            output_hdus.writeto(fits_image_buffer)
+                fits_image_buffer = io.BytesIO()
+                output_hdus.writeto(fits_image_buffer)
 
-            f_tmpfile = tempfile.NamedTemporaryFile(mode='w+b', delete=False, suffix='.fit.gz')
-            f_tmpfile.write(gzip.compress(fits_image_buffer.getbuffer()))
+                f_tmpfile = tempfile.NamedTemporaryFile(mode='w+b', delete=False, suffix='.fit.gz')
+                f_tmpfile.write(gzip.compress(fits_image_buffer.getbuffer()))
 
-            fits_ext = 'fit.gz'
-        else:
-            f_tmpfile = tempfile.NamedTemporaryFile(mode='w+b', delete=False, suffix='.fit')
-            output_hdus.writeto(f_tmpfile)
+                fits_ext = 'fit.gz'
+            else:
+                f_tmpfile = tempfile.NamedTemporaryFile(mode='w+b', delete=False, suffix='.fit')
+                output_hdus.writeto(f_tmpfile)
 
-            fits_ext = 'fit'
-
-
-        f_tmpfile.close()
-
-
-        tmpfile_p = Path(f_tmpfile.name)
+                fits_ext = 'fit'
 
 
-        fits_size_bytes = tmpfile_p.stat().st_size
-        logger.info('FITS image file size: %0.1f MB', fits_size_bytes / 1024 / 1024)
+            f_tmpfile.close()
 
 
-        date_str = i_ref.exp_date.strftime('%Y%m%d_%H%M%S')
-        # raw light
-        folder = self._getImageFolder(i_ref.exp_date, i_ref.day_date, camera, 'fits')
-        filename = folder.joinpath(self.filename_t.format(
-            i_ref.camera_id,
-            date_str,
-            fits_ext,  # defined above
-        ))
+            tmpfile_p = Path(f_tmpfile.name)
 
 
-        fits_metadata = {
-            'type'       : constants.FITS_IMAGE,
-            'createDate' : int(i_ref.exp_date.timestamp()),
-            'dayDate'    : i_ref.day_date.strftime('%Y%m%d'),
-            'utc_offset' : i_ref.exp_date.astimezone().utcoffset().total_seconds(),
-            'exposure'   : i_ref.exposure,
-            'gain'       : i_ref.gain,
-            'binmode'    : i_ref.binning,
-            'night'      : bool(self.night_av[constants.NIGHT_NIGHT]),
-            'fileSize'   : fits_size_bytes,
-            'height'     : image_height,
-            'width'      : image_width,
-            'camera_uuid': i_ref.camera_uuid,
-        }
-
-        fits_metadata['data'] = {
-            'moonmode'        : bool(self.night_av[constants.NIGHT_MOONMODE]),
-            'moonphase'       : self.image_processor.astrometric_data['moon_phase'],
-            'sqm'             : i_ref.sqm_value,
-            'stars'           : len(i_ref.stars),
-            'detections'      : len(i_ref.lines),
-            'kpindex'         : i_ref.kpindex,
-            'ovation_max'     : i_ref.ovation_max,
-            'smoke_rating'    : i_ref.smoke_rating,
-            'aurora_mag_bt'     : i_ref.aurora_mag_bt,
-            'aurora_mag_gsm_bz' : i_ref.aurora_mag_gsm_bz,
-            'aurora_plasma_density' : i_ref.aurora_plasma_density,
-            'aurora_plasma_speed'   : i_ref.aurora_plasma_speed,
-            'aurora_plasma_temp'    : i_ref.aurora_plasma_temp,
-            'aurora_n_hemi_gw'      : i_ref.aurora_n_hemi_gw,
-            'aurora_s_hemi_gw'      : i_ref.aurora_s_hemi_gw,
-            'camera_sqm_raw_mag'    : self.image_processor.camera_sqm_raw_mag,
-        }
-
-        fits_entry = self._miscDb.addFitsImage(
-            filename.relative_to(self.image_dir),
-            i_ref.camera_id,
-            fits_metadata,
-        )
+            fits_size_bytes = tmpfile_p.stat().st_size
+            logger.info('FITS image file size: %0.1f MB', fits_size_bytes / 1024 / 1024)
 
 
-        file_dir = filename.parent
-        if not file_dir.exists():
-            file_dir.mkdir(mode=0o755, parents=True)
+            date_str = i_ref.exp_date.strftime('%Y%m%d_%H%M%S')
+            # raw light
+            folder = self._getImageFolder(i_ref.exp_date, i_ref.day_date, camera, 'fits')
+            filename = folder.joinpath(self.filename_t.format(
+                i_ref.camera_id,
+                date_str,
+                fits_ext,  # defined above
+            ))
 
-        logger.info('fit filename: %s', filename)
+
+            fits_metadata = {
+                'type'       : constants.FITS_IMAGE,
+                'createDate' : int(i_ref.exp_date.timestamp()),
+                'dayDate'    : i_ref.day_date.strftime('%Y%m%d'),
+                'utc_offset' : i_ref.exp_date.astimezone().utcoffset().total_seconds(),
+                'exposure'   : i_ref.exposure,
+                'gain'       : i_ref.gain,
+                'binmode'    : i_ref.binning,
+                'night'      : bool(self.night_av[constants.NIGHT_NIGHT]),
+                'fileSize'   : fits_size_bytes,
+                'height'     : image_height,
+                'width'      : image_width,
+                'camera_uuid': i_ref.camera_uuid,
+            }
+
+            fits_metadata['data'] = {
+                'moonmode'        : bool(self.night_av[constants.NIGHT_MOONMODE]),
+                'moonphase'       : self.image_processor.astrometric_data['moon_phase'],
+                'sqm'             : i_ref.sqm_value,
+                'stars'           : len(i_ref.stars),
+                'detections'      : len(i_ref.lines),
+                'kpindex'         : i_ref.kpindex,
+                'ovation_max'     : i_ref.ovation_max,
+                'smoke_rating'    : i_ref.smoke_rating,
+                'aurora_mag_bt'     : i_ref.aurora_mag_bt,
+                'aurora_mag_gsm_bz' : i_ref.aurora_mag_gsm_bz,
+                'aurora_plasma_density' : i_ref.aurora_plasma_density,
+                'aurora_plasma_speed'   : i_ref.aurora_plasma_speed,
+                'aurora_plasma_temp'    : i_ref.aurora_plasma_temp,
+                'aurora_n_hemi_gw'      : i_ref.aurora_n_hemi_gw,
+                'aurora_s_hemi_gw'      : i_ref.aurora_s_hemi_gw,
+                'camera_sqm_raw_mag'    : self.image_processor.camera_sqm_raw_mag,
+            }
+
+            file_dir = filename.parent
+            if not file_dir.exists():
+                file_dir.mkdir(mode=0o755, parents=True)
+
+            logger.info('fit filename: %s', filename)
 
 
-        if filename.exists():
-            logger.error('File exists: %s (skipping)', filename)
+            if filename.exists():
+                logger.error('File exists: %s (skipping)', filename)
+                tmpfile_p.unlink()
+                return None
+
+
+            if not publish_image_file(tmpfile_p, filename, overwrite=False):
+                return None
+
+            fits_entry = self._miscDb.addFitsImage(
+                filename.relative_to(self.image_dir),
+                i_ref.camera_id,
+                fits_metadata,
+            )
+
+            # set mtime to original exposure time
+            #os.utime(str(filename), (i_ref.exp_date.timestamp(), i_ref.exp_date.timestamp()))
+
             tmpfile_p.unlink()
-            return None
 
 
-        shutil.copy2(str(tmpfile_p), str(filename))
-        filename.chmod(0o644)
+            self.fits_schedule.mark_written(
+                fits_schedule_key,
+                self.config.get('IMAGE_SAVE_FITS_PERIOD', 7200),
+                now=now_time,
+            )
 
-        # set mtime to original exposure time
-        #os.utime(str(filename), (i_ref.exp_date.timestamp(), i_ref.exp_date.timestamp()))
+            return {
+                'path'  : str(filename),
+                'db_id' : fits_entry.id,
+                'metadata': fits_metadata,
+                'type'  : 'fits.gz' if fits_ext == 'fit.gz' else 'fits',
+            }
 
-        tmpfile_p.unlink()
-
-
-        self.fits_schedule.mark_written(
-            fits_schedule_key,
-            self.config.get('IMAGE_SAVE_FITS_PERIOD', 7200),
-            now=now_time,
-        )
-
-        return {
-            'path'  : str(filename),
-            'db_id' : fits_entry.id,
-            'metadata': fits_metadata,
-            'type'  : 'fits.gz' if fits_ext == 'fit.gz' else 'fits',
-        }
+        finally:
+            if f_tmpfile is not None:
+                f_tmpfile.close()
+                Path(f_tmpfile.name).unlink(missing_ok=True)
 
 
     def export_raw_image(self, i_ref, camera, jpeg_exif=None):

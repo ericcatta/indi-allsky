@@ -54,6 +54,27 @@ def run():
     # and its position must remain identical to the pre-extraction implementation.
     tree = ast.parse((ROOT / 'indi_allsky/image.py').read_text())
     method = next(n for n in ast.walk(tree) if isinstance(n, ast.FunctionDef) and n.name == 'processImage')
+    archive_rules = json.loads((ROOT / 'testing/fixtures/archive_policy_hooks.json').read_text())
+    replacements = {ast.dump(ast.parse(row['new']).body[0]): ast.parse(row['old']).body for row in archive_rules}
+    counts = {key:0 for key in replacements}
+    class RestoreArchive(ast.NodeTransformer):
+        def visit(self, node):
+            key = ast.dump(node)
+            if key in replacements:
+                counts[key] += 1
+                return replacements[key]
+            return super().visit(node)
+        def visit_If(self, node):
+            gates = {
+                'archive_policy.save_fits(self.config, images_only)': "not images_only and self.config.get('IMAGE_SAVE_FITS')",
+                'archive_policy.save_raw(self.config, images_only)': "not images_only and self.config.get('IMAGE_EXPORT_RAW')",
+            }
+            old = gates.get(ast.unparse(node.test))
+            if old:
+                node.test = ast.parse(old, mode='eval').body
+            return self.generic_visit(node)
+    method = RestoreArchive().visit(method)
+    assert sorted(counts.values()) == [1,1,1,1,1,2], counts
     found = []
     class Restore(ast.NodeTransformer):
         def visit_Dict(self, node):

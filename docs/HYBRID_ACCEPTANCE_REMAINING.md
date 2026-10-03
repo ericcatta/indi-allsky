@@ -295,3 +295,27 @@ in its observation window. All 195 Python/compile and 35 JavaScript checks pass
 with unchanged source hashes ([evidence](../testing/evidence/hybrid-render-asset-lifecycle-20261003.json)). The
 collector's cost on a large source-only archive needs measurement before final
 production acceptance. Capture format policy remains inactive.
+
+
+The archive-format candidate adds day/night choices to Storage Protection:
+FITS only, processed image only, both, or existing detailed output settings
+(including RAW). The recommended form defaults are night FITS/day processed image
+and compressed FITS. Existing configurations without IMAGE_ARCHIVE remain on
+their previous output settings until an explicit save and capture restart.
+Processed format follows IMAGE_FILE_TYPE (JPEG on the current installation).
+Both cameras can now save FITS at every exposure even when the secondary profile
+uses images-only routing. Extra upload gates still apply. Temporary FITS files are
+closed/removed on failures and publication precedes the database record.
+
+A source-only transition commits its valid FITS reference before unlinking the
+redundant processed image, after thumbnails and post-hooks. Missing/incomplete
+source context or unlink failure retains the processed image. Latest images and
+small thumbnails remain. MQTT uses the image record rather than a removed local
+filename, preserving the existing flat MQTT payload. Archive choices are validated
+on settings save and config restore. Five targeted integration/parity suites pass;
+the initial 196-check Python/compile regression and 35 JavaScript checks pass.
+The final 196-check Python/compile regression and 35 JavaScript checks also pass
+with unchanged source hashes ([evidence](../testing/evidence/hybrid-archive-policy-20261003.json)).
+This includes frozen capture EXIF in FITS context and its replay into JPEG/WebP,
+with scientific pixels and decoded JPEG pixels unchanged. External-volume checks and actual capacity/retention
+preflight are still required before production activation.

@@ -351,4 +351,49 @@ with isolated_app(multi_camera=True) as app:
     with app.app_context():
         from source_upload_checks import check_source_upload
         check_source_upload(db.session.get(IndiAllSkyDbImageTable,image_id), source, root, expected)
+        from indi_allsky.archive_policy import retain_scientific_only
+        from indi_allsky.flask import models
+        item=db.session.get(IndiAllSkyDbImageTable,image_id)
+        item.data={'source_fits_id':cid,'render_source':published}
+        display=item.getFilesystemPath();display.write_bytes(jpeg.tobytes())
+        item.fileSize=display.stat().st_size;db.session.commit()
+        assert not retain_scientific_only(item,None,None,db.session,models) and display.exists()
+        with patch.object(Path,'unlink',side_effect=OSError('synthetic filesystem error')):
+            assert not retain_scientific_only(item,{'db_id':cid},published,db.session,models)
+        assert display.exists() and item.data.get('storage_format') is None
+        assert retain_scientific_only(item,{'db_id':cid},published,db.session,models)
+        assert not display.exists() and item.fileSize==0 and item.validateFile()
+        assert source.read_bytes()==stable
+        from indi_allsky.miscUpload import miscUpload
+        tasks=[]
+        upload=SimpleNamespace(config={'MQTTPUBLISH':{'ENABLE':True}},_queue_upload_task=tasks.append)
+        miscUpload.mqtt_publish_image(upload,display,'latest',{'exposure':1},image_entry=item)
+        assert len(tasks)==1 and tasks[0].data['id']==item.id
+        assert tasks[0].data['model']==type(item).__name__ and 'local_file' not in tasks[0].data
+        from indi_allsky.source_upload import source_upload_file
+        with source_upload_file(item,root,{'exposure':1}) as (_,metadata):
+            assert metadata=={'exposure':1}
+        # Preserve the actual capture EXIF through FITS context and reconstruction.
+        import piexif
+        from indi_allsky.source_preview import source_display_bytes
+        exif=piexif.dump({'0th':{piexif.ImageIFD.Model:b'Archive fixture'},
+                         'Exif':{piexif.ExifIFD.ExposureTime:(1,2)}, 'GPS':{}})
+        worker._source_render_recipe=lambda *args:published
+        before_science=scientific_digest(source)
+        with_exif=ImageWorker._finalize_fits_source(worker,result,None,None,None,
+                                                  upload=False,jpeg_exif=exif)
+        assert read_source_recipe(source)['export_exif']==exif.hex()
+        assert scientific_digest(source)==before_science
+        from PIL import Image
+        for extension in ('jpg','webp'):
+            encoded=source_display_bytes(source,with_exif,camera_id=cid,source_id=cid,
+                                         media_root=root,file_type=extension)
+            decoded=piexif.load(encoded)
+            assert decoded['0th'][piexif.ImageIFD.Model]==b'Archive fixture'
+            assert decoded['Exif'][piexif.ExifIFD.ExposureTime]==(1,2) and decoded['GPS']=={}
+            if extension=='jpg':
+                np.testing.assert_array_equal(simplejpeg.decode_jpeg(encoded,colorspace='BGR'),
+                                              simplejpeg.decode_jpeg(jpeg.tobytes(),colorspace='BGR'))
+
+
 print('Full source replay: exact display pixels, original FITS unchanged, calibrated/raw/stack/focus, two cameras, day/night, all stretch modes, AWB/CCM, masks and saved labels: PASS')

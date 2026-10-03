@@ -49,13 +49,21 @@ def source_display_bytes(path, recipe, *, camera_id, source_id, media_root,
             encoded, data = cv2.imencode('.' + file_type, pixels, options)
             if not encoded:
                 raise ValueError('Display encoding failed')
-            return data.tobytes()
+            encoded_bytes = data.tobytes()
+            if file_type == 'jpg' and recipe.get('export_exif'):
+                import io
+                import piexif
+                with io.BytesIO() as stream:
+                    piexif.insert(bytes.fromhex(recipe['export_exif']), encoded_bytes, stream)
+                    encoded_bytes = stream.getvalue()
+            return encoded_bytes
         import io
         from PIL import Image
         with io.BytesIO() as stream:
             image = Image.fromarray(cv2.cvtColor(pixels, cv2.COLOR_BGR2RGB))
             if file_type == 'webp':
-                image.save(stream, format='WEBP', quality=90, lossless=False)
+                image.save(stream, format='WEBP', quality=90, lossless=False,
+                           exif=bytes.fromhex(recipe.get('export_exif', '')))
             else:
                 image.save(stream, format='TIFF', compression='tiff_lzw')
             return stream.getvalue()
