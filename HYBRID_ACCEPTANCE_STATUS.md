@@ -53,8 +53,12 @@ Ordinary and mini timelapses now stream reconstructed frames directly to FFmpeg,
 including mixed archives, deflicker and wrap-keogram processing. Real decoded-video
 comparisons pass; the full 192 Python/compile and 35 JavaScript checks pass.
 [Timelapse evidence](testing/evidence/hybrid-timelapse-stream-20261003.json).
-Scientific asset retention, remaining source-aware web/media readers,
-portable recipe publication and configurable local/external storage still need
+Complete recipes are now published atomically in the FITS context before upload;
+preview/generation readers also work without the Image JSON recipe copy.
+193 Python/compile checks and 35 JavaScript checks pass.
+[Publication evidence](testing/evidence/hybrid-source-publication-20261003.json).
+Scientific asset retention, remaining source-aware web/media readers
+and configurable local/external storage still need
 completion before deploying and activating this policy.
 
 ## Current installation and regression

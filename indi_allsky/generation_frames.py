@@ -6,6 +6,7 @@ from pathlib import Path
 import cv2
 
 from .source_preview import source_preview_jpeg
+from .source_publication import read_source_recipe
 
 logger = logging.getLogger('indi_allsky')
 
@@ -20,16 +21,21 @@ def read_generation_frame(entry, media_root, fits_lookup):
     path = Path(entry.getFilesystemPath())
     if not path.exists():
         recipe = (entry.data or {}).get('render_source')
-        if recipe is None:
+        source_id = (recipe['basis']['source_id'] if recipe is not None
+                     else (entry.data or {}).get('source_fits_id'))
+        if source_id is None:
             logger.error('File not found: %s', path)
             return None
-        basis = recipe['basis']
-        source = fits_lookup(basis['source_id'])
-        if (source.camera_id != entry.camera_id or source.id != basis['source_id']
+        source = fits_lookup(source_id)
+        if (source.camera_id != entry.camera_id or source.id != source_id
                 or source.createDate != entry.createDate):
             raise ValueError('Generation source does not match the camera/exposure')
         source_path = Path(source.getFilesystemPath()).resolve(strict=True)
         source_path.relative_to(Path(media_root).resolve(strict=True))
+        if recipe is None:
+            recipe = read_source_recipe(source_path)
+            if recipe is None:
+                raise ValueError('Source lacks a complete rendering recipe')
         jpeg = source_preview_jpeg(source_path, recipe, camera_id=entry.camera_id,
                                    source_id=source.id, media_root=media_root)
         import simplejpeg

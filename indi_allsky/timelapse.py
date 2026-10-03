@@ -214,7 +214,8 @@ class TimelapseGenerator(object):
             if path.exists():
                 if path.stat().st_size:
                     eligible.append((entry, path))
-            elif (entry.data or {}).get('render_source') is not None:
+            elif ((entry.data or {}).get('render_source') is not None
+                  or (entry.data or {}).get('source_fits_id') is not None):
                 eligible.append((entry, path))
                 needs_source = True
             else:

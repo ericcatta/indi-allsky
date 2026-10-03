@@ -58,9 +58,9 @@ def run():
     class Restore(ast.NodeTransformer):
         def visit_Dict(self, node):
             for i, key in reversed(list(enumerate(node.keys))):
-                if isinstance(key, ast.Constant) and key.value in ('render_label', 'render_presentation', 'render_source'):
+                if isinstance(key, ast.Constant) and key.value in ('render_label', 'render_presentation', 'render_source', 'source_fits_id'):
                     expected = {'render_label':'snapshot_label(self.image_processor)', 'render_presentation':'presentation_record',
-                                'render_source':'self._source_render_recipe(source_basis, presentation_record, libcamera_ccm)'}[key.value]
+                                'render_source':'source_recipe', 'source_fits_id':"fits_result['db_id'] if fits_result else None"}[key.value]
                     assert ast.dump(node.values[i]) == ast.dump(ast.parse(expected, mode='eval').body)
                     node.keys.pop(i); node.values.pop(i)
             return self.generic_visit(node)
@@ -95,6 +95,10 @@ def run():
     index = indices[0]
     assert ast.dump(ast.Module(body=method.body[index:index+2],type_ignores=[])) == ast.dump(ast.Module(body=basis_body,type_ignores=[]))
     del method.body[index:index+2]
+    finalizers=[n for n in method.body if isinstance(n,ast.Assign) and isinstance(n.targets[0],ast.Name) and n.targets[0].id=='source_recipe']
+    assert len(finalizers)==1
+    assert ast.dump(finalizers[0])==ast.dump(ast.parse('source_recipe = self._finalize_fits_source(fits_result, source_basis, presentation_record, libcamera_ccm)').body[0])
+    method.body.remove(finalizers[0])
     method = Restore().visit(method)
     assert found == list(FIXTURE['blocks'])
     assert hashlib.sha256(ast.dump(method, include_attributes=False).encode()).hexdigest() == FIXTURE['processImage_ast_sha256']

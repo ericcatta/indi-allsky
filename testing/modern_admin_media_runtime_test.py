@@ -682,9 +682,9 @@ def test_fits_preview_extraction_preserves_class_and_shared_handler_boundary():
     assert len(indices) == 1
     i = indices[0]
     assert ast.dump(dispatch.body[i-1]) == ast.dump(ast.parse('filename_p = source_file_path(fits_entry, self.indi_allsky_config)').body[0])
-    branch = ast.Module(body=dispatch.body[i:i+3],type_ignores=[])
-    assert hashlib.sha256(ast.dump(branch).encode()).hexdigest() == '368826301112c5317b4c0d193d20c55e380249930cb4edc6b050478058796c08'
-    del dispatch.body[i:i+3]
+    branch = ast.Module(body=dispatch.body[i:i+5],type_ignores=[])
+    assert hashlib.sha256(ast.dump(branch).encode()).hexdigest() == 'd84a2407b8548f280bfaa24ec2db3d9d1547272c148a0f12475bad4d0d5518c5'
+    del dispatch.body[i:i+5]
     # Snapshot captured from the complete pre-extraction class. This checks
     # statement/order parity, not a claim of hardware or image-output acceptance.
     canonical = ast.dump(ast.Module(body=[handler], type_ignores=[]), include_attributes=False)

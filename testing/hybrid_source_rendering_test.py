@@ -260,4 +260,38 @@ with isolated_app(multi_camera=True) as app:
             createDate=when,dayDate=when.date(),exposure=1,gain=0,adu=0,night=night)
         db.session.add(duplicate);db.session.commit()
     assert client.get(url).status_code==422
+    # A completed FITS carries its recipe even without the Image JSON copy.
+    from indi_allsky.source_publication import read_source_recipe, scientific_digest
+    from indi_allsky.image import ImageWorker
+    from types import SimpleNamespace
+    import io
+    with app.app_context():
+        db.session.delete(duplicate);db.session.commit()
+        calls=[]
+        def uploaded(fits_entry, metadata):
+            published=read_source_recipe(source)
+            assert published['basis']['version']==2
+            assert metadata['fileSize']==source.stat().st_size==fits_entry.fileSize
+            assert metadata['data']['render_source']==published
+            calls.append('s3')
+        worker=SimpleNamespace(_source_render_recipe=lambda *args:recipe,
+            _miscUpload=SimpleNamespace(s3_upload_fits=uploaded,
+                upload_fits_image=lambda entry:calls.append('upload')))
+        result={'path':str(source),'db_id':cid,'metadata':{'fileSize':len(original)}}
+        science=scientific_digest(source)
+        published=ImageWorker._finalize_fits_source(worker,result,None,None,None)
+        assert calls==['s3','upload']
+        assert scientific_digest(source)==science
+        image_entry=db.session.get(IndiAllSkyDbImageTable,image_id)
+        image_entry.data={'source_fits_id':cid};db.session.commit()
+        with fits.open(source) as stored, fits.open(io.BytesIO(original)) as previous:
+            np.testing.assert_array_equal(stored[0].data,previous[0].data)
+        preview_cache.clear()
+        frame=read_generation_frame(image_entry,root,lambda source_id:db.session.get(IndiAllSkyDbFitsImageTable,source_id))
+        np.testing.assert_array_equal(frame[1],simplejpeg.decode_jpeg(jpeg.tobytes(),colorspace='BGR'))
+        stable=source.read_bytes()
+        assert published==read_source_recipe(source)
+    preview_cache.clear()
+    assert client.get(url).data==jpeg.tobytes()
+    assert source.read_bytes()==stable
 print('Full source replay: exact display pixels, original FITS unchanged, calibrated/raw/stack/focus, two cameras, day/night, all stretch modes, AWB/CCM, masks and saved labels: PASS')

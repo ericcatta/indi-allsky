@@ -1,0 +1,38 @@
+{
+  "date": "2026-10-03",
+  "baseline": "0925f029",
+  "status": "passed",
+  "change": "Publish complete rendering recipes atomically inside FITS before upload, preserving scientific HDUs and allowing replay without the Image JSON recipe copy.",
+  "tests": {
+    "targeted": [
+      "hybrid_source_publication_test.py: passed on isolated Raspberry",
+      "hybrid_fits_dimensions_test.py: passed on isolated Raspberry",
+      "hybrid_source_rendering_test.py: passed on isolated Raspberry",
+      "hybrid_image_rendering_test.py: passed locally",
+      "modern_admin_media_runtime_test.py: passed locally"
+    ],
+    "report": "/home/eric/hybrid-source-publication-regression-20261003/results.json",
+    "javascript": 35,
+    "javascript_status": "passed",
+    "javascript_report": "/tmp/hybrid-source-publication-js.json",
+    "javascript_sha256": "a27ea23618f96308a22b4b877794cfffc9187b6c972bf995b2e7ff785649b81e",
+    "expected_source_manifest_sha256": "e97b4779592b89ad3c108686773ebb28b3a088d32387c746d4f416d97daff001",
+    "python_compile_checks": 193,
+    "source_changed": false,
+    "report_sha256": "4ce9f8c969b70c6853025db2f00d2a2ddeabebbf8467b4595c7f3cefe3e8f5d5"
+  },
+  "proof": [
+    "uint8 RGB, uint16 and float science pixels and unrelated HDUs survive plain/gzip publication.",
+    "Failed replace, oversized metadata, symlink and altered-science guards preserve the existing file.",
+    "Version-2 integrity hashes scientific HDUs independently of metadata to avoid a self-referential whole-file hash; historical version-1 recipes remain readable.",
+    "Upload callbacks observe the completed recipe and the correct final file size in the database and metadata.",
+    "Authenticated preview and generation reader reconstruct the same pixels from embedded context after removing the Image recipe JSON copy; preview does not alter the published file.",
+    "Historical image pipeline and FITS view fingerprints remain unchanged after normalization of reviewed metadata hooks."
+  ],
+  "deployment": "Not deployed. Existing production FITS and capture configuration unchanged.",
+  "limits": [
+    "Shared lossless rendering assets remain content-addressed in .render-assets on the archive volume; FITS recipe publication does not embed duplicate fonts and arrays per exposure.",
+    "Asset lifecycle, remaining source-aware web readers, configurable formats and external storage remain open.",
+    "Source-only activation must require successful recipe publication; on publication failure the existing processed-JPEG capture path is retained."
+  ]
+}

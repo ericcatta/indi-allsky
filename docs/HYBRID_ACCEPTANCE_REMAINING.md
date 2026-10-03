@@ -219,3 +219,22 @@ removal and draining of stderr larger than the pipe buffer. The full 192
 Python/compile checks and 35 JavaScript checks pass with unchanged source hashes.
 [Evidence](../testing/evidence/hybrid-timelapse-stream-20261003.json). No deployment
 or storage-policy activation has occurred.
+
+
+The working candidate now finalizes the rendering recipe inside `HYBRID_CTX`
+after labeling and before queueing FITS uploads. Publication writes a sibling
+file, verifies all scientific HDUs, syncs it and atomically replaces the source;
+permissions and timestamps are preserved. The source table receives the final
+size and recipe before upload metadata is constructed. A failed publication keeps
+the scientific source and the existing processed-JPEG capture path.
+
+The new basis version hashes scientific HDUs independently of the context, avoiding
+a self-referential file hash; old basis versions retain their original whole-file
+integrity check. Authenticated preview and generation readers can use the embedded
+recipe without the Image JSON recipe copy. Shared lossless assets stay under
+`.render-assets` on the archive volume and must accompany that volume; publication
+does not make each FITS a self-contained bundle of duplicate fonts/masks/arrays.
+Typed/gzip, failure, upload-order and actual replay tests pass. The full 193
+Python/compile checks and 35 JavaScript checks pass with unchanged source hashes.
+[Evidence](../testing/evidence/hybrid-source-publication-20261003.json). Deployment
+and format-policy activation remain pending.

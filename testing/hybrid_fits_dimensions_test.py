@@ -27,6 +27,7 @@ with isolated_app(multi_camera=True) as app, app.app_context():
         image_processor=SimpleNamespace(astrometric_data={'moon_phase': 0}, camera_sqm_raw_mag=0),
         _getImageFolder=lambda *args: root / 'fits',
         _miscDb=miscDb({}),
+        _source_render_recipe=lambda *args:None,
         _miscUpload=SimpleNamespace(
             s3_upload_fits=lambda entry, metadata: uploads.append(metadata.copy()),
             upload_fits_image=lambda entry: None,
@@ -49,7 +50,11 @@ with isolated_app(multi_camera=True) as app, app.app_context():
             )
             for compressed in (False, True):
                 worker.config['IMAGE_SAVE_FITS_COMPRESSED'] = compressed
+                before_uploads=len(uploads)
                 result = ImageWorker.write_fit(worker, ref, None)
+                assert len(uploads)==before_uploads, 'Uploads must wait for final context'
+                assert ImageWorker._finalize_fits_source(worker,result,None,None,None) is None
+                assert len(uploads)==before_uploads+1
                 entry = IndiAllSkyDbFitsImageTable.query.filter_by(id=result['db_id']).one()
                 assert (entry.width, entry.height) == (64, 48), (shape, compressed)
                 assert (uploads[-1]['width'], uploads[-1]['height']) == (64, 48)

@@ -4,6 +4,7 @@ import time
 from sqlalchemy.orm.exc import NoResultFound
 from ..processing import ImageProcessor
 from ..source_preview import source_preview_jpeg
+from ..source_publication import read_source_recipe
 from ..modern_admin_media_runtime import ModernAdminMediaAccessAdapter, ModernAdminMediaUrlNormalizer
 from pathlib import Path
 from urllib.parse import urlsplit
@@ -130,10 +131,21 @@ class Fits2JpegView(BaseView):
             camera_id=fits_entry.camera_id, createDate=fits_entry.createDate,
         ).limit(2).all()
         recipes = [(entry.data or {}).get('render_source') for entry in images]
+        recipe = None
         if any(record is not None for record in recipes):
             if len(images) != 1:
                 abort(422, description='The source rendering context is ambiguous.')
             recipe = recipes[0]
+        else:
+            try:
+                recipe = read_source_recipe(filename_p)
+            except FileNotFoundError:
+                abort(404, description='The FITS file is no longer available locally.')
+            except PermissionError:
+                abort(403, description='The FITS file cannot be read by the web service.')
+            except (OSError, ValueError, TypeError, KeyError, AttributeError):
+                abort(422, description='The saved FITS rendering context is invalid.')
+        if recipe is not None:
             root = self.indi_allsky_config.get('IMAGE_FOLDER') or app.config['INDI_ALLSKY_IMAGE_FOLDER']
             try:
                 jpeg = source_preview_jpeg(filename_p, recipe,

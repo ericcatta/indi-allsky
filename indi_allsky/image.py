@@ -56,6 +56,7 @@ from .image_rendering import render_tone, render_geometry_and_color, render_pres
 from .image_labels import snapshot_label
 from .image_awb import apply_rgb_gains
 from .source_rendering import snapshot_source_basis, snapshot_source_recipe
+from .source_publication import publish_source_recipe
 from .image_presentation import snapshot_presentation
 from .render_assets import RenderAssetStore
 from .image_publication import publish_image_file
@@ -3014,6 +3015,10 @@ class ImageWorker(Process):
             self._images_only_diag(profile_id, camera_id, 'IMAGE_LABEL_END')
 
 
+        source_recipe = self._finalize_fits_source(
+            fits_result, source_basis, presentation_record, libcamera_ccm,
+        )
+
         processing_elapsed_s = time.time() - processing_start
         logger.info('Image processed in %0.4f s', processing_elapsed_s)
         post_processing_start = time.time()
@@ -3123,7 +3128,8 @@ class ImageWorker(Process):
             image_add_data = {
                 'render_label'      : snapshot_label(self.image_processor),
                 'render_presentation': presentation_record,
-                'render_source': self._source_render_recipe(source_basis, presentation_record, libcamera_ccm),
+                'render_source': source_recipe,
+                'source_fits_id': fits_result['db_id'] if fits_result else None,
                 'uptime'            : i_ref.uptime,
                 'kpindex'           : i_ref.kpindex,
                 'ovation_max'       : i_ref.ovation_max,
@@ -3686,6 +3692,30 @@ class ImageWorker(Process):
             return None
 
 
+    def _finalize_fits_source(self, result, basis, presentation, libcamera_ccm):
+        if result is None:
+            return None
+        recipe = self._source_render_recipe(basis, presentation, libcamera_ccm)
+        if recipe is not None:
+            try:
+                recipe = publish_source_recipe(result['path'], recipe)
+            except Exception:
+                # Keep the source and processed JPEG if exact replay publication
+                # fails. A source-only policy must require a successful recipe.
+                logger.exception('Unable to publish complete FITS rendering context')
+                recipe = None
+        from .flask.models import IndiAllSkyDbFitsImageTable
+        entry = db.session.get(IndiAllSkyDbFitsImageTable, result['db_id'])
+        entry.fileSize = Path(result['path']).stat().st_size
+        entry.data = dict(entry.data or {}, render_source=recipe)
+        db.session.commit()
+        metadata = dict(result['metadata'], fileSize=entry.fileSize, data=entry.data)
+        # Queue uploads only after the final context and its size are persisted.
+        self._miscUpload.s3_upload_fits(entry, metadata)
+        self._miscUpload.upload_fits_image(entry)
+        return recipe
+
+
     def write_fit(self, i_ref, camera):
         now_time = time.time()
         fits_schedule_key = self.fits_schedule.key(
@@ -3825,12 +3855,10 @@ class ImageWorker(Process):
             now=now_time,
         )
 
-        self._miscUpload.s3_upload_fits(fits_entry, fits_metadata)
-        self._miscUpload.upload_fits_image(fits_entry)
-
         return {
             'path'  : str(filename),
             'db_id' : fits_entry.id,
+            'metadata': fits_metadata,
             'type'  : 'fits.gz' if fits_ext == 'fit.gz' else 'fits',
         }
 

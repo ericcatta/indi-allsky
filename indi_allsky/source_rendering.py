@@ -146,12 +146,15 @@ def render_source(path, recipe, assets, *, camera_id, source_id):
     from .config import IndiAllSkyConfigBase
     from .processing import ImageProcessor
 
-    if recipe.get('version') != 1 or recipe.get('basis', {}).get('version') != 1:
+    if recipe.get('version') != 1 or recipe.get('basis', {}).get('version') not in (1, 2):
         raise ValueError('Unsupported source rendering recipe')
     basis = recipe['basis']
     if basis['camera_id'] != camera_id or basis['source_id'] != source_id:
         raise ValueError('Source recipe identity mismatch')
-    if file_digest(path) != basis['source_sha256']:
+    from .source_publication import scientific_digest
+    integrity = (file_digest(path) == basis['source_sha256'] if basis['version'] == 1
+                 else scientific_digest(path) == basis['scientific_sha256'])
+    if not integrity:
         raise ValueError('Source content differs from the archived exposure')
     config = deepcopy(IndiAllSkyConfigBase().base_config)
     # Defaults supply infrastructure-only constructor keys. Rendering values are
