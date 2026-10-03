@@ -3,6 +3,7 @@
 from pathlib import Path
 import ast
 import hashlib
+import json
 import sys
 import tempfile
 from types import SimpleNamespace
@@ -40,6 +41,13 @@ def run():
                 if len(node.test.values)==1:node.test=node.test.values[0]
                 gates+=1
     assert gates==2
+    # Reviewed source-aware frame reader; keep the frozen scientific worker baseline.
+    loop=next(n for n in method.body if isinstance(n,ast.For) and ast.unparse(n.target)=='(i, entry)')
+    assert hashlib.sha256(ast.dump(loop,include_attributes=False).encode()).hexdigest()=='18412d3111bee183a4c219858eedf85ea7f95a24967ab6b737b63c0e97e181c8'
+    frozen=json.loads((Path(__file__).parent/'fixtures/source_generation_legacy_loop.json').read_text())
+    original=ast.parse(frozen['loop']).body[0]
+    assert hashlib.sha256(ast.dump(original,include_attributes=False).encode()).hexdigest()=='f6d418094431db242589f2af460f9594bdea86699fab7e62123db8c1fd6d45a7'
+    method.body[method.body.index(loop)]=original
     assert hashlib.sha256(ast.dump(method,include_attributes=False).encode()).hexdigest()=='ee2e28ea1bb9fd38ccb542adcf939bfcb9572939b1179e60cf3955eece0878ba'
     with tempfile.TemporaryDirectory() as folder:
         paths=[Path(folder)/str(i) for i in range(3)]

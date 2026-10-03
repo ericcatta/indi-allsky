@@ -45,7 +45,11 @@ requests reuse verified JPEG bytes and evicted entries regenerate from the sourc
 On isolated copies from both cameras, cold reconstruction took 3.70/2.04 seconds
 and cached reads 1.5/1.2 milliseconds, with identical JPEG bytes and unchanged FITS.
 [Cache evidence](testing/evidence/hybrid-preview-cache-20261003.json).
-Scientific asset retention, source-aware generated-media consumers,
+Keogram/startrail readers also support reconstructed FITS frames in the candidate,
+with saved exposure timestamps and explicit failures for unavailable sources.
+The full 191 Python/compile and 35 JavaScript checks pass;
+[generator evidence](testing/evidence/hybrid-generation-frames-20261003.json).
+Scientific asset retention, ordinary/mini timelapse source readers,
 portable recipe publication and configurable local/external storage still need
 completion before deploying and activating this policy.
 

@@ -226,7 +226,7 @@ class StarTrailGenerator(object):
         pass  # read only
 
 
-    def processImage(self, file_p, image, binning, adu=None, star_count=None):
+    def processImage(self, file_p, image, binning, adu=None, star_count=None, exposure_timestamp=None):
         self.process_count += 1
 
         if self.process_count <= self.skip_frames:
@@ -284,7 +284,8 @@ class StarTrailGenerator(object):
             self.placeholder_adu = m_avg
 
 
-        mtime_datetime_utc = datetime.fromtimestamp(file_p.stat().st_mtime).astimezone(tz=timezone.utc)
+        image_mtime = file_p.stat().st_mtime if exposure_timestamp is None else exposure_timestamp
+        mtime_datetime_utc = datetime.fromtimestamp(image_mtime).astimezone(tz=timezone.utc)
         self.obs.date = mtime_datetime_utc
 
         self.sun.compute(self.obs)
@@ -354,8 +355,6 @@ class StarTrailGenerator(object):
 
         # Star trail timelapse processing
         if self.config.get('STARTRAILS_TIMELAPSE', True):
-            image_mtime = file_p.stat().st_mtime
-
             f_tmp_frame = tempfile.NamedTemporaryFile(dir=self.timelapse_tmpdir_p, suffix='.{0:s}'.format(self.config['IMAGE_FILE_TYPE']), delete=False)
             f_tmp_frame.close()
 

@@ -183,3 +183,21 @@ from the database rather than cache access times. `getFilesystemPath()` must rem
 free of rendering effects because delete/validation paths also call it. Test video
 and keogram/startrail generation after eviction, plus missing-source failures,
 before enabling source-only capture.
+
+
+Keogram and startrail generation now read a missing display frame through its
+saved FITS recipe. The reader validates camera, source ID and exposure date and
+returns owned pixels, never a cache filename. Both consumers receive the exposure
+time from the database for reconstructed frames; the startrail sequence stamps
+its generated frames with that same time. Historical JPEG/PNG/other display files
+retain their decoder and timestamp behavior. Missing legacy files remain skipped;
+a missing or invalid scientific source with a saved recipe fails the task through
+the existing worker failure boundary.
+
+The source replay integration test compares actual keogram pixels, startrail
+pixels and generated startrail sequence bytes/timestamps against the equivalent
+JPEG input after clearing the cache between frames. The historical scientific
+worker fingerprint is retained by normalizing only the reviewed frame-reader loop
+against its pre-extraction fixture. Ordinary/mini timelapse input streaming and
+panorama source generation remain unfinished; this does not activate FITS-only
+capture or change installed production services.

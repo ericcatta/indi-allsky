@@ -146,6 +146,57 @@ with isolated_app(multi_camera=True) as app:
         db.session.add_all([entry,image_entry]);db.session.commit()
         expected=render_source(source,recipe,assets,camera_id=cid,source_id=cid)
         ok,jpeg=cv2.imencode('.jpg',expected,[cv2.IMWRITE_JPEG_QUALITY,recipe['jpeg_quality']]);assert ok
+        # The generated-image consumers use the same display bytes with no
+        # permanent JPEG and no cache-path lease or cache-mtime dependency.
+        from indi_allsky.generation_frames import read_generation_frame
+        from indi_allsky.preview_cache import PreviewCache
+        from indi_allsky.keogram import KeogramGenerator
+        from indi_allsky.starTrails import StarTrailGenerator
+        import simplejpeg
+        import os
+        cache=PreviewCache(root/'.render-cache')
+        generators=[]
+        generation_config=deepcopy(p.config)
+        generation_config['IMAGE_FOLDER']=str(root)
+        generation_config['STARTRAILS_TIMELAPSE']=True
+        for _ in range(2):
+            kg=KeogramGenerator(generation_config)
+            st=StarTrailGenerator(generation_config,mask={1:np.full(expected.shape[:2],255,np.uint8)})
+            st.sun_alt_threshold=91;st.max_adu=256;st.pixel_cutoff_threshold=101
+            generators.append((kg,st))
+        reference=root/'reference.jpg';reference.write_bytes(jpeg.tobytes())
+        os.utime(reference,(when.timestamp(),when.timestamp()))
+        for _ in range(2):
+            cache.clear()
+            source_path,pixels,stamp=read_generation_frame(image_entry,root,lambda source_id:entry)
+            assert stamp==when.timestamp() and source_path==source
+            np.testing.assert_array_equal(pixels,simplejpeg.decode_jpeg(jpeg.tobytes(),colorspace='BGR'))
+            generators[0][0].processImage(pixels,stamp)
+            generators[0][1].processImage(source_path,pixels,1,adu=0,star_count=100,exposure_timestamp=stamp)
+            reference_pixels=simplejpeg.decode_jpeg(reference.read_bytes(),colorspace='BGR')
+            generators[1][0].processImage(reference_pixels,reference.stat().st_mtime)
+            generators[1][1].processImage(reference,reference_pixels,1,adu=0,star_count=100)
+        np.testing.assert_array_equal(generators[0][0]._keogram_data,generators[1][0]._keogram_data)
+        assert generators[0][0]._timestamps==generators[1][0]._timestamps
+        np.testing.assert_array_equal(generators[0][1].trail_image,generators[1][1].trail_image)
+        assert generators[0][1].trail_count==generators[1][1].trail_count==2
+        for left,right in zip(generators[0][1]._timelapse_frame_list,generators[1][1]._timelapse_frame_list):
+            assert left.read_bytes()==right.read_bytes()
+            assert left.stat().st_mtime==right.stat().st_mtime==when.timestamp()
+        assert source.read_bytes()==original
+        for attribute,wrong in (('camera_id',999),('createDate',datetime(2001,1,1))):
+            from types import SimpleNamespace
+            invalid=SimpleNamespace(id=entry.id,camera_id=entry.camera_id,createDate=entry.createDate)
+            setattr(invalid,attribute,wrong)
+            try:read_generation_frame(image_entry,root,lambda source_id:invalid)
+            except ValueError:pass
+            else:raise AssertionError('Wrong generation exposure accepted')
+        cache.clear()
+        source.rename(source.with_suffix('.hidden'))
+        try:read_generation_frame(image_entry,root,lambda source_id:entry)
+        except FileNotFoundError:pass
+        else:raise AssertionError('Missing scientific source silently skipped')
+        source.with_suffix('.hidden').rename(source)
         image_id=image_entry.id
     url='/indi-allsky/fits2jpeg?id='+str(cid)
     assert app.test_client().get(url).status_code in (302,401)

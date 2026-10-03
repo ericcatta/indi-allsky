@@ -1,0 +1,32 @@
+{
+  "date": "2026-10-03",
+  "baseline": "252037f6",
+  "change": "Source-aware keogram and startrail generation with explicit exposure timestamps and owned display pixels.",
+  "status": "passed",
+  "tests": {
+    "targeted": "hybrid_source_rendering_test.py passed on isolated Raspberry checkout; generation_result_test.py passed locally",
+    "report": "/home/eric/hybrid-generation-frames-regression-20261003/results.json",
+    "javascript": 35,
+    "javascript_status": "passed",
+    "javascript_report": "/tmp/hybrid-generation-frames-js.json",
+    "javascript_sha256": "a27ea23618f96308a22b4b877794cfffc9187b6c972bf995b2e7ff785649b81e",
+    "expected_source_manifest_sha256": "74246f656377618f4ade14a28fcb7a69a3b04929ff4ef10c6b9116e2763e1c66",
+    "python_compile_checks": 191,
+    "source_changed": false,
+    "report_sha256": "e7d096e7fdaa0aa7e10d4fa6a8266176c19d245f64bdfce9cf61c0b44873f895"
+  },
+  "proof": [
+    "Actual keogram pixels and timestamps match equivalent JPEG input after cache eviction between source frames.",
+    "Actual startrail pixels and generated sequence bytes/timestamps match equivalent JPEG input.",
+    "Original FITS bytes remain unchanged; wrong camera/exposure and missing scientific source fail explicitly.",
+    "Historical scientific worker fingerprint is unchanged after normalization of the reviewed frame reader loop."
+  ],
+  "deployment": "Not deployed. No capture configuration, services or archive data changed.",
+  "remaining": [
+    "Ordinary and mini timelapse streaming",
+    "Panorama source generation",
+    "Scientific asset retention and portable recipe publication",
+    "Configurable day/night storage, quota and external storage",
+    "Live deployment and acceptance"
+  ]
+}

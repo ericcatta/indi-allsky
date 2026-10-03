@@ -22,6 +22,7 @@ from .modern_admin_queued_maintenance import retention_policy_token
 from .modern_admin_media_cleanup import MediaCleanupIncomplete, flush_media_batches, prune_empty_camera_directories
 from .end_of_night import prepare_end_of_night_payload, handoff_end_of_night_upload
 
+from .generation_frames import read_generation_frame
 from .timelapse import TimelapseGenerator
 from .keogram import KeogramGenerator
 from .starTrails import StarTrailGenerator
@@ -1136,6 +1137,11 @@ class VideoWorker(Process):
         self._miscUpload.youtube_upload_panorama_video(video_entry, video_metadata)
 
 
+    @staticmethod
+    def _source_fits_entry(source_id):
+        return IndiAllSkyDbFitsImageTable.query.filter_by(id=source_id).one()
+
+
     def generateKeogramStarTrails(self, task, **kwargs):
         timespec = kwargs['timespec']
         night = bool(kwargs['night'])
@@ -1510,50 +1516,12 @@ class VideoWorker(Process):
                 processing_elapsed_s = time.time() - processing_start
                 logger.info('Processed %d of %d images (%0.2f images/s)', i, image_count, (i + 1) / processing_elapsed_s)
 
-            image_file_p = Path(entry.getFilesystemPath())
-
-            if not image_file_p.exists():
-                logger.error('File not found: %s', image_file_p)
+            frame = read_generation_frame(entry, self.image_dir, self._source_fits_entry)
+            if frame is None:
                 continue
-
-            if image_file_p.stat().st_size == 0:
-                continue
-
-
-            #logger.info('Reading file: %s', p_entry)
-            if image_file_p.suffix in ('.jpg', '.jpeg'):
-                import simplejpeg
-
-                try:
-                    with io.open(str(image_file_p), 'rb') as f_img:
-                        image_data = simplejpeg.decode_jpeg(f_img.read(), colorspace='BGR')
-                except ValueError as e:
-                    logger.error('Unable to read image - %s: %s', str(e), image_file_p)
-                    continue
-            elif image_file_p.suffix in ('.png',):
-                # opencv is faster than Pillow with PNG
-                image_data = cv2.imread(str(image_file_p), cv2.IMREAD_COLOR)
-
-                if isinstance(image_data, type(None)):
-                    logger.error('Unable to read %s', image_file_p)
-                    continue
-
-            else:
-                # Pillow supports remaining image types
-                import numpy
-                import PIL
-                from PIL import Image
-
-                try:
-                    with Image.open(str(image_file_p)) as img_pil:
-                        image_data = cv2.cvtColor(numpy.array(img_pil), cv2.COLOR_RGB2BGR)
-                except PIL.UnidentifiedImageError:
-                    logger.error('Unable to read image: %s', image_file_p)
-                    continue
-
+            image_file_p, image_data, image_ts = frame
 
             try:
-                image_ts = image_file_p.stat().st_mtime
                 kg.processImage(image_data, image_ts)
             except KeogramMismatchException as e:
                 logger.error('Error processing keogram image: %s', str(e))
@@ -1566,7 +1534,7 @@ class VideoWorker(Process):
                 else:
                     adu, star_count = None, None
 
-                stg.processImage(image_file_p, image_data, entry.binmode, adu=adu, star_count=star_count)
+                stg.processImage(image_file_p, image_data, entry.binmode, adu=adu, star_count=star_count, exposure_timestamp=image_ts)
 
 
         kg.finalize(keogram_file, camera)
