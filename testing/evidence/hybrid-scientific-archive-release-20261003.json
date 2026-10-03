@@ -1,0 +1,91 @@
+{
+  "date": "2026-10-03",
+  "application": "3d87c9aa1804b494ba62223a529e306f0182ad85",
+  "previous": "0cf2de6e",
+  "status": "deployed; every-frame archive formats not activated",
+  "source_hashes_match": true,
+  "source_manifest_sha256": "0bfb7883eda11fd357426a63eb80d28b855a5d0e3319620183aa3bbf581b9599",
+  "tests": {
+    "python_compile": 198,
+    "javascript": 35,
+    "status": "passed",
+    "evidence": "hybrid-fast-fits-20261003.json"
+  },
+  "deployment": {
+    "capture_restart": "controlled stop, fast-forward, exact source verification, start",
+    "capture_pid": 1631805,
+    "capture_active": true,
+    "automatic_restarts": 0,
+    "gunicorn": "reloaded",
+    "config_revision_before": 118,
+    "config_revision_after": 118,
+    "active_tasks_before": [],
+    "tracked_production_changes": false,
+    "untracked_files": "Preserved; production is not represented as a pristine checkout."
+  },
+  "backup": {
+    "path": "/home/eric/hybrid-backups/hybrid-scientific-archive-20261003/code.tar.gz",
+    "sha256": "8e56c8db443ecb36764d786923319ccb50884b97345af2d6667ec2854abac892",
+    "gzip_integrity": "passed",
+    "scope": "Code only. Configuration/schema unchanged; no old database restore required."
+  },
+  "live_checks": {
+    "native_now": "Fresh frames and decoded images observed for both cameras after reload",
+    "native_storage": "New archive format and filesystem UUID controls visible; previous detailed output settings explicitly active",
+    "native_fits": "FITS 987 detail and Preview JPEG opened; browser title reports decoded 3840x2160 image. Screenshot unavailable for image-only tab.",
+    "frame_intervals_s": {
+      "camera_1": [
+        15,
+        15,
+        15,
+        15,
+        15
+      ],
+      "camera_2": [
+        15,
+        15,
+        16,
+        15,
+        13
+      ]
+    },
+    "log_check": "No ERROR/Traceback/CRITICAL matches in the last 800 capture log lines inspected; user journal unavailable.",
+    "replay": [
+      {
+        "camera_id": 1,
+        "fits_id": 986,
+        "image_id": 207493,
+        "decoded_pixels_equal": true,
+        "shape": [
+          2592,
+          4608,
+          3
+        ],
+        "preview_seconds": 1.3615242219821084,
+        "science_unchanged": true
+      },
+      {
+        "camera_id": 2,
+        "fits_id": 987,
+        "image_id": 207494,
+        "decoded_pixels_equal": true,
+        "shape": [
+          2160,
+          3840,
+          3
+        ],
+        "preview_seconds": 0.0017770830017980188,
+        "science_unchanged": true
+      }
+    ],
+    "replay_report": "/home/eric/hybrid-live-fits-replay-20261003.json"
+  },
+  "limits": [
+    "Production still saves JPEG and scheduled FITS every 7200 seconds",
+    "Every-frame night FITS/day JPEG activation awaits capacity/retention decision",
+    "Not full sustained source-only capture/generation acceptance",
+    "Physical external storage untested; no external disk connected",
+    "24-hour observation and detector/AI deferred",
+    "Whole-product control matrix remains open"
+  ]
+}

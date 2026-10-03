@@ -2,6 +2,28 @@
 
 ## Current application
 
+On 3 October `3d87c9aa` deployed the scientific archive implementation, disk UUID
+protection and fast lossless FITS compression. All 198 Python/compile and 35
+JavaScript checks passed; installed source hashes match exactly. Capture restarted
+as PID 1631805 with zero automatic restarts and fresh frames from both cameras;
+Gunicorn reloaded. Configuration remains revision 118: the new format policy is
+not yet activated, and scheduled FITS remains every 7200 seconds.
+
+New real FITS 986/987 contain complete rendering context. Their reconstructed
+previews have exactly the same decoded pixels as saved images 207493/207494;
+scientific digests remain unchanged. Native Now and Storage Protection checks
+passed. This proves those two exposures, not sustained source-only acquisition.
+[Deploy evidence](testing/evidence/hybrid-scientific-archive-release-20261003.json).
+
+Rollback before activating the new policy: stop capture, restore the prior tracked
+code from `/home/eric/hybrid-backups/hybrid-scientific-archive-20261003/code.tar.gz`
+(baseline `0cf2de6e`), reload Gunicorn and restart capture. Verify both fresh frames.
+Preserve untracked local files and the current database. Once source-only capture
+is activated, do not roll back to a reader lacking source-backed media support.
+
+Previous deployments:
+
+
 On 2 October `dda3eeff` added exposure-matched FITS/RAW options to Highlights
 and renamed the processed download accurately. All 182 Python/compile and 35
 JavaScript tests passed; installed source hashes match. Gunicorn was reloaded;

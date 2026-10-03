@@ -343,3 +343,12 @@ full capture cadence. All 198 Python/compile and 35 JavaScript checks passed wit
 matching source hashes ([evidence](../testing/evidence/hybrid-fast-fits-20261003.json)).
 Legacy scheduled compression remains unchanged. Deployment and live acceptance
 are still required before closing the archive change.
+
+
+On 3 October the archive candidate was deployed as `3d87c9aa` with unchanged
+configuration 118. Both cameras resumed and both first new FITS replayed to pixels
+identical to their saved JPEGs. Native Now, Settings and the FITS detail/preview
+link were checked. [Deployment and exact limits](../testing/evidence/hybrid-scientific-archive-release-20261003.json).
+The every-frame night policy remains inactive until storage capacity/retention is
+resolved. Source-only live acquisition, generation and retention acceptance remain
+open; deployment alone does not close those gates.
