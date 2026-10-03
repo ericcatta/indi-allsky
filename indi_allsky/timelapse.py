@@ -110,44 +110,10 @@ class TimelapseGenerator(object):
 
         start = time.time()
 
-        cmd = [self.ffmpeg_bin]
-
-
-        # add codec options
-        if self.codec in ['h264_qsv']:
-            ### Intel QSV
-            cmd.extend(['-init_hw_device', 'qsv=hw', '-filter_hw_device', 'hw'])
-        elif self.codec in ['h264_nvenc']:
-            ### Nvidia NVENC
-            #cmd.extend([])  # nothing to add currently
-            pass
-        elif self.codec in ['h264_vaapi']:
-            ### AMD VAAPI
-            #cmd.extend([])  # nothing to add currently
-            pass
-
-
-        cmd.extend([
-            '-y',
-            '-loglevel', 'level+error',
-            '-r', '{0:0.2f}'.format(self.framerate),
-            '-f', 'image2',
-            #'-start_number', '0',
-            #'-pattern_type', 'glob',
-            '-i', '{0:s}/%05d.{1:s}'.format(str(seqfolder), self.config['IMAGE_FILE_TYPE']),
-            '-c:v', '{0:s}'.format(self.codec),
-            '-b:v', '{0:s}'.format(self.bitrate),
-            #'-filter:v', 'setpts=50*PTS',
-            '-pix_fmt', 'yuv420p',
-            '-movflags', '+faststart',
+        cmd = self._ffmpeg_command(video_file_p, [
+            '-f', 'image2', '-i', '{0:s}/%05d.{1:s}'.format(
+                str(seqfolder), self.config['IMAGE_FILE_TYPE']),
         ])
-
-
-        cmd.extend(video_filter_arguments(self.config, self.vf_scale, self.ffmpeg_extra_options))
-
-
-        # finally add filename
-        cmd.append('{0:s}'.format(str(video_file_p)))
 
         logger.info('FFmpeg command: %s', ' '.join(cmd))
 
@@ -192,3 +158,94 @@ class TimelapseGenerator(object):
 
         # set default permissions
         video_file_p.chmod(0o644)
+
+
+    def _ffmpeg_command(self, video_file_p, input_arguments):
+        cmd = [self.ffmpeg_bin]
+
+
+        # add codec options
+        if self.codec in ['h264_qsv']:
+            ### Intel QSV
+            cmd.extend(['-init_hw_device', 'qsv=hw', '-filter_hw_device', 'hw'])
+        elif self.codec in ['h264_nvenc']:
+            ### Nvidia NVENC
+            #cmd.extend([])  # nothing to add currently
+            pass
+        elif self.codec in ['h264_vaapi']:
+            ### AMD VAAPI
+            #cmd.extend([])  # nothing to add currently
+            pass
+
+
+        cmd.extend([
+            '-y',
+            '-loglevel', 'level+error',
+            '-r', '{0:0.2f}'.format(self.framerate),
+        ])
+        cmd.extend(input_arguments)
+        cmd.extend([
+            '-c:v', '{0:s}'.format(self.codec),
+            '-b:v', '{0:s}'.format(self.bitrate),
+            #'-filter:v', 'setpts=50*PTS',
+            '-pix_fmt', 'yuv420p',
+            '-movflags', '+faststart',
+        ])
+
+
+        cmd.extend(video_filter_arguments(self.config, self.vf_scale, self.ffmpeg_extra_options))
+
+
+        # finally add filename
+        cmd.append('{0:s}'.format(str(video_file_p)))
+
+        return cmd
+
+    def generate_entries(self, video_file, entries, media_root, fits_lookup):
+        """Preserve the legacy path when display files exist; stream source frames."""
+        from .generation_frames import read_generation_frame
+        from .timelapse_stream import encode_stream
+        import cv2
+
+        eligible = []
+        needs_source = False
+        for entry in entries:
+            path = Path(entry.getFilesystemPath())
+            if path.exists():
+                if path.stat().st_size:
+                    eligible.append((entry, path))
+            elif (entry.data or {}).get('render_source') is not None:
+                eligible.append((entry, path))
+                needs_source = True
+            else:
+                logger.error('File not found: %s', path)
+        if not needs_source:
+            return self.generate(video_file, [path for _, path in eligible])
+        ordered = sorted(eligible, key=lambda item: (item[0].createDate, item[0].id))
+        ordered = ordered[self.skip_frames:]
+        if not ordered:
+            raise TimelapseException('No frames remain after timelapse selection')
+        wrap_args = None
+        if hasattr(self.pre_processor, 'prepare'):
+            wrap_args = self.pre_processor.prepare(len(ordered))
+
+        def frames():
+            for index, (entry, _) in enumerate(ordered):
+                frame = read_generation_frame(entry, media_root, fits_lookup)
+                if frame is None:
+                    raise TimelapseException('A selected timelapse frame is no longer readable')
+                _, pixels, _ = frame
+                if wrap_args is not None:
+                    pixels = self.pre_processor.wrap(index, None, None, *wrap_args,
+                                                     image=pixels, return_pixels=True)
+                ok, encoded = cv2.imencode('.png', pixels)
+                if not ok:
+                    raise TimelapseException('Unable to encode timelapse frame')
+                yield encoded.tobytes()
+
+        command = self._ffmpeg_command(Path(video_file),
+            ['-f', 'image2pipe', '-vcodec', 'png', '-i', 'pipe:0'])
+        env = {}
+        if self.config.get('TIMELAPSE', {}).get('FFMPEG_REPORT'):
+            env['FFREPORT'] = 'file={0:s}/ffmpeg-report-%t.log'.format(os.environ['HOME'])
+        encode_stream(command, frames(), video_file, env)

@@ -198,6 +198,24 @@ The source replay integration test compares actual keogram pixels, startrail
 pixels and generated startrail sequence bytes/timestamps against the equivalent
 JPEG input after clearing the cache between frames. The historical scientific
 worker fingerprint is retained by normalizing only the reviewed frame-reader loop
-against its pre-extraction fixture. Ordinary/mini timelapse input streaming and
-panorama source generation remain unfinished; this does not activate FITS-only
+against its pre-extraction fixture. Panorama source generation remains unfinished;
+this does not activate FITS-only
 capture or change installed production services.
+
+
+Ordinary and mini timelapse tasks now select the source-aware generator in the
+working candidate. Existing display-only archives retain the prior file-sequence
+path. If a selected display frame is absent but has a saved source recipe, the
+mixed sequence is ordered by database exposure date and streamed as lossless PNG
+frames to FFmpeg. No reconstructed sequence is retained on disk. Deflicker, scaling,
+codec options, initial skip and wrap-keogram processing remain available. The wrap
+implementation is compared against its frozen previous implementation, and the
+source path avoids an additional lossy intermediate compression.
+
+Targeted tests encode and decode real videos for source-only, mixed and ordinary
+archives, compare standard/wrap and deflicker modes, and exercise actual FITS replay
+with an evicted cache. Failure tests verify child termination, partial-output
+removal and draining of stderr larger than the pipe buffer. The full 192
+Python/compile checks and 35 JavaScript checks pass with unchanged source hashes.
+[Evidence](../testing/evidence/hybrid-timelapse-stream-20261003.json). No deployment
+or storage-policy activation has occurred.

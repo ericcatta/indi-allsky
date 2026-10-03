@@ -184,6 +184,32 @@ with isolated_app(multi_camera=True) as app:
             assert left.read_bytes()==right.read_bytes()
             assert left.stat().st_mtime==right.stat().st_mtime==when.timestamp()
         assert source.read_bytes()==original
+        # Real FITS -> saved rendering -> streaming FFmpeg, with no archived JPEG.
+        from indi_allsky.timelapse import TimelapseGenerator
+        import subprocess
+        video_config=deepcopy(generation_config)
+        video_config['IMAGE_FILE_TYPE']='png'
+        video_config['TIMELAPSE']['DEFLICKER']=False
+        png_reference=root/'display-reference.png'
+        assert cv2.imwrite(str(png_reference),pixels)
+        os.utime(png_reference,(when.timestamp(),when.timestamp()))
+        videos=[]
+        for source_input in (False,True):
+            generator=TimelapseGenerator(video_config)
+            generator.vf_scale='64:48'
+            generator.ffmpeg_extra_options='-threads 1 -filter_threads 1 -preset ultrafast -crf 0'
+            video=root/('source-stream.mp4' if source_input else 'display-stream.mp4')
+            cache.clear()
+            if source_input:
+                generator.generate_entries(video,[image_entry],root,lambda source_id:entry)
+                assert not list(generator.pre_processor.seqfolder.iterdir())
+            else:
+                generator.generate(video,[png_reference])
+            videos.append(subprocess.run(['ffmpeg','-v','error','-threads','1','-i',str(video),
+                '-f','rawvideo','-pix_fmt','bgr24','pipe:1'],capture_output=True,check=True,timeout=30).stdout)
+            generator.pre_processor.temp_seqfolder.cleanup()
+        assert videos[0]==videos[1] and len(videos[0])==64*48*3
+        assert source.read_bytes()==original
         for attribute,wrong in (('camera_id',999),('createDate',datetime(2001,1,1))):
             from types import SimpleNamespace
             invalid=SimpleNamespace(id=entry.id,camera_id=entry.camera_id,createDate=entry.createDate)

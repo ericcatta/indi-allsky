@@ -1,0 +1,30 @@
+{
+  "date": "2026-10-03",
+  "baseline": "d6ebc510",
+  "status": "passed",
+  "change": "Ordinary and mini timelapse source streaming without an on-disk reconstructed sequence.",
+  "tests": {
+    "targeted": "hybrid_timelapse_stream_test.py and hybrid_source_rendering_test.py passed on isolated Raspberry checkout; final stderr diagnostic change is included in the full run",
+    "report": "/home/eric/hybrid-timelapse-stream-regression-20261003/results.json",
+    "javascript": 35,
+    "javascript_status": "passed",
+    "javascript_report": "/tmp/hybrid-timelapse-stream-js.json",
+    "javascript_sha256": "a27ea23618f96308a22b4b877794cfffc9187b6c972bf995b2e7ff785649b81e",
+    "expected_source_manifest_sha256": "11fb99a3d29bd5b888cd0db6884a9b15ec196a9daceecc5e5d12151f649fbecd",
+    "python_compile_checks": 192,
+    "source_changed": false,
+    "report_sha256": "cf3451fd65bd5417d84119cf4ad5f722103fa41fa426f0dbf139f9975bf2f794"
+  },
+  "proof": [
+    "Decoded video pixels match the equivalent display sequence for standard/wrap, deflicker off/on and mixed archives.",
+    "Wrap comparisons use the frozen d6ebc510 implementation.",
+    "Ordering follows exposure date and initial skip is retained.",
+    "Actual FITS replay with an evicted cache encodes the same decoded video as its display pixels; FITS bytes are unchanged.",
+    "Stream preprocessing creates no sequence files.",
+    "Missing middle frames and failed encoder terminate/reap child and remove partial output; large stderr cannot block frame delivery."
+  ],
+  "limits": [
+    "Exact codec comparisons use PNG display fixtures; JPEG-derived streams preserve decoded preview pixels without another lossy intermediate encoding.",
+    "Not deployed; panorama generation, retention, portable recipe publication, day/night settings and external storage remain open."
+  ]
+}

@@ -438,20 +438,6 @@ class VideoWorker(Process):
         logger.info('Max kpindex: %0.2f, ovation: %d, smoke rating: %s', max_kpindex, max_ovation_max, constants.SMOKE_RATING_MAP_STR[max_smoke_rating])
 
 
-        timelapse_files = list()
-        for entry in timelapse_files_entries:
-            p_entry = Path(entry.getFilesystemPath())
-
-            if not p_entry.exists():
-                logger.error('File not found: %s', p_entry)
-                continue
-
-            if p_entry.stat().st_size == 0:
-                continue
-
-            timelapse_files.append(p_entry)
-
-
         timelapse_skip_frames = self.config.get('TIMELAPSE_SKIP_FRAMES', 4)
 
         video_metadata = {
@@ -538,7 +524,7 @@ class VideoWorker(Process):
             tg.pre_processor.keogram = keogram_filename
             tg.pre_processor.pre_scale = self.config.get('TIMELAPSE', {}).get('PRE_SCALE', 50)
 
-            tg.generate(video_file, timelapse_files)
+            tg.generate_entries(video_file, timelapse_files_entries, self.image_dir, self._source_fits_entry)
 
 
             try:
@@ -735,20 +721,6 @@ class VideoWorker(Process):
         logger.info('Max kpindex: %0.2f, ovation: %d, smoke rating: %s', max_kpindex, max_ovation_max, constants.SMOKE_RATING_MAP_STR[max_smoke_rating])
 
 
-        timelapse_files = list()
-        for entry in mini_timelapse_files_entries:
-            p_entry = Path(entry.getFilesystemPath())
-
-            if not p_entry.exists():
-                logger.error('File not found: %s', p_entry)
-                continue
-
-            if p_entry.stat().st_size == 0:
-                continue
-
-            timelapse_files.append(p_entry)
-
-
         mini_video_metadata = {
             'type'          : constants.MINI_VIDEO,
             'createDate'    : int(now.timestamp()),
@@ -835,7 +807,7 @@ class VideoWorker(Process):
             mini_tg.vf_scale = vf_scale
             mini_tg.ffmpeg_extra_options = ffmpeg_extra_options
 
-            mini_tg.generate(video_file, timelapse_files)
+            mini_tg.generate_entries(video_file, mini_timelapse_files_entries, self.image_dir, self._source_fits_entry)
 
 
             try:

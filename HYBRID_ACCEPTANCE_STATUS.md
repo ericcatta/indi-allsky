@@ -49,7 +49,11 @@ Keogram/startrail readers also support reconstructed FITS frames in the candidat
 with saved exposure timestamps and explicit failures for unavailable sources.
 The full 191 Python/compile and 35 JavaScript checks pass;
 [generator evidence](testing/evidence/hybrid-generation-frames-20261003.json).
-Scientific asset retention, ordinary/mini timelapse source readers,
+Ordinary and mini timelapses now stream reconstructed frames directly to FFmpeg,
+including mixed archives, deflicker and wrap-keogram processing. Real decoded-video
+comparisons pass; the full 192 Python/compile and 35 JavaScript checks pass.
+[Timelapse evidence](testing/evidence/hybrid-timelapse-stream-20261003.json).
+Scientific asset retention, remaining source-aware web/media readers,
 portable recipe publication and configurable local/external storage still need
 completion before deploying and activating this policy.
 

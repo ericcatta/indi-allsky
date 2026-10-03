@@ -50,7 +50,7 @@ class PreProcessorWrapKeogram(PreProcessorBase):
         self._seqfolder = Path(self.temp_seqfolder.name)
 
 
-    def main(self, file_list):
+    def prepare(self, frame_count):
         # scale settings
         scaled_image_circle = int(self.image_circle * (self.pre_scale / 100))
         scaled_x_offset = int(self.x_offset * (self.pre_scale / 100))
@@ -88,8 +88,14 @@ class PreProcessorWrapKeogram(PreProcessorBase):
         self._keogram_image = cv2.flip(self._keogram_image, -1)
 
 
-        self.file_list_len = len(file_list)
+        self.file_list_len = frame_count
 
+
+        return scaled_image_circle, scaled_x_offset, scaled_y_offset
+
+
+    def main(self, file_list):
+        scaled_image_circle, scaled_x_offset, scaled_y_offset = self.prepare(len(file_list))
 
         process_start = time.time()
 
@@ -114,7 +120,7 @@ class PreProcessorWrapKeogram(PreProcessorBase):
         logger.info('Pre-processing in %0.4f s (%0.2f images/s)', process_elapsed_s, len(file_list) / process_elapsed_s)
 
 
-    def wrap(self, i, f, seqfolder_p, image_circle, x_offset, y_offset):
+    def wrap(self, i, f, seqfolder_p, image_circle, x_offset, y_offset, image=None, return_pixels=False):
         #wrap_start = time.time()
 
         keogram = self._keogram_image.copy()
@@ -133,28 +139,29 @@ class PreProcessorWrapKeogram(PreProcessorBase):
         #start_open = time.time()
 
 
-        if f.suffix in ('.jpg', '.jpeg'):
-            try:
-                with io.open(str(f), 'rb') as f_img:
-                    image = simplejpeg.decode_jpeg(f_img.read(), colorspace='BGR')
-            except ValueError as e:
-                logger.error('Unable to read - %s: %s', str(e), f)
-                return
+        if image is None:
+            if f.suffix in ('.jpg', '.jpeg'):
+                try:
+                    with io.open(str(f), 'rb') as f_img:
+                        image = simplejpeg.decode_jpeg(f_img.read(), colorspace='BGR')
+                except ValueError as e:
+                    logger.error('Unable to read - %s: %s', str(e), f)
+                    return
 
-        elif f.suffix in ('.png',):
-            image = cv2.imread(str(f), cv2.IMREAD_COLOR)
+            elif f.suffix in ('.png',):
+                image = cv2.imread(str(f), cv2.IMREAD_COLOR)
 
-            if isinstance(image, type(None)):
-                logger.error('Unable to read %s', f)
-                return
-        else:
-            # Pillow supports remaining image types
-            try:
-                with Image.open(str(f)) as img_pil:
-                    image = cv2.cvtColor(numpy.array(img_pil), cv2.COLOR_RGB2BGR)
-            except PIL.UnidentifiedImageError:
-                logger.error('Unable to read %s', f)
-                return
+                if isinstance(image, type(None)):
+                    logger.error('Unable to read %s', f)
+                    return
+            else:
+                # Pillow supports remaining image types
+                try:
+                    with Image.open(str(f)) as img_pil:
+                        image = cv2.cvtColor(numpy.array(img_pil), cv2.COLOR_RGB2BGR)
+                except PIL.UnidentifiedImageError:
+                    logger.error('Unable to read %s', f)
+                    return
 
 
         #elapsed_open_s = time.time() - start_open
@@ -284,6 +291,9 @@ class PreProcessorWrapKeogram(PreProcessorBase):
 
 
         #start_compress = time.time()
+
+        if return_pixels:
+            return image_with_keogram
 
         outfile_p = seqfolder_p.joinpath('{0:05d}.{1:s}'.format(self.image_count, self.config['IMAGE_FILE_TYPE']))
         if self.config['IMAGE_FILE_TYPE'] in ('jpg', 'jpeg'):
