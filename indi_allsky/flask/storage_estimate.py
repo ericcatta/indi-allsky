@@ -5,6 +5,7 @@ import shutil
 from sqlalchemy import func, or_
 from . import db, models
 from ..storage_pressure import GIB, StoragePressureOptions, retention_estimate
+from ..render_asset_lifecycle import asset_usage
 
 IMAGE_FAMILIES = ('Image', 'FitsImage', 'RawImage', 'PanoramaImage', 'Thumbnail')
 OUTPUT_FAMILIES = ('Video', 'MiniVideo', 'Keogram', 'StarTrails', 'StarTrailsVideo', 'PanoramaVideo')
@@ -85,6 +86,9 @@ def storage_forecast(config, config_id, root, *, now=None, disk_usage=shutil.dis
     if unknown:
         result['reason'] = 'Some recent media have no recorded size; capacity cannot yet be estimated reliably.'
         return result
+    asset_bytes, recent_assets = asset_usage(root / '.render-assets', since=since.timestamp())
+    recorded += asset_bytes
+    observed += recent_assets
     estimate = retention_estimate(free_bytes=disk.free, stored_image_bytes=recorded,
                  observed_bytes=observed, observed_seconds=seconds, samples=samples, options=options)
     result.update(estimate)

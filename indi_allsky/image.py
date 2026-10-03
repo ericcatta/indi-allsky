@@ -2267,7 +2267,9 @@ class ImageWorker(Process):
             # new context for every task, reduces the effects of caching
             with app.app_context():
                 try:
-                    self.processImage(i_dict)
+                    from .render_asset_lifecycle import archive_asset_lock
+                    with archive_asset_lock(self.image_dir / '.render-assets'):
+                        self.processImage(i_dict)
                 except Exception as e:
                     if self._images_only_diag_enabled(bool(i_dict.get('images_only', False))):
                         profile_id = self._validate_profile_id(i_dict)

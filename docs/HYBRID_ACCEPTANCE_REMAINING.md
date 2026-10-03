@@ -280,3 +280,18 @@ on the next bounded pass. Historical JPEG-plus-FITS acquisitions retain independ
 retention. All 194 Python/compile and 35 JavaScript checks pass with unchanged
 source hashes ([evidence](../testing/evidence/hybrid-source-retention-20261003.json)).
 Rendering asset garbage collection and external-volume checks remain open.
+
+
+The rendering-asset lifecycle candidate leases the asset store during image
+processing and source reconstruction. Under storage pressure, a nonblocking
+exclusive collector scans Image/FITS references completely before removing any
+managed files. Imported FITS without a database recipe are inspected for embedded
+context; an unreadable source aborts collection. Referenced files, young files
+(24-hour grace), symlinks and unrelated files are preserved. Old managed crash
+partials are collectible. Scientific asset publication syncs both the file and
+directory; disposable font derivatives remain reconstructible from their NPZ.
+The storage forecast adds actual rendering-asset bytes and newly created assets
+in its observation window. All 195 Python/compile and 35 JavaScript checks pass
+with unchanged source hashes ([evidence](../testing/evidence/hybrid-render-asset-lifecycle-20261003.json)). The
+collector's cost on a large source-only archive needs measurement before final
+production acceptance. Capture format policy remains inactive.

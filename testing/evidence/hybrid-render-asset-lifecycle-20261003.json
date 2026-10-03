@@ -1,0 +1,27 @@
+{
+  "date": "2026-10-03",
+  "baseline": "317bec46",
+  "status": "passed",
+  "change": "Reference-based rendering asset reclamation under an archive lease, durable asset publication and source-space accounting.",
+  "tests": {
+    "targeted": "Lifecycle tests passed including complete reference scans, source-only records, active leases, grace periods, managed crash partials, accounting and corrupt-source rejection.",
+    "report": "/home/eric/hybrid-asset-lifecycle-regression-20261003/results.json",
+    "expected_source_manifest_sha256": "3832180446d7e2869fefe4e5e9de04784d4b4500444c9df8d3a2f1a32eadee45",
+    "javascript": 35,
+    "javascript_status": "passed",
+    "javascript_report": "/tmp/hybrid-asset-lifecycle-js.json",
+    "javascript_sha256": "2b0254c3a4a7323939145c45cba327c558e93a854df6115451280f46aeaba8b8",
+    "python_compile": 195,
+    "python_compile_status": "passed",
+    "source_changed": false,
+    "report_sha256": "0bf087f018095e2ec9404d39413a16b3ad44fcee2ab2cdacb08c1c368e5a95e6"
+  },
+  "scope": "Isolated file/database tests; collection performance on a full source-only production archive remains unmeasured.",
+  "deployment": "Not deployed; no production files deleted.",
+  "remaining": [
+    "Capture policy and Settings",
+    "External-volume safety",
+    "Final storage measurements",
+    "Deployment and live acceptance"
+  ]
+}

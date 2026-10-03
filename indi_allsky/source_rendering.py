@@ -20,6 +20,7 @@ from .image_awb import apply_rgb_gains
 from .image_labels import snapshot_label, render_saved_label
 from .image_rendering import render_tone, render_geometry_and_color
 from .image_presentation import render_saved_presentation
+from .render_asset_lifecycle import source_render_lease
 
 EXTRA_KEYS = frozenset('''
 FOCUS_MODE DETECT_DRAW DETECT_METEORS DETECT_STARS
@@ -135,6 +136,7 @@ def snapshot_source_recipe(processor, basis, presentation, assets, *, ccm=None):
     return json.loads(json.dumps(record, allow_nan=False))
 
 
+@source_render_lease
 def render_source(path, recipe, assets, *, camera_id, source_id):
     """Return display pixels; leave the source, database and live providers untouched.
 

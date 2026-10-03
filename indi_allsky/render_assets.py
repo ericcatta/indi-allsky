@@ -9,6 +9,7 @@ import tempfile
 import zipfile
 
 import numpy as np
+from .render_asset_lifecycle import asset_store_lease
 
 MAX_BYTES = 256 * 1024 * 1024
 
@@ -46,6 +47,7 @@ class RenderAssetStore:
             raise ValueError('Render assets cannot be symlinks')
         return path
 
+    @asset_store_lease
     def put(self, **arrays):
         identity = _digest(arrays)
         self.root.mkdir(parents=True, exist_ok=True)
@@ -54,17 +56,23 @@ class RenderAssetStore:
             return identity
         temporary = None
         try:
-            with tempfile.NamedTemporaryFile(dir=self.root, suffix='.part', delete=False) as output:
+            with tempfile.NamedTemporaryFile(dir=self.root, prefix='.hybrid-asset-', suffix='.part', delete=False) as output:
                 temporary = Path(output.name)
                 np.savez_compressed(output, **arrays)
                 output.flush()
                 os.fsync(output.fileno())
             os.replace(temporary, path)
+            directory = os.open(self.root, os.O_RDONLY | os.O_DIRECTORY)
+            try:
+                os.fsync(directory)
+            finally:
+                os.close(directory)
         finally:
             if temporary is not None:
                 temporary.unlink(missing_ok=True)
         return identity
 
+    @asset_store_lease
     def get(self, identity):
         path = self._path(identity)
         with zipfile.ZipFile(path) as archive:
@@ -93,6 +101,7 @@ class RenderAssetStore:
             raise ValueError('Render asset content does not match identity')
         return arrays
 
+    @asset_store_lease
     def font_path(self, identity):
         """Materialize an immutable font asset for libraries requiring a filename."""
         arrays = self.get(identity)
@@ -107,7 +116,7 @@ class RenderAssetStore:
             return path
         temporary = None
         try:
-            with tempfile.NamedTemporaryFile(dir=self.root, suffix='.part', delete=False) as output:
+            with tempfile.NamedTemporaryFile(dir=self.root, prefix='.hybrid-asset-', suffix='.part', delete=False) as output:
                 temporary = Path(output.name)
                 output.write(payload)
             os.replace(temporary, path)

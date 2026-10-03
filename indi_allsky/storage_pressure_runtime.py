@@ -209,9 +209,15 @@ class StoragePressureRuntime:
             self.set_recovering(True)
             if any((task.data or {}).get('action') in GENERATION_ACTIONS for task in self.pending_tasks()):
                 return {'status': 'generation_pending', 'deleted': 0, 'free_bytes': self.free_bytes()}
+            from .render_asset_lifecycle import collect_assets, archive_references
+            collected = collect_assets(self.root / '.render-assets',
+                lambda: archive_references(self.session, self.models))
             result = reclaim_old_images(options=self.options, now=now or datetime.now(),
                                         free_bytes=self.free_bytes, candidates=self.candidates,
                                         delete=self.delete, continuing=True)
             if result['status'] in ('recovered', 'not_needed'):
                 self.set_recovering(False)
+            if collected['deleted']:
+                result['render_assets_deleted'] = collected['deleted']
+                result['render_assets_bytes'] = collected['bytes']
             return result
