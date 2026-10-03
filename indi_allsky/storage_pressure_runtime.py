@@ -12,6 +12,7 @@ import shutil
 
 from .media_task_guard import GENERATION_ACTIONS, media_task_lock
 from .storage_pressure import GIB, StoragePressureOptions, reclaim_old_images
+from .source_retention import image_source, source_dependents
 
 IMAGE_FAMILIES = ('Image', 'FitsImage', 'RawImage', 'PanoramaImage')
 ACTION = 'storagePressureCleanup'
@@ -57,13 +58,17 @@ class StoragePressureRuntime:
         if not pending:
             return False
         assets = [entry]
+        source = image_source(entry, self.session, self.models)
+        if source is not None:
+            assets.append(source)
         # deleteAsset also deletes the thumbnail. A pending thumbnail upload
         # therefore protects its parent even if no task names the parent image.
-        if entry.thumbnail_uuid:
-            thumbnail = self.models.IndiAllSkyDbThumbnailTable.query.filter_by(
-                uuid=entry.thumbnail_uuid).first()
-            if thumbnail is not None:
-                assets.append(thumbnail)
+        for parent in list(assets):
+            if parent.thumbnail_uuid:
+                thumbnail = self.models.IndiAllSkyDbThumbnailTable.query.filter_by(
+                    uuid=parent.thumbnail_uuid).first()
+                if thumbnail is not None:
+                    assets.append(thumbnail)
         for task in pending:
             data = task.data or {}
             for asset in assets:
@@ -95,7 +100,10 @@ class StoragePressureRuntime:
                     return
                 after = (rows[-1].createDate, rows[-1].id)
                 for entry in rows:
-                    path = self.path(entry)
+                    if source_dependents(entry, self.session, self.models):
+                        continue
+                    source = image_source(entry, self.session, self.models)
+                    path = self.path(source if source is not None else entry)
                     try:
                         eligible = path.is_file() and path.stat().st_dev == device
                     except FileNotFoundError:
@@ -118,6 +126,11 @@ class StoragePressureRuntime:
                 raise RuntimeError('A generation was queued during storage cleanup; retry later.')
             if self.protected(entry, pending):
                 raise RuntimeError('An image was queued for transfer during storage cleanup; retry later.')
+            if source_dependents(entry, self.session, self.models):
+                raise RuntimeError('The FITS source is still required by an archived image.')
+            source = image_source(entry, self.session, self.models)
+            if source is not None:
+                self.path(source)
             path = self.path(entry)
             if entry.thumbnail_uuid:
                 thumbnail = self.models.IndiAllSkyDbThumbnailTable.query.filter_by(uuid=entry.thumbnail_uuid).first()

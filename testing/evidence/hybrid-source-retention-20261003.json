@@ -1,0 +1,27 @@
+{
+  "date": "2026-10-03",
+  "baseline": "17051825",
+  "status": "passed",
+  "change": "Protect source-only image dependencies in ordinary FITS deletion and storage-pressure cleanup; retain independent legacy dual-format behavior.",
+  "tests": {
+    "targeted": "hybrid_source_retention_test.py passed with actual isolated files and SQLite, two cameras, pending uploads, selection races, missing display files and legacy deletion parity.",
+    "report": "/home/eric/hybrid-source-retention-regression-20261003/results.json",
+    "expected_source_manifest_sha256": "468c25ecca78a08a8522470e80389e00bec488527b5dda75020abe801cc7e98c",
+    "javascript_report": "/tmp/hybrid-source-retention-js.json",
+    "javascript": 35,
+    "javascript_status": "passed",
+    "javascript_sha256": "2b0254c3a4a7323939145c45cba327c558e93a854df6115451280f46aeaba8b8",
+    "python_compile": 194,
+    "python_compile_status": "passed",
+    "source_changed": false,
+    "report_sha256": "81076e8f4e93cfdebe28a1eb777f272cf9122e302ffffcaecc40b2e4f6e5de56"
+  },
+  "scope": "Isolated cleanup tests; no production images deleted.",
+  "deployment": "Not deployed; source-only capture remains disabled.",
+  "remaining": [
+    "Rendering asset lifecycle and accounting",
+    "Capture policy and Settings",
+    "External-volume safety",
+    "Deployment and live acceptance"
+  ]
+}

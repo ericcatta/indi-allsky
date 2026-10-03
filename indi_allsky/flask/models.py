@@ -644,6 +644,16 @@ class IndiAllSkyDbStarTrailsVideoTable(IndiAllSkyDbFileBase):
 
 
 class IndiAllSkyDbFitsImageTable(IndiAllSkyDbFileBase):
+    def deleteAsset(self):
+        from ..source_retention import require_unreferenced
+        require_unreferenced(self)
+        super().deleteAsset()
+
+    def deleteFile(self):
+        from ..source_retention import require_unreferenced
+        require_unreferenced(self)
+        super().deleteFile()
+
     __tablename__ = 'fitsimage'
 
     id = db.Column(db.Integer, primary_key=True)
@@ -1035,4 +1045,3 @@ class IndiAllSkyDbTleDataTable(db.Model):
     #next_set = db.Column(db.DateTime(), nullable=True, index=True)
     #next_set_az = db.Column(db.Float, nullable=True, index=True)
     #next_alt = db.Column(db.Float, nullable=True, index=True)
-

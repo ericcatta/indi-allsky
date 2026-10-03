@@ -268,3 +268,15 @@ isolated non-network adapters. All 193 Python/compile and 35 JavaScript checks p
 ([evidence](../testing/evidence/hybrid-source-upload-20261003.json)). No production
 policy is enabled by this work. Reconstructed display files do not yet recreate the
 legacy JPEG/WebP EXIF block; acquisition metadata remains in the original FITS.
+
+
+The retention candidate protects a FITS file while a source-only Image record
+references it. Ordinary FITS deletion refuses before removing its thumbnail.
+Pressure cleanup recognizes missing display files backed by FITS, protects the
+image during transfers of either representation and checks again after candidate
+selection. It removes an eligible expired Image record first; the unreferenced
+FITS can then be reclaimed under the existing source-retention policy, potentially
+on the next bounded pass. Historical JPEG-plus-FITS acquisitions retain independent
+retention. All 194 Python/compile and 35 JavaScript checks pass with unchanged
+source hashes ([evidence](../testing/evidence/hybrid-source-retention-20261003.json)).
+Rendering asset garbage collection and external-volume checks remain open.
