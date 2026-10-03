@@ -252,6 +252,30 @@ class IndiAllSkyDbThumbnailTable(IndiAllSkyDbFileBase):
 class IndiAllSkyDbImageTable(IndiAllSkyDbFileBase):
     __tablename__ = 'image'
 
+    def getUrl(self, s3_prefix='', local=True):
+        if (self.data or {}).get('storage_format') != 'fits' or (not local and (self.remote_url or self.s3_key)):
+            return super().getUrl(s3_prefix=s3_prefix, local=local)
+        from flask import has_request_context, url_for
+        parameters = dict(kind='image', camera_id=self.camera_id, media_id=self.id)
+        if has_request_context():
+            return url_for('indi_allsky.public_media_original_view', **parameters)
+        return app.url_map.bind('').build('indi_allsky.public_media_original_view', parameters, force_external=False)
+
+    def validateFile(self):
+        if (self.data or {}).get('storage_format') != 'fits':
+            return super().validateFile()
+        identity = (self.data or {}).get('source_fits_id')
+        recipe = (self.data or {}).get('render_source')
+        basis = recipe.get('basis') if isinstance(recipe, dict) else None
+        if identity is None and isinstance(basis, dict):
+            identity = basis.get('source_id')
+        if isinstance(identity, bool) or not isinstance(identity, int) or not 0 < identity < 2**63:
+            return False
+        source = db.session.get(IndiAllSkyDbFitsImageTable, identity)
+        return bool(source is not None and source.camera_id == self.camera_id
+                    and source.createDate == self.createDate and source.getFilesystemPath().is_file())
+
+
     id = db.Column(db.Integer, primary_key=True)
     filename = db.Column(db.String(length=255), unique=True, nullable=False)
     thumbnail_uuid = db.Column(db.String(length=36), nullable=True, index=True)

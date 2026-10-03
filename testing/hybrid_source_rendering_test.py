@@ -294,4 +294,57 @@ with isolated_app(multi_camera=True) as app:
     preview_cache.clear()
     assert client.get(url).data==jpeg.tobytes()
     assert source.read_bytes()==stable
+    # Source-only display records serve Library/Loop and existing public URLs.
+    with app.app_context():
+        image_entry=db.session.get(IndiAllSkyDbImageTable,image_id)
+        image_entry.data={'source_fits_id':cid,'storage_format':'fits'}
+        image_entry.fileSize=0;db.session.commit()
+        assert image_entry.validateFile()
+        assert not image_entry.getFilesystemPath().exists(), 'Validation must not render a file'
+        display_url=str(image_entry.getUrl())
+        assert display_url==f'/indi-allsky/media/image/{cid}/{image_id}/original'
+        from indi_allsky.modern_admin_media_runtime import ModernAdminMediaUrlNormalizer
+        normalizer=ModernAdminMediaUrlNormalizer()
+        assert normalizer.normalize_safe_local_image_url(display_url)==display_url
+        assert normalizer.normalize_safe_local_image_url(display_url+'/../private') is None
+        assert normalizer.normalize_safe_local_image_url(display_url+'?target=https://example.invalid') is None
+    for uid in (1,2):
+        reader=login_client(app,uid)
+        response=reader.get(display_url)
+        assert response.status_code==200 and response.data==jpeg.tobytes()
+        assert response.mimetype=='image/jpeg' and 'attachment' not in response.headers['Content-Disposition']
+        assert reader.get(display_url,headers={'If-None-Match':response.headers['ETag']}).status_code==304
+        assert reader.get(display_url,headers={'Range':'bytes=0-15'}).data==jpeg.tobytes()[:16]
+        for download_url in (display_url+'?download=1',f'/indi-allsky/modern-admin/media/image/{cid}/{image_id}/download'):
+            response=reader.get(download_url)
+            assert response.status_code==200 and response.data==jpeg.tobytes()
+            assert response.mimetype=='image/jpeg' and 'attachment' in response.headers['Content-Disposition']
+        library=reader.get('/indi-allsky/modern-admin/library',query_string={'kind':'image','camera_id':cid})
+        assert library.status_code==200 and display_url in library.text
+        detail=reader.get(f'/indi-allsky/modern-admin/media/images/{image_id}',query_string={'camera_id':cid})
+        assert detail.status_code==200 and display_url in detail.text
+        loop=reader.get('/indi-allsky/js/loop',query_string={'camera_id':cid,'timestamp':int(when.timestamp())})
+        assert loop.status_code==200 and any(item['url']==display_url for item in loop.json['image_list'])
+        viewer=reader.get('/indi-allsky/view_image',query_string={'id':image_id,'camera_id':cid})
+        assert viewer.status_code==200 and 'Download JPEG with overlay' in viewer.text
+        assert reader.get(f'/indi-allsky/media/image/{3-cid}/{image_id}/original').status_code==404
+    anonymous=app.test_client()
+    app.config.update(INDI_ALLSKY_AUTH_ALL_VIEWS=False,INDI_ALLSKY_AUTH_MEDIA_VIEWS=False)
+    assert anonymous.get(display_url).data==jpeg.tobytes()
+    assert anonymous.get(f'/indi-allsky/modern-admin/media/fits/{cid}/{cid}/download').status_code in (302,401)
+    app.config['INDI_ALLSKY_AUTH_MEDIA_VIEWS']=True
+    assert anonymous.get(display_url).status_code in (302,401)
+    with app.app_context():
+        camera=db.session.get(IndiAllSkyDbCameraTable,cid)
+        camera.web_nonlocal_images=True;camera.web_local_images_admin=False;db.session.commit()
+    assert reader.get(display_url).status_code==404
+    with app.app_context():
+        camera.web_nonlocal_images=False;db.session.commit()
+        fits_entry=db.session.get(IndiAllSkyDbFitsImageTable,cid)
+        fits_entry.camera_id=3-cid;db.session.commit()
+        assert not db.session.get(IndiAllSkyDbImageTable,image_id).validateFile()
+    assert reader.get(display_url).status_code==404
+    with app.app_context():
+        fits_entry.camera_id=cid;db.session.commit()
+    assert source.read_bytes()==stable, 'All display/download requests preserve the FITS'
 print('Full source replay: exact display pixels, original FITS unchanged, calibrated/raw/stack/focus, two cameras, day/night, all stretch modes, AWB/CCM, masks and saved labels: PASS')

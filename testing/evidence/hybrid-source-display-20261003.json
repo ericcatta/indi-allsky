@@ -1,0 +1,35 @@
+{
+  "date": "2026-10-03",
+  "baseline": "54ff67b0",
+  "status": "passed",
+  "change": "Source-only display records use the existing public media endpoint for reconstructed JPEG previews and downloads; Library/Loop retain the model URL contract.",
+  "tests": {
+    "targeted": "hybrid_source_rendering_test.py passed on isolated Raspberry through actual Flask routes; final reference-shape checks included in full regression",
+    "report": "/home/eric/hybrid-source-display-regression-20261003/results.json",
+    "javascript": 35,
+    "javascript_status": "passed",
+    "javascript_report": "/tmp/hybrid-source-display-js.json",
+    "javascript_sha256": "a27ea23618f96308a22b4b877794cfffc9187b6c972bf995b2e7ff785649b81e",
+    "expected_source_manifest_sha256": "5773b664f0c21cf22b307b0e6ebd05a1861ca91e01a8a1cabd341675e963eef9",
+    "python_compile": 193,
+    "python_compile_status": "passed",
+    "source_changed": false,
+    "report_sha256": "e9230f1580c2e1ce7310cfa3fa703752e4e0bce0417e65135aabc5911d76ee91"
+  },
+  "proof": [
+    "Admin and ordinary-user Library/detail/Loop responses reference the reconstructed media URL, whose response has the expected exact JPEG bytes.",
+    "Inline and attachment delivery, byte ranges and ETag conditional requests are exercised.",
+    "Public media retains optional-login policy; original FITS download still requires login.",
+    "Cross-camera requests, mismatched FITS references and nonlocal-only policy do not serve local pixels.",
+    "Source-only validation checks the corresponding FITS without rendering or creating a display file.",
+    "Scientific FITS bytes remain unchanged across preview/download requests."
+  ],
+  "scope": "Isolated Flask/test-client evidence, not a native-browser production acceptance run.",
+  "deployment": "Not deployed; no capture format defaults changed.",
+  "remaining": [
+    "Capture storage policy and Settings integration",
+    "Asset retention and volume accounting",
+    "Source-aware upload consumers",
+    "External-volume safety and final live acceptance"
+  ]
+}

@@ -1,4 +1,5 @@
 from pathlib import Path
+import re
 
 
 class ModernAdminMediaListQueryPlan:
@@ -108,7 +109,8 @@ class ModernAdminMediaUrlNormalizer:
         if not value.startswith('/'):
             return False
 
-        if '/images/' not in value:
+        derivative = re.fullmatch(r'/(?:[^/?#]+/)*media/image/[1-9][0-9]*/[1-9][0-9]*/original', value)
+        if '/images/' not in value and derivative is None:
             return False
 
         if any(token in value_lower for token in ('..', '\\', '://', 'file:', '\x00')):

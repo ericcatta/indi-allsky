@@ -21,7 +21,7 @@
   <p id="public-media-error" role="status" hidden>The media file could not be loaded. It may be missing or unreachable.</p>
   <p>{{ filename }}</p>
   <div class="modern-admin-filter-bar">
-    <a class="modern-admin-file-action" href="{{ original_url }}">Download original</a>
+    <a class="modern-admin-file-action" href="{{ original_url }}">{{ original_label|default('Download original') }}</a>
     <button type="button" id="public-media-copy" data-permalink="{{ permalink }}">Copy link</button>
     <button type="button" id="public-media-fullscreen">Fullscreen</button>
   </div>

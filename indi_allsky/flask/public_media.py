@@ -7,7 +7,7 @@ from . import db
 from .base_views import BaseView
 from .misc import login_optional_media
 from .models import IndiAllSkyDbCameraTable, IndiAllSkyDbImageTable, IndiAllSkyDbThumbnailTable
-from .source_media_views import MEDIA_DOWNLOAD_MODELS, local_source_allowed, source_file_path, validate_media_identifiers
+from .source_media_views import MEDIA_DOWNLOAD_MODELS, local_source_allowed, source_file_path, validate_media_identifiers, image_scientific_source, source_backed_image_response
 from ..modern_admin_media_runtime import ModernAdminMediaUrlNormalizer
 
 PUBLIC_MEDIA_MODELS = {key: model for key, model in MEDIA_DOWNLOAD_MODELS.items() if key != 'fits'}
@@ -30,6 +30,8 @@ def record_kind(entry):
 
 def checked_local_path(entry, config):
     try:
+        if isinstance(entry, IndiAllSkyDbImageTable) and (entry.data or {}).get('storage_format') == 'fits':
+            entry = image_scientific_source(entry)
         return source_file_path(entry, config)
     except PermissionError:
         abort(403, description='The media file cannot be read by the web service.')
@@ -129,7 +131,7 @@ class PublicMediaViewerView(BaseView):
                           camera_id=entry.camera_id, media_id=entry.id, download=1)
         return render_template(self.template_name, website_title=self.indi_allsky_config.get('WEBSITE', {}).get('TITLE', 'indi-allsky'),
             page_title=self.page_title, media=entry, media_kind=record_kind(entry), media_url=normalizer.normalize_media_url(target),
-            original_url=original, is_video=self.video, filename=Path(entry.filename).name,
+            original_url=original, original_label=('Download JPEG with overlay' if isinstance(entry, IndiAllSkyDbImageTable) and (entry.data or {}).get('storage_format') == 'fits' else 'Download original'), is_video=self.video, filename=Path(entry.filename).name,
             permalink=url_for(self.file_view, id=entry.id, camera_id=entry.camera_id, _external=True))
 
 
@@ -144,6 +146,9 @@ class PublicMediaOriginalView(BaseView):
         entry = model.query.filter_by(id=media_id, camera_id=camera_id).first_or_404()
         if not local_source_allowed(entry.camera, self.verify_admin_network):
             return redirect(media_url(entry, self.indi_allsky_config, self.verify_admin_network))
+        if kind == 'image' and (entry.data or {}).get('storage_format') == 'fits':
+            return source_backed_image_response(entry, self.indi_allsky_config,
+                                               attachment=request.args.get('download') == '1')
         path = checked_local_path(entry, self.indi_allsky_config)
         types = {'.jpg':'image/jpeg', '.jpeg':'image/jpeg', '.png':'image/png', '.webp':'image/webp',
                  '.gif':'image/gif', '.avif':'image/avif', '.mp4':'video/mp4', '.webm':'video/webm'}

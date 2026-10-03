@@ -51,6 +51,46 @@ def source_file_path(entry, config):
     return path
 
 
+def image_scientific_source(entry):
+    data = entry.data or {}
+    recipe = data.get('render_source')
+    source_id = data.get('source_fits_id')
+    basis = recipe.get('basis') if isinstance(recipe, dict) else None
+    if source_id is None and isinstance(basis, dict):
+        source_id = basis.get('source_id')
+    if isinstance(source_id, bool) or not isinstance(source_id, int) or not 0 < source_id < 2**63:
+        abort(422, description='The image has no valid scientific source reference.')
+    return IndiAllSkyDbFitsImageTable.query.filter_by(
+        id=source_id, camera_id=entry.camera_id, createDate=entry.createDate,
+    ).first_or_404(description='The scientific source for this exposure is unavailable.')
+
+
+def source_backed_image_response(entry, config, *, attachment):
+    """Display bytes for the exact exposure; authorization remains with callers."""
+    import cv2
+    import hashlib
+    source = image_scientific_source(entry)
+    path = source_file_path(source, config)
+    try:
+        recipe = (entry.data or {}).get('render_source')
+        if recipe is None:
+            recipe = read_source_recipe(path)
+        if recipe is None:
+            raise ValueError('Incomplete scientific source context')
+        root = config.get('IMAGE_FOLDER') or app.config['INDI_ALLSKY_IMAGE_FOLDER']
+        jpeg = source_preview_jpeg(path, recipe, camera_id=entry.camera_id,
+                                   source_id=source.id, media_root=root)
+    except (OSError, ValueError, TypeError, KeyError, IndexError, AttributeError, BadZipFile, EOFError, cv2.error):
+        app.logger.exception('Unable to reconstruct image %s', entry.id)
+        abort(422, description='The saved image cannot be reconstructed. Its original FITS may still be downloaded.')
+    response = send_file(io.BytesIO(jpeg), mimetype='image/jpeg', as_attachment=attachment,
+                         download_name=Path(entry.filename).stem+'.jpg', conditional=True, max_age=0,
+                         etag=hashlib.sha256(jpeg).hexdigest())
+    response.cache_control.private = True
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    return response
+
+
 class ModernAdminSourceDownloadView(BaseView):
     methods = ['GET']
     decorators = [login_required]
@@ -73,6 +113,8 @@ class ModernAdminSourceDownloadView(BaseView):
             if parts.scheme not in ('https', 'http') or not parts.netloc:
                 abort(404, description='The remote original URL is unavailable.')
             return redirect(target)
+        if kind == 'image' and (entry.data or {}).get('storage_format') == 'fits':
+            return source_backed_image_response(entry, self.indi_allsky_config, attachment=True)
         try:
             path = source_file_path(entry, self.indi_allsky_config)
             response = send_file(path, mimetype='application/octet-stream', as_attachment=True,
