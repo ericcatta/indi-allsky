@@ -32,6 +32,7 @@ class ImageCandidate:
 class StoragePressureRuntime:
     def __init__(self, config, session, models, image_root, *, disk_usage=shutil.disk_usage):
         self.options = StoragePressureOptions.from_config(config)
+        self.volume_spec = config.get('ARCHIVE_VOLUME')
         self.session = session
         self.models = models
         self.root = Path(image_root).resolve()
@@ -39,6 +40,8 @@ class StoragePressureRuntime:
         self.tables = [getattr(models, 'IndiAllSkyDb' + name + 'Table') for name in IMAGE_FAMILIES]
 
     def free_bytes(self):
+        from .archive_volume import verify_archive
+        verify_archive(self.root, self.volume_spec, writable=True)
         return self.disk_usage(self.root).free
 
     def pending_tasks(self):
@@ -48,6 +51,8 @@ class StoragePressureRuntime:
         ).all()
 
     def path(self, entry):
+        from .archive_volume import verify_archive
+        verify_archive(self.root, self.volume_spec, writable=True)
         path = entry.getFilesystemPath()
         resolved = path.resolve()
         if not resolved.is_relative_to(self.root) or resolved == self.root:
@@ -142,6 +147,8 @@ class StoragePressureRuntime:
 
     @contextmanager
     def lock(self):
+        from .archive_volume import verify_archive
+        verify_archive(self.root, self.volume_spec, writable=True)
         fd = os.open(self.root / '.hybrid-storage-cleanup.lock',
                      os.O_CREAT | os.O_RDWR | os.O_NOFOLLOW, 0o600)
         try:

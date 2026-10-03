@@ -3021,6 +3021,9 @@ class CaptureWorker(Process):
 
 
     def shoot(self, exposure, gain, binning, sync=True, timeout=None, sqm_exposure=False):
+        if self.config.get('ARCHIVE_VOLUME'):
+            from .archive_volume import verify_archive
+            verify_archive(self.image_dir, self.config['ARCHIVE_VOLUME'], writable=True)
         if self.config.get('MULTI_CAMERA_CAPTURE_ENABLE', False) and not self.focus_mode and not sqm_exposure:
             self._limit_exposure_to_cadence()
             # A worker decision computed before a day/night limit change must

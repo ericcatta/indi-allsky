@@ -75,13 +75,13 @@ The user revoked the 20:00 deadline on 1 October and authorized continuing to
 completion. Deploy and bounded live checks can resume; the separate 24-hour
 observation remains excluded. Do not request the expired window again.
 
-## Accepted archive change — 2 October (not implemented)
+## Accepted archive change — 2 October (implemented candidate; not deployed)
 
 The user selected configurable day/night storage, defaulting to JPEG-only by day
 and FITS-only for every retained exposure at night, with optional external storage.
 FITS samples must remain untouched by preview/export stretch and overlays. The
 rendered result must preserve the current appearance, not the existing simplified
-FITS preview. This supersedes the pending retention-choice question.
+FITS preview. This selects the archive formats. Capacity and minimum retention still need a separate decision before production activation.
 
 Completion requires one shared capture/replay rendering path with recorded
 processing settings and acquisition/overlay context; bounded derivative caching;
@@ -319,3 +319,16 @@ with unchanged source hashes ([evidence](../testing/evidence/hybrid-archive-poli
 This includes frozen capture EXIF in FITS context and its replay into JPEG/WebP,
 with scientific pixels and decoded JPEG pixels unchanged. External-volume checks and actual capacity/retention
 preflight are still required before production activation.
+
+
+The volume-protection candidate now pins the configured archive directory to its
+block-filesystem UUID. Capture waits for a missing disk; media access and cleanup
+reject the wrong or absent filesystem. The installer checks the pinned disk before
+rewriting archive paths. Tests cover absence, wrong-device and read-only cases,
+reconnection, supervisor shutdown, and administrator recovery through Settings
+while the disk is offline. These are automated simulations, not a physical USB
+removal test. The final 198-check Python/compile regression and all 35 JavaScript checks passed
+with matching source hashes ([evidence](../testing/evidence/hybrid-archive-volume-20261003.json)).
+Native Settings saves and the no-UUID error were verified on an isolated database.
+No production storage policy or archive format has changed. External setup and recovery instructions are
+in HYBRID_DEPLOYMENT.md.

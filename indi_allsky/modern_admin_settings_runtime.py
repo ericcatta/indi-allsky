@@ -868,6 +868,8 @@ class ModernAdminSettingsConfigValidationService:
         from .capture_cadence import validate_capture_cadence
         try:
             validate_capture_cadence(config)
+            from .archive_volume import validate_volume_spec
+            validate_volume_spec(config.get('ARCHIVE_VOLUME'))
             if 'IMAGE_ARCHIVE' in config:
                 from .archive_policy import validate_archive_config
                 validate_archive_config(config['IMAGE_ARCHIVE'])

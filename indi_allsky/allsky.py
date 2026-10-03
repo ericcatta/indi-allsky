@@ -1013,9 +1013,32 @@ class IndiAllSky(object):
         uw_dict['worker'].join()
 
 
+    def _wait_for_archive(self):
+        from .archive_volume import verify_archive, ArchiveUnavailable
+        if not self.config.get('ARCHIVE_VOLUME'):
+            return True
+        unavailable = None
+        while not self._shutdown and not self._terminate:
+            try:
+                verify_archive(self.image_dir, self.config['ARCHIVE_VOLUME'], writable=True)
+            except (ArchiveUnavailable, ValueError) as error:
+                if str(error) != unavailable:
+                    unavailable = str(error)
+                    logger.error('Archive unavailable: %s; waiting for its disk', error)
+                    self._miscDb.setState('ARCHIVE_STATUS', unavailable)
+                time.sleep(5)
+            else:
+                if unavailable is not None:
+                    self._miscDb.setState('ARCHIVE_STATUS', 'ready')
+                return True
+        return False
+
+
     def run(self):
         with app.app_context():
             self.write_pid()
+            if not self._wait_for_archive():
+                return
 
             self._expireOrphanedTasks()
 
@@ -1024,6 +1047,8 @@ class IndiAllSky(object):
 
 
         while True:
+            with app.app_context():
+                self._wait_for_archive()
             if self._shutdown:
                 with app.app_context():
                     self._miscDb.setState('STATUS', constants.STATUS_STOPPING)

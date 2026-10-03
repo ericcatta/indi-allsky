@@ -2267,6 +2267,8 @@ class ImageWorker(Process):
             # new context for every task, reduces the effects of caching
             with app.app_context():
                 try:
+                    from .archive_volume import verify_archive
+                    verify_archive(self.image_dir, self.config.get('ARCHIVE_VOLUME'), writable=True)
                     from .render_asset_lifecycle import archive_asset_lock
                     with archive_asset_lock(self.image_dir / '.render-assets'):
                         self.processImage(i_dict)
@@ -4371,6 +4373,8 @@ class ImageWorker(Process):
 
 
     def _getImageFolder(self, exp_date, day_date, camera, type_folder):
+        from .archive_volume import verify_archive
+        verify_archive(self.image_dir, self.config.get('ARCHIVE_VOLUME'), writable=True)
         if self.night_av[constants.NIGHT_NIGHT]:
             # images should be written to previous day's folder until noon
             timeofday_str = 'night'

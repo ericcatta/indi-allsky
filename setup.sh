@@ -2635,6 +2635,12 @@ fi
 # Detect IMAGE_FOLDER
 IMAGE_FOLDER=$(jq -r '.IMAGE_FOLDER' "$TMP_CONFIG_DUMP")
 
+# A disconnected pinned disk must not become a directory on the system disk.
+if ! "${PYTHON_BIN}" "${ALLSKY_DIRECTORY}/misc/check_archive_volume.py" "$TMP_CONFIG_DUMP"; then
+    echo "Reconnect the configured archive disk before continuing setup."
+    exit 1
+fi
+
 
 # Detect VARLIB_FOLDER
 # This will not change the location of the database

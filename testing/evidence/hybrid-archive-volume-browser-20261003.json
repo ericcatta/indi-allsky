@@ -1,0 +1,42 @@
+{
+  "date": "2026-10-03",
+  "scope": "Native in-app browser, isolated Flask fixture on Raspberry; not production",
+  "url": "http://localhost:18110/indi-allsky/modern-admin/settings/storage-protection",
+  "tests": [
+    {
+      "action": "Save recommended archive formats",
+      "observed": "Archive formats saved banner; night FITS/day processed selected; camera_id=2 retained",
+      "result": "passed"
+    },
+    {
+      "action": "Enable volume protection on tmpfs without UUID",
+      "observed": "Explicit connect-disk/configure-path error; checkbox remains off; no config revision created",
+      "result": "passed"
+    },
+    {
+      "action": "Save existing unpinned disk configuration",
+      "observed": "Disk protection saved banner; revision created",
+      "result": "passed"
+    }
+  ],
+  "database_evidence": {
+    "revision_1": "IMAGE_ARCHIVE absent",
+    "revision_2": {
+      "NIGHT": "fits",
+      "DAY": "processed"
+    },
+    "revision_3": {
+      "IMAGE_ARCHIVE": {
+        "NIGHT": "fits",
+        "DAY": "processed"
+      },
+      "ARCHIVE_VOLUME": null
+    }
+  },
+  "limits": [
+    "No capture restart or real storage format activation",
+    "No external disk connected; physical reconnection untested",
+    "Ordinary-role, CSRF and offline recovery covered separately by integration tests"
+  ],
+  "cleanup": "Browser tab closed; isolated server and SSH tunnel stopped"
+}

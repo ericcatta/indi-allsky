@@ -78,6 +78,11 @@ class SyncApiBaseView(BaseView):
             return jsonify({'error' : 'authentication failed'}), 400
 
 
+        # Authenticate first; camera metadata does not require a media volume.
+        if self.model is not IndiAllSkyDbCameraTable and request.method in ('POST', 'PUT', 'DELETE'):
+            from ..archive_volume import verify_app_archive
+            verify_app_archive(writable=True)
+
         try:
             if request.method == 'POST':
                 return self.post()

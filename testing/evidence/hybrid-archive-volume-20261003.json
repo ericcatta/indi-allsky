@@ -1,0 +1,35 @@
+{
+  "date": "2026-10-03",
+  "baseline": "99ad6089",
+  "status": "passed",
+  "scope": "Archive UUID guard, installer preflight, worker waiting and Settings recovery; candidate not deployed",
+  "tests": {
+    "python_compile": 198,
+    "status": "passed",
+    "report": "/home/eric/hybrid-volume-final-regression-20261003/results.json",
+    "report_sha256": "3b65249b542ef0fd5cfaef7fe8d6196008ffd0219484fc02a35ea26e8a28d108",
+    "source_manifest_sha256": "6d97e274093cba1b7e46c1a2d188b24ce1f4ffde660d1a5928931360bffd878f",
+    "source_changed": false,
+    "javascript": 35,
+    "javascript_status": "passed",
+    "javascript_report_sha256": "69ed8deb39684ab34a08c877ac39cff3d2f7523d7f6ad3fec10eb966f7ce31a1",
+    "installer": "bash -n and direct CLI missing-disk/legacy checks passed; no directory created",
+    "setup_sha256": "987b03936b57a5378cbd23dbda3cc14b3c237ab3becb35201d22436e297cec62",
+    "preflight_sha256": "3b1835e1fb097627164b3d28807f3ff835bea807365db5318244f73f862845b7"
+  },
+  "initial_regression": "197/198 passed; video failure fixture lacked worker.config. Fixture updated and extended with missing-volume task failure; final full suite passed.",
+  "proof": [
+    "Matching UUID accepted; absent/wrong/read-only volumes rejected without modifying source file",
+    "Supervisor waits without busy looping, reports recovery and honors shutdown",
+    "Settings remains accessible offline; admin recovery, CSRF, roles and revisions verified",
+    "Authenticated Sync upload blocked before publication while archive is unavailable",
+    "Model path, validation and deletion reject unavailable archive; source file unchanged",
+    "Native browser settings persistence and no-UUID error verified on isolated database"
+  ],
+  "native_evidence": "hybrid-archive-volume-browser-20261003.json",
+  "limits": [
+    "No physical external disk available; disconnect/reconnect simulated",
+    "Production deployment and capture throughput acceptance remain open",
+    "Every-frame FITS activation awaits capacity/retention decision; existing production unchanged"
+  ]
+}

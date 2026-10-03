@@ -282,6 +282,9 @@ class VideoWorker(Process):
                 task.setFailed('Unknown video task action')
                 return
 
+            if self.config.get('ARCHIVE_VOLUME'):
+                from .archive_volume import verify_archive
+                verify_archive(self.image_dir, self.config['ARCHIVE_VOLUME'], writable=True)
             action_method(task, **kwargs)
         except Exception as error:
             # A failed flush expires ORM attributes; use the queue ID until rollback.

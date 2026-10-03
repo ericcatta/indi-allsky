@@ -166,6 +166,8 @@ class IndiAllSkyDbFileBase(db.Model):
 
 
     def getFilesystemPath(self):
+        from ..archive_volume import verify_app_archive
+        verify_app_archive()
         filename_p = Path(self.filename)
 
         if self.filename.startswith('/'):

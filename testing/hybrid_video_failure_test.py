@@ -4,6 +4,7 @@ import ast
 import logging
 from pathlib import Path
 from types import SimpleNamespace
+from unittest.mock import patch
 from hybrid_runtime_fixture import isolated_app
 
 
@@ -14,9 +15,9 @@ def run():
         from indi_allsky.flask.models import IndiAllSkyDbTaskQueueTable as Task, TaskQueueState as State, TaskQueueQueue as Queue, IndiAllSkyDbCameraTable as Camera
         tree=ast.parse((Path(__file__).resolve().parents[1]/'indi_allsky/video.py').read_text())
         method=next(node for node in ast.walk(tree) if isinstance(node,ast.FunctionDef) and node.name=='processTask')
-        namespace={'IndiAllSkyDbTaskQueueTable':Task,'TaskQueueState':State,'TaskQueueQueue':Queue,'NoResultFound':NoResultFound,'db':db,'logger':logging.getLogger('video-test')}
+        namespace={'__package__':'indi_allsky','IndiAllSkyDbTaskQueueTable':Task,'TaskQueueState':State,'TaskQueueQueue':Queue,'NoResultFound':NoResultFound,'db':db,'logger':logging.getLogger('video-test')}
         exec(compile(ast.fix_missing_locations(ast.Module(body=[method],type_ignores=[])),'actual-video-method','exec'),namespace)
-        worker=SimpleNamespace(_validate_profile_id=lambda payload:payload['profile_id'],_set_queue_context=lambda *args,**kwargs:None)
+        worker=SimpleNamespace(config={},image_dir=Path(app.config['INDI_ALLSKY_IMAGE_FOLDER']),_validate_profile_id=lambda payload:payload['profile_id'],_set_queue_context=lambda *args,**kwargs:None)
         def fail(task,**kwargs):
             db.session.get(Camera,2).name='must rollback'
             raise TypeError('provider returned None')
@@ -44,6 +45,14 @@ def run():
                 assert task.state==expected and task.result
                 assert task.queue == Queue.VIDEO
                 assert db.session.get(Camera,2).name==original
+            from indi_allsky.archive_volume import ArchiveUnavailable
+            worker.config={'ARCHIVE_VOLUME':{'ROOT':str(worker.image_dir),'UUID':'missing'}}
+            task=Task(queue=Queue.VIDEO,state=State.QUEUED,data={'action':'succeed'})
+            db.session.add(task); db.session.commit()
+            with patch('indi_allsky.archive_volume.verify_archive',side_effect=ArchiveUnavailable('missing disk')):
+                namespace['processTask'](worker,{'task_id':task.id,'profile_id':'test-profile-2'})
+            assert task.state==State.FAILED and task.result
+            worker.config={}
             def fail_context(*args, **kwargs):
                 db.session.get(Camera, 2).name = 'must rollback context'
                 raise RuntimeError('route setup failed')

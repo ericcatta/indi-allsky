@@ -108,6 +108,12 @@ def create_app():
     csrf.exempt(bp_syncapi_allsky)  # disable CSRF for syncapi views
     csrf.exempt(bp_actionapi_allsky)  # disable CSRF for actionapi views
 
+    from ..archive_volume import ArchiveUnavailable
+    @app.errorhandler(ArchiveUnavailable)
+    def archive_unavailable(error):
+        return {'error': 'Archive disk unavailable',
+                'message': 'Reconnect the configured archive disk or review Storage Protection settings.'}, 503
+
     db.init_app(app)
     migrate.init_app(app, db, directory=app.config['MIGRATION_FOLDER'])
 

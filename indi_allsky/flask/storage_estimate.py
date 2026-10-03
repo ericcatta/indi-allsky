@@ -23,6 +23,8 @@ def duration_label(seconds):
 def storage_forecast(config, config_id, root, *, now=None, disk_usage=shutil.disk_usage):
     now = now or datetime.now()
     root = Path(root).resolve()
+    from ..archive_volume import verify_archive
+    verify_archive(root, config.get('ARCHIVE_VOLUME'))
     disk = disk_usage(root)
     result = dict(status='insufficient_data', free_gib=round(disk.free/GIB, 2),
                   total_gib=round(disk.total/GIB, 2), reason='At least one hour of fresh media is needed.')

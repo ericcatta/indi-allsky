@@ -206,6 +206,9 @@ class FileUploader(Thread):
 
     def _executeUpload(self, task):
         """Execute a claimed task; ownership and terminal recovery stay above."""
+        if self.config.get('ARCHIVE_VOLUME'):
+            from .archive_volume import verify_archive
+            verify_archive(self.image_dir, self.config['ARCHIVE_VOLUME'])
         if not isinstance(task.data, dict):
             raise ValueError('Upload task data must be an object')
         entry = None

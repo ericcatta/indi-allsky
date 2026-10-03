@@ -205,3 +205,30 @@ were unchanged. For this code-only release, rollback is the retained
 `/home/eric/hybrid-backups/hybrid-fits-context-20261002/source_media_views.py` copied
 back to `indi_allsky/flask/source_media_views.py`, followed by a Gunicorn reload.
 No old database restore is needed. [Test/deploy evidence](testing/evidence/hybrid-fits-preview-context-20261002.json).
+
+## Archive disk protection (candidate, not deployed)
+
+Storage Protection can pin the currently configured archive directory to its
+filesystem UUID. This does not mount, format, or migrate a disk. For external
+storage, first configure a persistent UUID-based operating-system mount and copy
+existing archive contents with capture stopped. Preserve relative paths, source
+FITS, thumbnails and the shared rendering assets together. Set IMAGE_FOLDER to
+the mounted archive directory, rerun setup to update the web path, and enable
+“Require this filesystem before using archive” in Storage Protection. Restart
+capture to load the saved policy. Do not remove the previous archive until file
+counts, source previews/downloads and both cameras have been verified.
+
+The protection requires a block filesystem UUID; a network share without one
+cannot use this guard. Setup checks an already pinned volume before rewriting
+storage paths. A missing or different disk stops guarded archive access and
+cleanup. Capture waits for the configured disk and resumes after it returns;
+the Storage Protection page remains available to administrators for recovery.
+Do not disable protection merely to silence an absent-disk error: doing so permits
+use of the directory on the underlying filesystem. When intentionally changing
+disks, stop capture, update the storage configuration and mount, then pin the new
+filesystem and restart capture.
+
+Automated absence/reconnection checks are simulations. No external disk is
+currently connected to this installation, so physical external-storage recovery
+remains unverified. This candidate does not change production archive formats or
+retention. Capacity and retention must be agreed before enabling every-frame FITS.
