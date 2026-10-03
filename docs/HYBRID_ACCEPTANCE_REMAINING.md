@@ -1,20 +1,29 @@
 # Remaining Hybrid acceptance work
 
-Checked against deployed source `48c2eddb` and the recorded evidence on 1 October 2026.
-This is a work queue, not a coverage percentage or a replacement for the control
-matrix. Classic removal is deployed; whole-product acceptance remains open.
-The 24-hour observation and detector/AI remain outside the agreed current run.
+Updated against application `3d87c9aa` and acceptance evidence through 3 October
+2026. This is a work queue, not a coverage percentage. Classic removal is deployed;
+whole-product acceptance remains open. The 24-hour observation and detector/AI
+remain outside the agreed current run.
 
 ## Latest release completed
 
-The combined candidate is deployed: 182 Python/compile and 35 JavaScript checks
-passed, exact installed source hashes match, both cameras resumed, and all four
-Keogram links passed native checks. Task 14234 generated and played a mini-video;
-both cameras captured during encoding. See the [release evidence](../testing/evidence/hybrid-combined-release-20261001.json).
-The earlier day-end timeout's cause remains unproven; the successful short encode
-must not be represented as sustained worst-case-load certification. A same-SD
-backup caused overlapping filesystem waits and was interrupted; its incomplete
-copy is not a usable backup. Rollback uses retained code files, not the old DB.
+The scientific archive implementation is deployed, with **198 Python/compile and
+35 JavaScript checks** and an exact installed-source match. Both cameras resumed;
+real FITS rendering matches saved JPEG pixels. Configuration 118 still uses the
+old output policy: every-frame night FITS is **not active** pending capacity and
+retention choice. Its live source-only acquisition, generation and cleanup gates
+remain open. [Release evidence](../testing/evidence/hybrid-scientific-archive-release-20261003.json).
+
+Production Process FITS previews and received downloads now pass for administrator
+on both cameras. Four generated-media Open clicks also pass for camera 2.
+The latest filtered Tasks CSV still has no verified client receipt; the isolated
+Save & Sync native confirmation remains blocked with no saved revision.
+[Follow-up](../testing/evidence/hybrid-acceptance-followup-20261003.json).
+
+The earlier day-end timeout's cause remains unproven; a successful short encode
+is not sustained worst-case-load certification. Avoid same-SD online full database
+backups: a prior attempt overlapped filesystem stalls. Use the documented rollback
+and preserve the existing database.
 
 On 2 October the user confirmed mini-video 7 downloads and opens, both Users CSV/Excel
 files save and are readable, and the simulator copies an URL. [Confirmation and
@@ -41,9 +50,9 @@ this table alone does not certify all discovered controls.
 
 Use the [route register](hybrid-acceptance-route-register.json) and its linked
 control discovery, retaining role, camera/profile, prerequisites, expected
-request/effect and source revision. There are 19 historical blocked/defect
-records without a fully passed resolution after the scoped resolutions, including three user-confirmed CSV/Excel and simulator results on 2 October and the combined Users Copy/CSV/Excel record. That number is not
-19 current product defects: some combine scopes, refer to older controls, or
+request/effect and source revision. There are 17 historical blocked/defect
+records without a fully passed resolution after the scoped resolutions through 3 October, including the later Process FITS production preview and download evidence. That number is not
+17 current product defects: some combine scopes, refer to older controls, or
 already have narrower later evidence. The 7,369 static identities likewise are
 not 7,369 independently failed functions.
 

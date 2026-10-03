@@ -4,6 +4,52 @@ Updated 3 October 2026. **Classic frontend removal is deployed. Whole-product ac
 The user deferred the separate 24-hour day/night test and detector/AI implementation.
 Those activities are outside this acceptance run, not passed tests.
 
+## Current state — 3 October 2026
+
+Application `3d87c9aa` is deployed. It includes source-backed FITS rendering and
+generation, configurable day/night archive formats, bounded preview cache,
+source-aware retention/uploads, disk UUID protection and fast lossless compression.
+The release passed **198 Python/compile and 35 JavaScript checks** with matching
+installed source hashes. Both cameras resumed. Configuration remains revision
+118: **night FITS-only/day JPEG-only is not active**; scheduled FITS is still every
+7200 seconds. Code installation is not acceptance of every-frame source-only capture.
+[Release evidence](testing/evidence/hybrid-scientific-archive-release-20261003.json).
+
+Both first post-deploy FITS reconstruct to the exact decoded pixels of their
+saved JPEGs. Production administrator Process FITS now generates and delivers
+full-resolution PNG/JPEG files for cameras 1/2 to the Mac, preserving both source
+hashes. Four generated-media Open links also have direct native evidence.
+[Processing/downloads](testing/evidence/hybrid-process-fits-production-20261003.json),
+[Open links](testing/evidence/hybrid-generated-open-links-20261003.json).
+
+### Required next gates
+
+- Resolve capacity before activation: the current SD cannot retain three days of
+  estimated every-frame night FITS. A proposal of one-day minimum retention on SD
+  plus test-media cleanup, or three days on external storage, awaits the user's
+  decision. Do not activate the policy or change retention without that decision.
+- After activation, verify both cameras, source-only browsing/export/generation,
+  cleanup and bounded capture load. The 24-hour test remains deferred.
+- Finish the remaining role/control scopes in the route register. CSV filtering
+  works, but the latest filtered CSV receipt is not confirmed. Native Save & Sync
+  confirmation remains inaccessible to automation; the isolated attempt saved no
+  revision and its server/tunnel were stopped.
+- Physical disk/GPIO/focuser/network effects and external OAuth/upload checks
+  require their actual devices, destinations or recovery conditions. They remain
+  explicitly unverified; existing simulations do not count as live acceptance.
+
+[Current follow-up](testing/evidence/hybrid-acceptance-followup-20261003.json).
+The complete remaining work is tracked in
+[the work queue](docs/HYBRID_ACCEPTANCE_REMAINING.md) and
+[the scoped route register](docs/hybrid-acceptance-route-register.json).
+
+## Historical evidence log
+
+The entries below describe their original checkpoints. Statements such as
+“candidate”, “not deployed”, earlier suite counts and capture PIDs are historical;
+they do not override the current state above. Preserve the original evidence and
+its limits rather than interpreting older blocked records as present-day defects.
+
 Two further Users controls now pass native production verification (account guidance
 and Home click). All four reset/flush combinations pass real HTTP restore effects
 on disposable state; no production credentials or history changed. Native key-reset
@@ -19,7 +65,7 @@ The user confirmed mini-video 7 download/opening, Users CSV and Excel receipt,
 and simulator link copying on 2 October. These are user-reported outcomes, not
 automated byte-integrity checks. Other export families retain their own evidence scopes. [Confirmation](testing/evidence/hybrid-user-confirmed-delivery-20261002.json).
 
-## Source archive candidate — not deployed
+## Archive implementation history — before deployment
 
 The requested default (night FITS-only, day JPEG-only) is not active yet.
 The isolated candidate now reconstructs display pixels from a saved FITS and its
@@ -61,9 +107,9 @@ Scientific asset retention, remaining source-aware web/media readers
 and configurable local/external storage still need
 completion before deploying and activating this policy.
 
-## Current installation and regression
+## Earlier installation and regression checkpoints
 
-Latest application `994ac136` is deployed: FITS previews use recorded exposure
+At this earlier checkpoint, application `994ac136` was deployed: FITS previews use recorded exposure
 context instead of file mtime and forced night mode. Both real-camera previews
 decoded after web-only reload; capture remained active with unchanged PID.
 182 Python checks pass across the full run and two targeted rechecks after
