@@ -41,9 +41,9 @@ this table alone does not certify all discovered controls.
 
 Use the [route register](hybrid-acceptance-route-register.json) and its linked
 control discovery, retaining role, camera/profile, prerequisites, expected
-request/effect and source revision. There are 23 historical blocked/defect
+request/effect and source revision. There are 19 historical blocked/defect
 records without a fully passed resolution after the scoped resolutions, including three user-confirmed CSV/Excel and simulator results on 2 October and the combined Users Copy/CSV/Excel record. That number is not
-23 current product defects: some combine scopes, refer to older controls, or
+19 current product defects: some combine scopes, refer to older controls, or
 already have narrower later evidence. The 7,369 static identities likewise are
 not 7,369 independently failed functions.
 
@@ -352,3 +352,10 @@ link were checked. [Deployment and exact limits](../testing/evidence/hybrid-scie
 The every-frame night policy remains inactive until storage capacity/retention is
 resolved. Source-only live acquisition, generation and retention acceptance remain
 open; deployment alone does not close those gates.
+
+
+Four historical Open read-only gaps are resolved by native production clicks on
+3 October for administrator, camera 2 / asi678mc: Keograms, Startrails, Startrail
+Videos and Panorama. Original image decoding and natural video completion were
+observed. Mini-timelapse opening also passed. Download receipt and other roles or
+cameras remain separate scopes. [Evidence](../testing/evidence/hybrid-generated-open-links-20261003.json).

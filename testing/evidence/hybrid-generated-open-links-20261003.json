@@ -1,0 +1,69 @@
+{
+  "date": "2026-10-03",
+  "application": "3d87c9aa",
+  "checkout": "9ad15e3e",
+  "scope": "Native in-app browser, production administrator, camera 2/profile asi678mc. Click the exact Open read-only link, observe newly opened media. No configuration changes.",
+  "controls": [
+    {
+      "page": "/modern-admin/media/keograms",
+      "control": "Open read-only",
+      "role": "production administrator",
+      "camera_id": 2,
+      "profile_id": "asi678mc",
+      "filename": "allsky-keogram_ccd2_20261002_night_1791003804.jpg",
+      "action": "Native pointer click opens original media in a new tab",
+      "observed": "Decoded image 907x700, complete=true",
+      "status": "superato",
+      "historical_source": "testing/evidence/hybrid-generated-media-2026-09-06.json",
+      "historical_record": "controls[7]"
+    },
+    {
+      "page": "/modern-admin/media/startrails",
+      "control": "Open read-only",
+      "role": "production administrator",
+      "camera_id": 2,
+      "profile_id": "asi678mc",
+      "filename": "allsky-startrail_ccd2_20261002_night_1791003804.jpg",
+      "action": "Native pointer click opens original media in a new tab",
+      "observed": "Decoded image 3840x2160, complete=true",
+      "status": "superato",
+      "historical_source": "testing/evidence/hybrid-generated-media-2026-09-06.json",
+      "historical_record": "controls[16]"
+    },
+    {
+      "page": "/modern-admin/media/startrail-videos",
+      "control": "Open read-only",
+      "role": "production administrator",
+      "camera_id": 2,
+      "profile_id": "asi678mc",
+      "filename": "allsky-startrail_timelapse_ccd2_20260921_night_1790052045.mp4",
+      "action": "Native pointer click opens original media in a new tab",
+      "observed": "Native video ended=true, currentTime=duration=11.96, readyState=4, 3840x2160, error=null",
+      "status": "superato",
+      "historical_source": "testing/evidence/hybrid-generated-media-2026-09-06.json",
+      "historical_record": "controls[25]"
+    },
+    {
+      "page": "/modern-admin/media/panorama",
+      "control": "Open read-only",
+      "role": "production administrator",
+      "camera_id": 2,
+      "profile_id": "asi678mc",
+      "filename": "panorama_ccd2_20261003_141158.jpg",
+      "action": "Native pointer click opens original media in a new tab",
+      "observed": "Decoded image 4712x750, complete=true",
+      "status": "superato",
+      "historical_source": "testing/evidence/hybrid-generated-media-2026-09-06.json",
+      "historical_record": "controls[43]"
+    }
+  ],
+  "additional": {
+    "mini_timelapse": "Exact Open read-only click opens 1790887136.mp4; screenshot shows decoded frame and natural end 0:15/0:15. This is extra evidence; existing resolution retained."
+  },
+  "limits": [
+    "No claim about camera 1 or ordinary-user clicks",
+    "Opening media does not certify download receipt",
+    "Video screenshot capture failed; DOM media state directly proves successful playback instead"
+  ],
+  "regression": "Application unchanged from deployed 198 Python/compile and 35 JavaScript passing suite."
+}

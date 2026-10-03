@@ -1685,7 +1685,17 @@
           "source": "testing/evidence/hybrid-generated-media-2026-09-06.json",
           "record": "controls[7]",
           "control": "Open read-only",
-          "recorded_status": "bloccato"
+          "recorded_status": "bloccato",
+          "resolution": {
+            "reviewed_on": "2026-10-03",
+            "status": "superato",
+            "source": "testing/evidence/hybrid-generated-open-links-20261003.json",
+            "records": [
+              "controls[0]"
+            ],
+            "scope": "Exact native Open read-only click on current production page, administrator camera 2 / asi678mc; original media decoded, video reached natural end. No other role/camera or download receipt certification.",
+            "historical_outcome_preserved": true
+          }
         },
         {
           "source": "testing/evidence/hybrid-generated-media-2026-09-06.json",
@@ -1847,7 +1857,17 @@
           "source": "testing/evidence/hybrid-generated-media-2026-09-06.json",
           "record": "controls[43]",
           "control": "Open read-only",
-          "recorded_status": "bloccato"
+          "recorded_status": "bloccato",
+          "resolution": {
+            "reviewed_on": "2026-10-03",
+            "status": "superato",
+            "source": "testing/evidence/hybrid-generated-open-links-20261003.json",
+            "records": [
+              "controls[3]"
+            ],
+            "scope": "Exact native Open read-only click on current production page, administrator camera 2 / asi678mc; original media decoded, video reached natural end. No other role/camera or download receipt certification.",
+            "historical_outcome_preserved": true
+          }
         },
         {
           "source": "testing/evidence/hybrid-generated-media-2026-09-06.json",
@@ -2119,7 +2139,17 @@
           "source": "testing/evidence/hybrid-generated-media-2026-09-06.json",
           "record": "controls[25]",
           "control": "Open read-only",
-          "recorded_status": "bloccato"
+          "recorded_status": "bloccato",
+          "resolution": {
+            "reviewed_on": "2026-10-03",
+            "status": "superato",
+            "source": "testing/evidence/hybrid-generated-open-links-20261003.json",
+            "records": [
+              "controls[2]"
+            ],
+            "scope": "Exact native Open read-only click on current production page, administrator camera 2 / asi678mc; original media decoded, video reached natural end. No other role/camera or download receipt certification.",
+            "historical_outcome_preserved": true
+          }
         },
         {
           "source": "testing/evidence/hybrid-generated-media-2026-09-06.json",
@@ -2200,7 +2230,17 @@
           "source": "testing/evidence/hybrid-generated-media-2026-09-06.json",
           "record": "controls[16]",
           "control": "Open read-only",
-          "recorded_status": "bloccato"
+          "recorded_status": "bloccato",
+          "resolution": {
+            "reviewed_on": "2026-10-03",
+            "status": "superato",
+            "source": "testing/evidence/hybrid-generated-open-links-20261003.json",
+            "records": [
+              "controls[1]"
+            ],
+            "scope": "Exact native Open read-only click on current production page, administrator camera 2 / asi678mc; original media decoded, video reached natural end. No other role/camera or download receipt certification.",
+            "historical_outcome_preserved": true
+          }
         },
         {
           "source": "testing/evidence/hybrid-generated-media-2026-09-06.json",

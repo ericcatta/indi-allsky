@@ -205,3 +205,12 @@ registrate, risolve i due riferimenti allo stesso aggregato storico degli strume
 immagine. Sono conferme dell’utente, non nuove comparazioni automatiche degli
 appunti. Non certificano altri ruoli, viewport o il distinto rilievo di navigazione.
 [Conferme](../testing/evidence/hybrid-user-media-feedback-20261002.json).
+
+
+Riconciliazione del 3 ottobre: quattro controlli storici «Open read-only» ora
+hanno una prova diretta del click in produzione per amministratore, camera 2 /
+asi678mc: Keogram, Startrail, Startrail Video e Panorama. Le immagini sono state
+decodificate; il video ha raggiunto la fine senza errori. Questa risoluzione non
+certifica altri ruoli/camere o la ricezione dei download. È stata verificata anche
+l'apertura del mini timelapse già collaudato.
+[Evidenze puntuali](../testing/evidence/hybrid-generated-open-links-20261003.json).
