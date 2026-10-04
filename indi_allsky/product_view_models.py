@@ -2472,7 +2472,8 @@ def _safe_product_image_url(value):
     if not value.startswith('/'):
         return False
 
-    if '/images/' not in value:
+    derivative = re.fullmatch(r'/(?:[^/?#]+/)*media/image/[1-9][0-9]*/[1-9][0-9]*/original', value)
+    if '/images/' not in value and derivative is None:
         return False
 
     value_lower = value.lower()

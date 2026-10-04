@@ -321,6 +321,8 @@ with isolated_app(multi_camera=True) as app:
             assert response.mimetype=='image/jpeg' and 'attachment' in response.headers['Content-Disposition']
         library=reader.get('/indi-allsky/modern-admin/library',query_string={'kind':'image','camera_id':cid})
         assert library.status_code==200 and display_url in library.text
+        now=reader.get('/indi-allsky/modern-admin/now',query_string={'camera_id':cid})
+        assert now.status_code==200 and f'src="{display_url}"' in now.text
         detail=reader.get(f'/indi-allsky/modern-admin/media/images/{image_id}',query_string={'camera_id':cid})
         assert detail.status_code==200 and display_url in detail.text
         loop=reader.get('/indi-allsky/js/loop',query_string={'camera_id':cid,'timestamp':int(when.timestamp())})

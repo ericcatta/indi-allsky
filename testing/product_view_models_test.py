@@ -400,6 +400,25 @@ def test_latest_camera_frames_provider_accepts_safe_image_routes():
     assert_no_callables(now_view)
 
 
+def test_latest_camera_frames_provider_accepts_source_display_routes():
+    for url, available in (
+        ('/indi-allsky/media/image/1/123/original', True),
+        ('/indi-allsky/media/image/2/456/original', True),
+        ('/indi-allsky/media/image/1/123/original/../private', False),
+        ('/indi-allsky/media/image/1/123/original?target=https://example.invalid', False),
+        ('//example.invalid/media/image/1/123/original', False),
+        ('/indi-allsky/media/image/0/123/original', False),
+        ('/indi-allsky/media/fits/1/123/original', False),
+    ):
+        provider = LatestCameraFramesProvider(FakeLatestCameraFramesRepository([
+            {'camera_id': 1, 'image_available': True, 'safe_image_url': url},
+        ]))
+        view = build_now_view(latest_camera_frames_provider=provider)
+        item = view['latest_camera_frames']['items'][0]
+        assert item['image_available'] is available, url
+        assert item['safe_image_url'] == (url if available else None), url
+
+
 def test_latest_camera_frames_provider_rejects_unsafe_image_routes():
     provider = LatestCameraFramesProvider(FakeLatestCameraFramesRepository([
         {
@@ -3138,6 +3157,7 @@ def main():
         test_build_now_view_contains_no_sensitive_payload,
         test_latest_camera_frames_contract_is_fake_safe,
         test_latest_camera_frames_provider_accepts_safe_image_routes,
+        test_latest_camera_frames_provider_accepts_source_display_routes,
         test_latest_camera_frames_provider_rejects_unsafe_image_routes,
         test_build_sky_cycle_report_view_returns_dict,
         test_build_sky_cycle_report_view_is_json_serializable,
