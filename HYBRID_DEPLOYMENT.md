@@ -15,7 +15,58 @@ Restore configuration through the revision service if needed, then restart captu
 keep the deployed source-aware readers for any new FITS-only frames. Do not use
 an older code rollback that cannot read source-backed images.
 
-## Current application
+## Current application — 4 October, pending worker release
+
+Production is at `306c594a`: the source-only FITS previews on Now are fixed and
+both camera images were decoded in the production browser. The web restart left
+capture PID 1687399 running. The release passed 198 Python/compile and 35
+JavaScript checks. [Evidence](testing/evidence/hybrid-now-fits-preview-20261004.json).
+
+`7641e966` fixes mini timelapse thumbnail generation from FITS-only exposures.
+It is published, with 198 Python/compile checks passed and the tested source
+manifest matching the local candidate. It is **not yet active in production**.
+The complete worker test creates a thumbnail and a decodable video while leaving
+the original FITS unchanged. The previous code fails that same test at
+`None.fileSize`. [Evidence](testing/evidence/hybrid-mini-fits-repair-20261004.json).
+
+### Activate the pending worker release
+
+Do this after the continuous observation reaches its documented end (earliest
+5 October 2026 at 15:34 Europe/Zurich), and finish live tests by **19:15**.
+Do not stop or restart the observer merely because a read times out.
+
+1. Confirm the observer's final record, installed Git revision, configuration
+   revision 119, free space, capture/web service state and running video tasks.
+   Wait for active generation or cleanup to finish before the controlled restart.
+2. Preserve the currently installed tracked code in a private backup outside the
+   checkout, with its commit and checksums. No schema or configuration change is
+   required. Preserve the existing database and all untracked local files; do not
+   start another large online database copy on the busy SD card.
+3. Fetch and fast-forward `main`, checking the actual diff against the tested
+   release before activation. A newer unrelated application change needs its own
+   validation; a Git pull alone is not evidence that the running worker changed.
+4. Restart `indi-allsky.service` through the user service manager to load the new
+   Python worker. The coordinator forks imported modules, so restarting only a
+   video child does not reliably activate this change. Record the interruption,
+   old/new PIDs and installed revision. Reload the web service if its code changed.
+5. Check fresh source-backed frames from both cameras. Generate bounded mini
+   timelapses from recorded night FITS for each camera, then verify task success,
+   the output file, thumbnail, playback and download. Preserve original FITS.
+   Do not claim 24 hours of the newly activated worker from the earlier period.
+
+### Roll back this worker fix if necessary
+
+Keep the current source-aware archive readers and configuration 119. Revert only
+`7641e966`'s application change in `indi_allsky/video.py` (or restore that exact
+file from the pre-deploy private backup), then restart capture in a controlled
+window and verify both cameras. This restores the known mini-generation defect;
+report that limitation. Do not restore an old database, delete archived media or
+use a pre-source-aware application snapshot. Repository history should reflect
+any rollback through a new commit, without rewriting published history.
+
+## Release history — not current deployment instructions
+
+### Scientific archive, 3 October
 
 On 3 October `3d87c9aa` deployed the scientific archive implementation, disk UUID
 protection and fast lossless FITS compression. All 198 Python/compile and 35
