@@ -1,3 +1,10 @@
+> Current update, 4 October: the SD/retention choice is resolved and configuration
+> 119 is active (night lossless FITS, day JPEG, image pressure cutoff 24 hours,
+> timelapses retained at least five days). Both cameras resumed with 15-second
+> day JPEG cadence. Night source-only acquisition remains to be observed.
+> [Activation evidence](../testing/evidence/hybrid-sd-policy-20261004.json).
+> Older “pending activation” entries below describe earlier checkpoints.
+
 # Remaining Hybrid acceptance work
 
 Updated against application `3d87c9aa` and acceptance evidence through 3 October

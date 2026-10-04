@@ -1,5 +1,20 @@
 # Hybrid: deployment and rollback
 
+## Active configuration — 4 October
+
+Configuration 119 enables SD-only night FITS/day JPEG, lossless compression,
+24-hour image protection under storage pressure (5 GiB trigger, 8 GiB target),
+and five-day timelapse expiry. Pressure cleanup never selects video families.
+Both cameras resumed after capture restart; day JPEG cadence is 15 seconds.
+Night source-only capture acceptance is still open.
+[Evidence](testing/evidence/hybrid-sd-policy-20261004.json).
+
+The previous configuration is retained as revision 118 and in the private
+`/home/eric/hybrid-backups/hybrid-sd-policy-20261004/config-before.json`.
+Restore configuration through the revision service if needed, then restart capture;
+keep the deployed source-aware readers for any new FITS-only frames. Do not use
+an older code rollback that cannot read source-backed images.
+
 ## Current application
 
 On 3 October `3d87c9aa` deployed the scientific archive implementation, disk UUID

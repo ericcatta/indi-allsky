@@ -1,0 +1,63 @@
+{
+  "date": "2026-10-04",
+  "application": "3d87c9aa",
+  "checkout": "c77ee73b",
+  "authorization": "User chose SD only, day JPEG/night scientific originals, at least five days of night timelapses; other media may be reclaimed after 24\u201336 hours.",
+  "configuration": {
+    "before": 118,
+    "after": 119,
+    "changed": {
+      "IMAGE_ARCHIVE": {
+        "NIGHT": "fits",
+        "DAY": "processed"
+      },
+      "IMAGE_SAVE_FITS_COMPRESSED": true,
+      "STORAGE_PRESSURE": {
+        "ENABLE": true,
+        "MIN_FREE_GIB": 5.0,
+        "TARGET_FREE_GIB": 8.0,
+        "KEEP_DAYS": 1
+      },
+      "TIMELAPSE_EXPIRE_DAYS": 5
+    }
+  },
+  "protection": "Pressure cleanup IMAGE_FAMILIES contains only Image, FitsImage, RawImage, PanoramaImage; no video families. Scheduled timelapse expiry is separately five days by dayDate. All timelapses receive this minimum, including night outputs.",
+  "backup": "/home/eric/hybrid-backups/hybrid-sd-policy-20261004/config-before.json (mode 0600; not committed)",
+  "restart": {
+    "previous_pid": 1631805,
+    "pid": 1687399,
+    "state": "active",
+    "automatic_restarts": 0
+  },
+  "observations": {
+    "camera_1_images": [
+      215474,
+      215476,
+      215478
+    ],
+    "camera_2_images": [
+      215475,
+      215477,
+      215479
+    ],
+    "interval_seconds_each_camera": [
+      15,
+      15
+    ],
+    "all_observed_jpeg_files_exist": true,
+    "all_observed_night_flags": false,
+    "fits_created_after_restart": 0,
+    "free_gib_observed": 5.517
+  },
+  "tests": {
+    "local_storage_pressure_policy": "passed",
+    "local_archive_policy": "not runnable: missing /etc/indi-allsky/flask.json",
+    "raspberry_isolated_archive_policy": "passed; /tmp/hybrid-sd-policy-test-20261004.log"
+  },
+  "limits": [
+    "Night source-only capture not yet observed after this daytime activation.",
+    "No sustained-load or 24-hour claim.",
+    "Capacity estimate is not a guarantee; cleanup cannot delete protected recent frames or timelapses.",
+    "No manual production-media purge performed."
+  ]
+}

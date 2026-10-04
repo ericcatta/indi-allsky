@@ -1,19 +1,20 @@
 # Hybrid acceptance status
 
-Updated 3 October 2026. **Classic frontend removal is deployed. Whole-product acceptance is not complete.**
+Updated 4 October 2026. **Classic frontend removal is deployed. Whole-product acceptance is not complete.**
 The user deferred the separate 24-hour day/night test and detector/AI implementation.
 Those activities are outside this acceptance run, not passed tests.
 
 ## Current state — 3 October 2026
 
-Application `3d87c9aa` is deployed. It includes source-backed FITS rendering and
-generation, configurable day/night archive formats, bounded preview cache,
-source-aware retention/uploads, disk UUID protection and fast lossless compression.
-The release passed **198 Python/compile and 35 JavaScript checks** with matching
-installed source hashes. Both cameras resumed. Configuration remains revision
-118: **night FITS-only/day JPEG-only is not active**; scheduled FITS is still every
-7200 seconds. Code installation is not acceptance of every-frame source-only capture.
-[Release evidence](testing/evidence/hybrid-scientific-archive-release-20261003.json).
+Application `3d87c9aa` is deployed, with 198 Python/compile and 35 JavaScript
+checks passed and matching installed sources. On 4 October the user chose SD-only
+storage, 24-hour minimum image protection and at least five days of timelapses.
+Configuration **119 is active**: night FITS-only with lossless compression, day
+JPEG-only, pressure trigger 5 GiB/target 8 GiB, KEEP_DAYS=1 and separate timelapse
+expiry of five days. Pressure cleanup excludes videos. Both cameras resumed and
+produced day JPEGs at 15-second intervals; no new day FITS were recorded.
+**Night source-only acquisition still needs direct observation.**
+[Activation evidence](testing/evidence/hybrid-sd-policy-20261004.json).
 
 Both first post-deploy FITS reconstruct to the exact decoded pixels of their
 saved JPEGs. Production administrator Process FITS now generates and delivers
@@ -24,12 +25,9 @@ hashes. Four generated-media Open links also have direct native evidence.
 
 ### Required next gates
 
-- Resolve capacity before activation: the current SD cannot retain three days of
-  estimated every-frame night FITS. A proposal of one-day minimum retention on SD
-  plus test-media cleanup, or three days on external storage, awaits the user's
-  decision. Do not activate the policy or change retention without that decision.
-- After activation, verify both cameras, source-only browsing/export/generation,
-  cleanup and bounded capture load. The 24-hour test remains deferred.
+- Observe the first night acquisition with active configuration 119, then verify
+  source-only browsing/export/generation, cleanup and bounded capture load.
+  The SD/retention choice is resolved; the 24-hour test remains deferred.
 - Finish the remaining role/control scopes in the route register. CSV filtering
   works, but the latest filtered CSV receipt is not confirmed. Native Save & Sync
   confirmation remains inaccessible to automation; the isolated attempt saved no
