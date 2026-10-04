@@ -1,3 +1,10 @@
+> **24-hour acceptance re-enabled by the user on 4 October.** The previous
+> exclusions below are superseded. Observation began at 15:34 CEST on 4 October,
+> earliest completion 15:34 CEST on 5 October, with configuration 119. It is running,
+> not passed. A read-only collector on the Pi records new frames and runtime state
+> each minute; hourly review must inspect interval evidence and gaps.
+> Detector/AI remain excluded. [Observation record](../testing/evidence/hybrid-24h-observation-20261004.json).
+
 > Current update, 4 October: the SD/retention choice is resolved and configuration
 > 119 is active (night lossless FITS, day JPEG, image pressure cutoff 24 hours,
 > timelapses retained at least five days). Both cameras resumed with 15-second

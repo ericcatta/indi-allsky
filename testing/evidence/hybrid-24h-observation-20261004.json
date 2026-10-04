@@ -1,0 +1,40 @@
+{
+  "status": "running_not_passed",
+  "start_utc": "2026-10-04T13:34:09.678478+00:00",
+  "earliest_end_utc": "2026-10-05T13:34:09.678478+00:00",
+  "application": "3d87c9aa",
+  "checkout": "4852f93633524f389216ff53800216fc8eabf697",
+  "configuration_revision": 119,
+  "observer_pid": 1691469,
+  "capture_pid": 1687399,
+  "remote_samples": "/home/eric/hybrid-observation-20261004/samples.jsonl",
+  "remote_log": "/home/eric/hybrid-observation-20261004/observer.log",
+  "collector": "testing/operational/observe_archive.py",
+  "sampling_seconds": 60,
+  "method": "Incrementally retain every new image row, camera, exposure timestamp, day/night, source mapping and file existence; query backlog, config revision and service state; count new capture log errors with inode/offset and explicit rotation/truncation gaps. No production writes except the observation JSONL/log.",
+  "initial": {
+    "camera_image_ids": [
+      216080,
+      216081
+    ],
+    "free_bytes": 5418303488,
+    "capture_active": true,
+    "web_active": true,
+    "automatic_restarts": 0,
+    "existing_failed_tasks": 4,
+    "existing_expired_tasks": 1
+  },
+  "acceptance_requirements": [
+    "At least 24 consecutive hours with both day and night; inspect all inter-frame intervals and sampling gaps.",
+    "Both cameras, source-only FITS publication/preview/export/generation, cleanup and five-day timelapse protection remain separate acceptance gates.",
+    "Do not count pre-existing failed tasks as newly observed failures.",
+    "Any acquisition or scheduling fix requires a new 24-hour period.",
+    "Read logs around any rotation gap or errors; a complete JSONL alone is not a pass verdict."
+  ],
+  "verification": [
+    "Python compile passed; first real sample succeeded and process is alive."
+  ],
+  "excluded": [
+    "Detector and AI implementation"
+  ]
+}
