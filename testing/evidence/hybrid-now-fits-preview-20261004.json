@@ -1,0 +1,46 @@
+{
+  "status": "live_preview_fix_verified_full_regression_running",
+  "commit": "306c594a",
+  "cause": "Product view-model safety check rejected source-only FITS display URLs that the media repository already accepted.",
+  "fix": "Allow only the existing media/image/<positive camera>/<positive image>/original route in the product view model.",
+  "deployment": {
+    "web_restart_local": "2026-10-04T23:12:08+02:00",
+    "capture_pid_unchanged": 1687399,
+    "web_pid": 1708497,
+    "acquisition_or_scheduling_changed": false
+  },
+  "tests": {
+    "product_view_models": 166,
+    "media_runtime": "passed",
+    "source_rendering_flask": "passed, including Now source URLs for administrator and ordinary user",
+    "javascript_cases": 35,
+    "javascript_failed": 0,
+    "full_python_regression": "running",
+    "remote_results": "/home/eric/hybrid-regression-now-fits-20261004/results.json"
+  },
+  "browser": [
+    {
+      "camera": 1,
+      "image_id": 218541,
+      "complete": true,
+      "width": 4608,
+      "height": 2592
+    },
+    {
+      "camera": 2,
+      "image_id": 218540,
+      "complete": true,
+      "width": 3840,
+      "height": 2160
+    }
+  ],
+  "remaining_defects": [
+    {
+      "task": 14738,
+      "domain": "mini timelapse generation",
+      "cause": "Thumbnail generation reads the absent archived JPEG instead of reconstructing from FITS; returns None, then generateMiniVideo dereferences fileSize.",
+      "status": "open; not fixed by this web-only commit"
+    }
+  ],
+  "observation": "Existing capture observation continues; the pre-fix interval does not certify correct Now preview behavior. Hard end remains 2026-10-05T19:15:00+02:00."
+}
