@@ -210,6 +210,35 @@ with isolated_app(multi_camera=True) as app:
             generator.pre_processor.temp_seqfolder.cleanup()
         assert videos[0]==videos[1] and len(videos[0])==64*48*3
         assert source.read_bytes()==original
+        # Execute the complete mini worker, including DB thumbnail creation and
+        # FFmpeg; generator-only tests miss reads of the removed display JPEG.
+        from types import SimpleNamespace
+        from unittest.mock import Mock
+        from indi_allsky.video import VideoWorker
+        from indi_allsky.flask.miscDb import miscDb
+        from indi_allsky.flask.models import IndiAllSkyDbMiniVideoTable, IndiAllSkyDbThumbnailTable
+        video_config.update(IMAGE_FOLDER=str(root), FFMPEG_CODEC='libx264',
+            FFMPEG_VFSCALE='64:48', FFMPEG_EXTRA_OPTIONS='-threads 1 -filter_threads 1 -preset ultrafast')
+        worker = SimpleNamespace(config=video_config, image_dir=root,
+            _miscDb=miscDb(video_config), _miscUpload=Mock(),
+            _source_fits_entry=VideoWorker._source_fits_entry,
+            _getVideoFolder=lambda *args: root,
+            thumbnail_mini_timelapse_width=64, thumbnail_mini_timelapse_height_opt=48)
+        task = Mock()
+        VideoWorker.generateMiniVideo(worker, task, image_id=image_entry.id, camera_id=cid,
+            pre_seconds=0, post_seconds=0, framerate=1, note='FITS-only worker regression')
+        task.setSuccess.assert_called_once()
+        task.setFailed.assert_not_called()
+        mini = IndiAllSkyDbMiniVideoTable.query.filter_by(camera_id=cid, note='FITS-only worker regression').one()
+        thumb = IndiAllSkyDbThumbnailTable.query.filter_by(uuid=mini.thumbnail_uuid).one()
+        assert mini.success and mini.frames == 1 and mini.fileSize > 0
+        assert thumb.camera_id == cid and thumb.fileSize > 0
+        thumbnail_pixels = cv2.imread(str(thumb.getFilesystemPath()))
+        assert thumbnail_pixels.shape[:2] == (thumb.height, thumb.width)
+        assert 0 < thumb.width <= 64 and 0 < thumb.height <= 64
+        subprocess.run(['ffmpeg','-v','error','-i',str(mini.getFilesystemPath()),'-f','null','-'],check=True)
+        assert source.read_bytes()==original
+        assert not image_entry.getFilesystemPath().exists()
         for attribute,wrong in (('camera_id',999),('createDate',datetime(2001,1,1))):
             from types import SimpleNamespace
             invalid=SimpleNamespace(id=entry.id,camera_id=entry.camera_id,createDate=entry.createDate)

@@ -1,0 +1,40 @@
+{
+  "status": "regression_passed_not_deployed",
+  "changes": [
+    "Use read_generation_frame for mini target thumbnail, including source-only FITS",
+    "Report missing target/thumbnail without None.fileSize crash"
+  ],
+  "targeted": {
+    "old_code": "FAIL: AttributeError at video.py:783 None.fileSize",
+    "candidate": "PASS: real generateMiniVideo, database thumbnail, FFmpeg output and decode, original FITS unchanged",
+    "logs": [
+      "/tmp/mini-fits-before.log",
+      "/tmp/mini-fits-regression.log"
+    ]
+  },
+  "full_regression": {
+    "pid": 1733884,
+    "checkout": "/home/eric/hybrid-mini-fits-test-20261004",
+    "results": "/home/eric/hybrid-regression-mini-fits-20261004/results.json",
+    "log": "/tmp/hybrid-regression-mini-fits.log",
+    "waits_for_now_regression_pid": 1708503,
+    "status": "passed",
+    "passed": 198,
+    "failed": 0,
+    "source_changed": false,
+    "local_source_manifest_matches": true,
+    "source_manifest_sha256": "13cac5458471d082ef1b2c7ceda8c54fbf7f33833aaec438373db5477b6d57b2"
+  },
+  "remaining": [
+    "Commit/push and deploy after continuous observation",
+    "Existing coordinator forks workers with imported modules: deployment needs a controlled runtime restart; do not assume restarting only the video child loads new code",
+    "Live repeat task 14738 equivalent on source-only FITS and verify file/thumbnail/download",
+    "Record any acquisition interruption honestly; deadline 2026-10-05 19:15 Europe/Zurich must not extend"
+  ],
+  "deployment_plan": "After the current continuous observation completes (earliest 2026-10-05 15:34 Europe/Zurich), perform a controlled runtime restart and live mini generation; no extension beyond 19:15. Acquisition/scheduling code is unchanged. Preserve actual interruption and installed-version evidence.",
+  "javascript": {
+    "passed": 35,
+    "failed": 0,
+    "note": "Same unchanged JavaScript as the Now release run."
+  }
+}

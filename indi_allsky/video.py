@@ -749,6 +749,13 @@ class VideoWorker(Process):
             'avg_sqm'           : avg_sqm,
         }
 
+        # Resolve the target through the same source-aware reader as video frames.
+        # FITS-only archives intentionally have no JPEG at getFilesystemPath().
+        thumbnail_frame = read_generation_frame(image_entry, self.image_dir, self._source_fits_entry)
+        if thumbnail_frame is None:
+            task.setFailed('Cannot read target image for mini timelapse thumbnail')
+            return
+
         # Create DB entry before creating file
         mini_video_entry = self._miscDb.addMiniVideo(
             video_file.relative_to(self.image_dir),
@@ -775,11 +782,14 @@ class VideoWorker(Process):
             mini_video_thumbnail_metadata,
             new_width=self.thumbnail_mini_timelapse_width,
             opt_height=self.thumbnail_mini_timelapse_height_opt,
-            image_entry=image_entry,  # use target image for thumbnail
+            numpy_data=thumbnail_frame[1],  # frozen display of the target exposure
         )
 
 
         # populate fileSize
+        if mini_video_thumbnail_entry is None:
+            task.setFailed('Cannot create mini timelapse thumbnail')
+            return
         mini_video_thumbnail_metadata['fileSize'] = mini_video_thumbnail_entry.fileSize
 
 

@@ -1,5 +1,5 @@
 {
-  "status": "live_preview_fix_verified_full_regression_running",
+  "status": "live_preview_fix_and_full_regression_passed",
   "commit": "306c594a",
   "cause": "Product view-model safety check rejected source-only FITS display URLs that the media repository already accepted.",
   "fix": "Allow only the existing media/image/<positive camera>/<positive image>/original route in the product view model.",
@@ -15,8 +15,11 @@
     "source_rendering_flask": "passed, including Now source URLs for administrator and ordinary user",
     "javascript_cases": 35,
     "javascript_failed": 0,
-    "full_python_regression": "running",
-    "remote_results": "/home/eric/hybrid-regression-now-fits-20261004/results.json"
+    "full_python_regression": "passed",
+    "remote_results": "/home/eric/hybrid-regression-now-fits-20261004/results.json",
+    "python_cases": 198,
+    "python_failed": 0,
+    "source_changed": false
   },
   "browser": [
     {

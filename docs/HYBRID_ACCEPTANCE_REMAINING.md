@@ -8,7 +8,7 @@
 > Current update, 4 October: the SD/retention choice is resolved and configuration
 > 119 is active (night lossless FITS, day JPEG, image pressure cutoff 24 hours,
 > timelapses retained at least five days). Both cameras resumed with 15-second
-> day JPEG cadence. Night source-only acquisition remains to be observed.
+> day JPEG cadence. Night source-only acquisition has been observed; generation and sustained acceptance remain open.
 > [Activation evidence](../testing/evidence/hybrid-sd-policy-20261004.json).
 > Older “pending activation” entries below describe earlier checkpoints.
 
@@ -16,22 +16,22 @@
 
 Updated against application `3d87c9aa` and acceptance evidence through 3 October
 2026. This is a work queue, not a coverage percentage. Classic removal is deployed;
-whole-product acceptance remains open. The 24-hour observation and detector/AI
-remain outside the agreed current run.
+whole-product acceptance remains open. The 24-hour observation is required and
+must end no later than 5 October at 19:15 Europe/Zurich. Detector/AI remain excluded.
 
 ## Latest release completed
 
 The scientific archive implementation is deployed, with **198 Python/compile and
 35 JavaScript checks** and an exact installed-source match. Both cameras resumed;
-real FITS rendering matches saved JPEG pixels. Configuration 118 still uses the
-old output policy: every-frame night FITS is **not active** pending capacity and
-retention choice. Its live source-only acquisition, generation and cleanup gates
+real FITS rendering matches saved JPEG pixels. That release initially used configuration 118; configuration 119 now activates
+every-frame night FITS. Its sustained acquisition, generation and cleanup gates
 remain open. [Release evidence](../testing/evidence/hybrid-scientific-archive-release-20261003.json).
 
 Production Process FITS previews and received downloads now pass for administrator
 on both cameras. Four generated-media Open clicks also pass for camera 2.
-The latest filtered Tasks CSV still has no verified client receipt; the isolated
-Save & Sync native confirmation remains blocked with no saved revision.
+The filtered Tasks CSV now has a browser download-event receipt (4 October,
+filter task 14738, one row); downloaded-file byte integrity was not inspected.
+The isolated Save & Sync native confirmation remains blocked with no saved revision.
 [Follow-up](../testing/evidence/hybrid-acceptance-followup-20261003.json).
 
 The earlier day-end timeout's cause remains unproven; a successful short encode

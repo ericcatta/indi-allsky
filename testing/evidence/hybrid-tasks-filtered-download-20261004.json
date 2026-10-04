@@ -1,0 +1,10 @@
+{
+  "status": "browser_download_event_confirmed",
+  "url": "https://allsky-pi.local/indi-allsky/modern-admin/tasks",
+  "search": "14738",
+  "visible_filtered_rows": 1,
+  "total_rows": 502,
+  "action": "Clicked CSV with Playwright download event listener armed; event resolved successfully.",
+  "limit": "Download API exposes no filename or bytes. This proves a browser download event, not saved-file byte integrity.",
+  "production_mutations": false
+}
