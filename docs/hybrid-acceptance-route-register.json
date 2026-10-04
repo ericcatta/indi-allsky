@@ -5611,6 +5611,13 @@
             "source": "testing/evidence/hybrid-acceptance-followup-20261003.json",
             "record": "controls[0]",
             "scope": "Current read-only recheck; historical aggregate status retained. Exact limits in source."
+          },
+          "follow_up": {
+            "reviewed_on": "2026-10-04",
+            "source": "testing/evidence/hybrid-tasks-filtered-download-20261004.json",
+            "status": "browser_download_event_confirmed",
+            "scope": "Current production administrator CSV filtered to task 14738, one visible row. Confirms a download event for the same control with a current task; does not verify historical task 12729 bytes or saved-file integrity.",
+            "historical_outcome_preserved": true
           }
         },
         {
