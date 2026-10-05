@@ -15,7 +15,7 @@ Restore configuration through the revision service if needed, then restart captu
 keep the deployed source-aware readers for any new FITS-only frames. Do not use
 an older code rollback that cannot read source-backed images.
 
-## Current application — 4 October, pending worker release
+## Current application — 5 October, pending worker release
 
 Production is at `306c594a`: the source-only FITS previews on Now are fixed and
 both camera images were decoded in the production browser. The web restart left
@@ -29,11 +29,20 @@ The complete worker test creates a thumbnail and a decodable video while leaving
 the original FITS unchanged. The previous code fails that same test at
 `None.fileSize`. [Evidence](testing/evidence/hybrid-mini-fits-repair-20261004.json).
 
+Two additional published fixes are pending activation: `d53c72f4` keeps a SQLite
+backlog-notification conflict from terminating capture, and `2f850d7d` freezes
+day/night state during each frame's processing so archive format, rendering and
+metadata agree. The combined candidate passed 200 Python/compile checks with
+an exact source-manifest match. JavaScript is unchanged from the 35-check run.
+See the [SQLite evidence](testing/evidence/hybrid-capture-notification-repair-20261005.json)
+and [phase evidence](testing/evidence/hybrid-frame-phase-repair-20261005.json).
+
 ### Activate the pending worker release
 
-Do this after the continuous observation reaches its documented end (earliest
-5 October 2026 at 15:34 Europe/Zurich), and finish live tests by **19:15**.
-Do not stop or restart the observer merely because a read times out.
+The collector stopped at 15:34 CEST on 5 October after 24 hours. The 19:15
+maintenance/test deadline has expired: **wait for a new user-authorized window**
+before executing these steps. The observation found defects and evidence gaps;
+it is not a passed acceptance test of either the old or corrected runtime.
 
 1. Confirm the observer's final record, installed Git revision, configuration
    revision 119, free space, capture/web service state and running video tasks.
@@ -53,8 +62,13 @@ Do not stop or restart the observer merely because a read times out.
    timelapses from recorded night FITS for each camera, then verify task success,
    the output file, thumbnail, playback and download. Preserve original FITS.
    Do not claim 24 hours of the newly activated worker from the earlier period.
+6. Inspect child-worker PIDs and journal errors, not just the parent service's
+   restart counter. Do not deliberately lock the live database. Observe a natural
+   day/night transition if it falls inside the new window; otherwise explicitly
+   retain the automated-only qualification for that transition. Do not force night
+   or extend the window to manufacture live coverage.
 
-### Roll back this worker fix if necessary
+### Roll back a worker fix if necessary
 
 Keep the current source-aware archive readers and configuration 119. Revert only
 `7641e966`'s application change in `indi_allsky/video.py` (or restore that exact
@@ -63,6 +77,9 @@ window and verify both cameras. This restores the known mini-generation defect;
 report that limitation. Do not restore an old database, delete archived media or
 use a pre-source-aware application snapshot. Repository history should reflect
 any rollback through a new commit, without rewriting published history.
+For the SQLite or phase fixes, independently revert the application change in
+`capture.py` or `image.py`, respectively, using the preserved pre-deploy revision.
+Record the reintroduced defect; do not revert unrelated source-aware functionality.
 
 ## Release history — not current deployment instructions
 
