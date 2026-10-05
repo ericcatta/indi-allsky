@@ -11,6 +11,10 @@ Night source-only capture acceptance is still open.
 
 ### Daytime-first storage recovery
 
+Activated as `677afbab` at 21:39 CEST on 5 October; both cameras resumed,
+fresh FITS files were verified and the updated Settings page was checked.
+[Tests and release evidence](testing/evidence/hybrid-storage-priority-20261005.json).
+
 The 5 October cleanup update changes the priority of eligible assets:
 daytime images, night images, daytime generated outputs, then night generated
 outputs (including timelapses). Each group is ordered oldest first across cameras.
@@ -32,7 +36,7 @@ an older code rollback that cannot read source-backed images.
 
 ## Current application — 5 October, worker release activated
 
-Production is at `db5fc9c0`, including mini-FITS thumbnail repair `7641e966`,
+The worker repair release `db5fc9c0` (included in current `677afbab`) contains mini-FITS thumbnail repair `7641e966`,
 capture-notification contention repair `d53c72f4`, and stable per-frame day/night
 context `2f850d7d`. The combined candidate passed 200 Python/compile checks;
 JavaScript was unchanged from the 35-check run. Installed application hashes were

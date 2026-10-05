@@ -7,7 +7,8 @@ It found defects and evidence gaps; it is not a passed acceptance test.
 The user subsequently reopened maintenance with “ok, fai tutto”.
 
 The mini-FITS, capture-notification and per-frame day/night repairs are deployed
-at `db5fc9c0`. Both cameras resumed FITS capture. Mini outputs 9/10 passed real
+at `db5fc9c0`, followed by daytime-first pressure cleanup in `677afbab`.
+Both cameras resumed FITS capture after each activation. Mini outputs 9/10 passed real
 worker generation, complete file decoding and native browser playback; scientific
 original hashes are unchanged. A controlled cleanup restored 8 GiB using the
 existing 24-hour image protection. Native Hybrid Controller Save & Sync also

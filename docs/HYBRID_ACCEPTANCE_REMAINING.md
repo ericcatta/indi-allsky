@@ -3,7 +3,8 @@
 Updated 5 October 2026. Classic frontend removal is deployed; whole-product
 acceptance remains open. The user reopened maintenance after the 19:15 cutoff.
 
-The three worker repairs are now installed at `db5fc9c0`. Both cameras resumed
+The three worker repairs are installed at `db5fc9c0`, followed by daytime-first
+pressure cleanup in `677afbab`. Both cameras resumed
 night FITS capture; new files match their camera/exposure records. Mini timelapses
 9 and 10 generated from FITS, passed complete decoding and native browser playback,
 and left original hashes unchanged. The short live check found no regular-log
