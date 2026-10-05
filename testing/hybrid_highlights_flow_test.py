@@ -51,6 +51,24 @@ def run():
                 assert '/media/%s/' % kind not in cards[1]
             assert 'FITS unavailable for this exposure.' in cards[1]
 
+            # Library and archive must offer the same exact-exposure originals,
+            # rather than calling the processed JPEG an original.
+            for archive in ('library', 'media/archive'):
+                base = '/indi-allsky/modern-admin/' + archive
+                page = client.get(base + '?camera_id=1&search=archive-image-100.jpg')
+                assert ids(page) == [100]
+                assert 'Download processed JPEG' in page.text
+                for kind in ('fits', 'raw'):
+                    target = '/indi-allsky/modern-admin/media/%s/1/1/download' % kind
+                    assert target in page.text and 'Download original ' + kind.upper() in page.text
+                    original = client.get(target)
+                    assert original.status_code == 200 and len(original.data) > 100
+                    assert 'attachment;' in original.headers['Content-Disposition']
+                other = client.get(base + '?camera_id=1&search=archive-image-101.jpg')
+                assert ids(other) == [101]
+                assert '/media/fits/' not in other.text and '/media/raw/' not in other.text
+                assert 'FITS unavailable for this exposure.' in other.text
+
             for href in re.findall(r'href="([^"]+)"\s*>Inspect image</a>',response.text):
                 detail=client.get(html.unescape(href))
                 assert detail.status_code==302 and 'camera_id=1' in detail.location and 'profile_id=test-profile-1' in detail.location
@@ -83,6 +101,12 @@ def run():
         ambiguous=client.get(endpoint+'?camera_id=1').text
         first=re.findall(r'<article.*?</article>',ambiguous,re.S)[0]
         assert '/media/fits/' not in first and '/media/raw/1/1/download' in first
+        for archive in ('library', 'media/archive'):
+            ambiguous = client.get('/indi-allsky/modern-admin/' + archive +
+                                   '?camera_id=1&search=archive-image-100.jpg')
+            assert ids(ambiguous) == [100]
+            assert '/media/fits/' not in ambiguous.text
+            assert '/media/raw/1/1/download' in ambiguous.text
         with app.app_context():Image.query.delete();db.session.commit()
         response=client.get(endpoint)
         assert not ids(response) and 'No saved images are available' in response.text

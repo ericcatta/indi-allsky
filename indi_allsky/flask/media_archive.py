@@ -91,8 +91,15 @@ class ModernAdminMediaArchive:
         entries = entries[:PAGE_SIZE]
         if direction == 'previous':
             entries.reverse()
+        sources = exposure_source_downloads(entries) if self.kind == 'image' else {}
+        items = []
+        for entry in entries:
+            item = self.item(entry)
+            if self.kind == 'image':
+                item['source_downloads'] = sources[entry.id]
+            items.append(item)
         return {
-            'items': [self.item(entry) for entry in entries],
+            'items': items,
             'previous': self.cursor(entries[0]) if entries and (more if direction == 'previous' else anchor is not None) else None,
             'next': self.cursor(entries[-1]) if entries and (anchor is not None if direction == 'previous' else more) else None,
         }
@@ -124,6 +131,8 @@ class ModernAdminMediaArchive:
             'success': getattr(entry, 'success', None), 'note': getattr(entry, 'note', ''),
             'width': entry.width, 'height': entry.height, 'frames': getattr(entry, 'frames', None),
             'preview_url': preview, 'video': video,
+            'processed_format': {'.jpg': 'JPEG', '.jpeg': 'JPEG'}.get(
+                Path(entry.filename).suffix.lower(), Path(entry.filename).suffix.lstrip('.').upper()),
             'download_url': url_for('indi_allsky.modern_admin_source_download_view', kind=self.kind,
                 camera_id=entry.camera_id, media_id=entry.id)}
 

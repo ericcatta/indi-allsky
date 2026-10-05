@@ -44,6 +44,16 @@ contains no errors. Persistent database outage remains outside bounded retry
 recovery. A new 24-hour observation awaits the user’s decision after the previous
 19:15 cutoff; none has been started. [Task-state evidence](../testing/evidence/hybrid-task-failure-20261005.json). [Evidence](../testing/evidence/hybrid-storage-contention-20261005.json).
 
+## Archive download distinction
+
+Library and Media Archive now distinguish processed image downloads from exact-exposure
+FITS/RAW originals. Source matching is batched per page and requires the same camera
+and timestamp; missing or ambiguous originals are explicitly unavailable. The change
+preserves download authorization and stable archive pagination. Targeted real Flask
+checks pass for both roles and both archive entrypoints. All 202 Python/compile checks and 35 JavaScript checks pass. Production
+deployment evidence is pending. Image-detail wording and the recent-image lightbox
+still need the same terminology review; this does not close whole-product acceptance.
+
 ## Latest release completed
 
 The scientific archive implementation is deployed, with **198 Python/compile and

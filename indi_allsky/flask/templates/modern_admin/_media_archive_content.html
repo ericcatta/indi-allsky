@@ -32,7 +32,7 @@
       {% if item.preview_url %}
         {% if item.video %}<video src="{{ item.preview_url }}" controls preload="metadata" aria-label="Play {{ item.filename }}"></video>
         {% else %}<img src="{{ item.preview_url }}" alt="{{ item.filename }}" loading="lazy">{% endif %}
-      {% else %}<p>No browser preview is available. Download the original to inspect this file.</p>{% endif %}
+      {% else %}<p>No browser preview is available. Use the downloads below to inspect this file.</p>{% endif %}
       </div>
       <div class="modern-admin-media-body">
         <p class="modern-admin-card-label">Camera {{ item.camera_id }} · {{ 'Night' if item.night else 'Day' }} · ID {{ item.id }}</p>
@@ -46,8 +46,13 @@
           {% if item.excluded %}<div><dt>Viewer state</dt><dd>Excluded</dd></div>{% endif %}
         </dl>
         {% if item.note %}<p>{{ item.note }}</p>{% endif %}
-        <a class="modern-admin-file-action" href="{{ item.download_url }}">Download original</a>
+        <a class="modern-admin-file-action" href="{{ item.download_url }}">{% if archive_values.kind == 'image' %}Download processed {{ item.processed_format }}{% else %}Download original{% endif %}</a>
         {% if archive_values.kind == 'image' %}
+        {% for kind in ('fits', 'raw') %}
+        {% if item.source_downloads.get(kind) %}
+        <a class="modern-admin-file-action" href="{{ item.source_downloads[kind] }}">Download original {{ kind|upper }}</a>
+        {% else %}<span>{{ kind|upper }} unavailable for this exposure.</span>{% endif %}
+        {% endfor %}
         <a href="{{ url_for('indi_allsky.modern_admin_media_image_detail_view', image_id=item.id, camera_id=item.camera_id, archive_return=request.full_path) }}">Image details</a>
         <a href="{{ url_for('indi_allsky.modern_admin_mini_generate_view', image_id=item.id, camera_id=item.camera_id) }}">Create mini timelapse</a>
         {% elif archive_values.kind == 'fits' %}

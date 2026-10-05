@@ -1,0 +1,20 @@
+{
+  "status": "automated_pass_deployment_pending",
+  "scope": "Library and Media Archive processed versus exact-exposure original downloads",
+  "source_matching": "Two batch queries per image page; exact camera and createDate; omit ambiguous or missing sources",
+  "tests": {
+    "targeted": "Both roles, both entrypoints, actual FITS/RAW attachments, cross-camera isolation, missing and ambiguous sources",
+    "python_compile": 202,
+    "javascript": 35,
+    "result": "passed",
+    "source_changed": false,
+    "source_manifest_sha256": "8dbd553de008e4736e05a2dabf672f33c75e903840cc3b5942fa1837ce577018",
+    "report": "/home/eric/hybrid-regression-archive-downloads-20261005/results.json",
+    "javascript_report": "/tmp/hybrid-archive-downloads-js-20261005.json"
+  },
+  "limits": [
+    "Native production verification pending",
+    "Not whole-product acceptance",
+    "Image detail and recent-image lightbox terminology remains open"
+  ]
+}
