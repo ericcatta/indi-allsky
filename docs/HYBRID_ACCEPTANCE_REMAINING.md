@@ -87,6 +87,14 @@ this table alone does not certify all discovered controls.
 
 ## Control matrix reconciliation
 
+The 5 October discovery now records 99 GET entries, 500 contexts and 7,377 static
+identities. No render defects or searched placeholder phrases were found. The
+10 added identities and one reused button identity are linked to explicit scoped
+automated/native evidence in the [control delta](../testing/evidence/hybrid-control-delta-20261005.json).
+Two old link identities are retired. This updates discovery and the changed-control
+proof mapping; it does not certify all existing or JavaScript-generated controls.
+
+
 Use the [route register](hybrid-acceptance-route-register.json) and its linked
 control discovery, retaining role, camera/profile, prerequisites, expected
 request/effect and source revision. There are 17 historical blocked/defect

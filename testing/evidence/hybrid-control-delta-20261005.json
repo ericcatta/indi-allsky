@@ -1,0 +1,648 @@
+{
+  "revision": "e56c3536",
+  "source_manifest_sha256": "191cbacdfd38d597dbf4921876ce2ace7cb910d4fb7e0af16dc372709c788ff5",
+  "purpose": "Reconcile controls added since October 1; link scoped evidence without copying old outcomes by generated identity.",
+  "discovery": {
+    "get_entries": 99,
+    "contexts": 500,
+    "rendered": 376,
+    "blocked": 124,
+    "render_defects": 0,
+    "placeholder_signals": 0,
+    "occurrences": 44002,
+    "identities": 7377,
+    "raw_report": "/home/eric/hybrid-controls-20261005.json",
+    "raw_sha256": "96f5340618cba3237e66e59dcd3c45605b13ae51a3d19a1113c447a9ce32ddbd",
+    "index": "/home/eric/hybrid-control-index-20261005.json",
+    "index_sha256": "95ff7333c8a03ebf87578c4e880d4fe490816b79971d4e17a1261c578caffea2"
+  },
+  "added": 10,
+  "retired": [
+    {
+      "id": "/indi-allsky/modern-admin/media/keograms::0d77176aeca17a7a::1",
+      "label": "Open Realtime Keogram"
+    },
+    {
+      "id": "/indi-allsky/modern-admin/media/keograms::5f8c920b47f9b26d::1",
+      "label": "Open Long Term Keogram"
+    }
+  ],
+  "changed_button_identities": 1,
+  "controls": [
+    {
+      "id": "/indi-allsky/modern-admin/media/keograms::65602921c6a1cfdc::1",
+      "label": "Open Long Term Keogram",
+      "references": [
+        [
+          26,
+          1,
+          70
+        ],
+        [
+          26,
+          3,
+          70
+        ]
+      ],
+      "kind": "added",
+      "proofs": [
+        {
+          "status": "superato",
+          "method": "real Flask integration",
+          "source": "testing/hybrid_media_detail_context_test.py",
+          "scope": "Both fixture roles/cameras: follow exact link and verify selected camera/profile in destination context."
+        },
+        {
+          "status": "superato",
+          "method": "native production browser",
+          "source": "testing/evidence/hybrid-keogram-footer-20261005.json",
+          "scope": "Administrator camera 2 only; Realtime decoded image, Long Term selected-camera form. Other scopes not promoted."
+        }
+      ],
+      "contexts": [
+        {
+          "role": "admin",
+          "camera_id": 2,
+          "profile_id": "test-profile-2"
+        },
+        {
+          "role": "user",
+          "camera_id": 2,
+          "profile_id": "test-profile-2"
+        }
+      ]
+    },
+    {
+      "id": "/indi-allsky/modern-admin/media/keograms::b188de333e171d9c::1",
+      "label": "Open Long Term Keogram",
+      "references": [
+        [
+          26,
+          0,
+          70
+        ],
+        [
+          26,
+          2,
+          70
+        ]
+      ],
+      "kind": "added",
+      "proofs": [
+        {
+          "status": "superato",
+          "method": "real Flask integration",
+          "source": "testing/hybrid_media_detail_context_test.py",
+          "scope": "Both fixture roles/cameras: follow exact link and verify selected camera/profile in destination context."
+        }
+      ],
+      "contexts": [
+        {
+          "role": "admin",
+          "camera_id": 1,
+          "profile_id": "test-profile-1"
+        },
+        {
+          "role": "user",
+          "camera_id": 1,
+          "profile_id": "test-profile-1"
+        }
+      ]
+    },
+    {
+      "id": "/indi-allsky/modern-admin/media/keograms::ca4a78a328c1578e::1",
+      "label": "Open Realtime Keogram",
+      "references": [
+        [
+          26,
+          1,
+          69
+        ],
+        [
+          26,
+          3,
+          69
+        ]
+      ],
+      "kind": "added",
+      "proofs": [
+        {
+          "status": "superato",
+          "method": "real Flask integration",
+          "source": "testing/hybrid_media_detail_context_test.py",
+          "scope": "Both fixture roles/cameras: follow exact link and verify selected camera/profile in destination context."
+        },
+        {
+          "status": "superato",
+          "method": "native production browser",
+          "source": "testing/evidence/hybrid-keogram-footer-20261005.json",
+          "scope": "Administrator camera 2 only; Realtime decoded image, Long Term selected-camera form. Other scopes not promoted."
+        }
+      ],
+      "contexts": [
+        {
+          "role": "admin",
+          "camera_id": 2,
+          "profile_id": "test-profile-2"
+        },
+        {
+          "role": "user",
+          "camera_id": 2,
+          "profile_id": "test-profile-2"
+        }
+      ]
+    },
+    {
+      "id": "/indi-allsky/modern-admin/media/keograms::ef7e22b10dc51edb::1",
+      "label": "Open Realtime Keogram",
+      "references": [
+        [
+          26,
+          0,
+          69
+        ],
+        [
+          26,
+          2,
+          69
+        ]
+      ],
+      "kind": "added",
+      "proofs": [
+        {
+          "status": "superato",
+          "method": "real Flask integration",
+          "source": "testing/hybrid_media_detail_context_test.py",
+          "scope": "Both fixture roles/cameras: follow exact link and verify selected camera/profile in destination context."
+        }
+      ],
+      "contexts": [
+        {
+          "role": "admin",
+          "camera_id": 1,
+          "profile_id": "test-profile-1"
+        },
+        {
+          "role": "user",
+          "camera_id": 1,
+          "profile_id": "test-profile-1"
+        }
+      ]
+    },
+    {
+      "id": "/indi-allsky/modern-admin/settings/storage-protection::6554c085e6ce1c91::1",
+      "label": "Compress FITS without losing data",
+      "references": [
+        [
+          69,
+          0,
+          63
+        ],
+        [
+          69,
+          1,
+          63
+        ],
+        [
+          69,
+          2,
+          63
+        ],
+        [
+          69,
+          3,
+          63
+        ]
+      ],
+      "kind": "added",
+      "proofs": [
+        {
+          "status": "superato",
+          "method": "real Flask integration",
+          "source": "testing/hybrid_archive_policy_test.py",
+          "scope": "Admin persists night FITS/day processed with lossless compression; invalid mode, stale revision, ordinary-role write rejection and CSRF checks. Other field-value combinations are not certified here."
+        },
+        {
+          "status": "superato",
+          "method": "native isolated browser",
+          "source": "testing/evidence/hybrid-archive-volume-browser-20261003.json",
+          "record": "tests[0]",
+          "scope": "Save recommended archive formats and confirm saved day/night choices and revision. Not a native toggle of every compression/mode option."
+        }
+      ],
+      "contexts": [
+        {
+          "role": "admin",
+          "camera_id": 1,
+          "profile_id": "test-profile-1"
+        },
+        {
+          "role": "admin",
+          "camera_id": 2,
+          "profile_id": "test-profile-2"
+        },
+        {
+          "role": "user",
+          "camera_id": 1,
+          "profile_id": "test-profile-1"
+        },
+        {
+          "role": "user",
+          "camera_id": 2,
+          "profile_id": "test-profile-2"
+        }
+      ]
+    },
+    {
+      "id": "/indi-allsky/modern-admin/settings/storage-protection::6d2125d66fe4904e::1",
+      "label": "Save disk protection",
+      "references": [
+        [
+          69,
+          0,
+          60
+        ],
+        [
+          69,
+          1,
+          60
+        ],
+        [
+          69,
+          2,
+          60
+        ],
+        [
+          69,
+          3,
+          60
+        ]
+      ],
+      "kind": "identity_reused_for_different_control",
+      "proofs": [
+        {
+          "status": "superato",
+          "method": "real Flask integration",
+          "source": "testing/hybrid_archive_volume_settings_test.py",
+          "scope": "Pin UUID, reject stale edits/CSRF/ordinary role, recover while volume is absent, preserve source on denied access."
+        },
+        {
+          "status": "superato",
+          "method": "native isolated browser",
+          "source": "testing/evidence/hybrid-archive-volume-browser-20261003.json",
+          "records": [
+            "tests[1]",
+            "tests[2]"
+          ],
+          "scope": "No-UUID error without revision and save unpinned disk configuration. Physical external disk unavailable and untested."
+        }
+      ],
+      "previous_label": "Save storage protection",
+      "contexts": [
+        {
+          "role": "admin",
+          "camera_id": 1,
+          "profile_id": "test-profile-1"
+        },
+        {
+          "role": "admin",
+          "camera_id": 2,
+          "profile_id": "test-profile-2"
+        },
+        {
+          "role": "user",
+          "camera_id": 1,
+          "profile_id": "test-profile-1"
+        },
+        {
+          "role": "user",
+          "camera_id": 2,
+          "profile_id": "test-profile-2"
+        }
+      ]
+    },
+    {
+      "id": "/indi-allsky/modern-admin/settings/storage-protection::6d2125d66fe4904e::2",
+      "label": "Save archive formats",
+      "references": [
+        [
+          69,
+          0,
+          64
+        ],
+        [
+          69,
+          1,
+          64
+        ],
+        [
+          69,
+          2,
+          64
+        ],
+        [
+          69,
+          3,
+          64
+        ]
+      ],
+      "kind": "added",
+      "proofs": [
+        {
+          "status": "superato",
+          "method": "real Flask integration",
+          "source": "testing/hybrid_archive_policy_test.py",
+          "scope": "Admin persists night FITS/day processed with lossless compression; invalid mode, stale revision, ordinary-role write rejection and CSRF checks. Other field-value combinations are not certified here."
+        },
+        {
+          "status": "superato",
+          "method": "native isolated browser",
+          "source": "testing/evidence/hybrid-archive-volume-browser-20261003.json",
+          "record": "tests[0]",
+          "scope": "Save recommended archive formats and confirm saved day/night choices and revision. Not a native toggle of every compression/mode option."
+        }
+      ],
+      "contexts": [
+        {
+          "role": "admin",
+          "camera_id": 1,
+          "profile_id": "test-profile-1"
+        },
+        {
+          "role": "admin",
+          "camera_id": 2,
+          "profile_id": "test-profile-2"
+        },
+        {
+          "role": "user",
+          "camera_id": 1,
+          "profile_id": "test-profile-1"
+        },
+        {
+          "role": "user",
+          "camera_id": 2,
+          "profile_id": "test-profile-2"
+        }
+      ]
+    },
+    {
+      "id": "/indi-allsky/modern-admin/settings/storage-protection::6d2125d66fe4904e::3",
+      "label": "Save storage protection",
+      "references": [
+        [
+          69,
+          0,
+          69
+        ],
+        [
+          69,
+          1,
+          69
+        ],
+        [
+          69,
+          2,
+          69
+        ],
+        [
+          69,
+          3,
+          69
+        ]
+      ],
+      "kind": "added",
+      "proofs": [
+        {
+          "status": "superato",
+          "method": "real Flask integration",
+          "source": "testing/hybrid_storage_settings_flow_test.py",
+          "scope": "Persist disabled and enabled policies, preserve unrelated settings/profile, reject invalid target/stale edit/CSRF/ordinary-role mutation."
+        }
+      ],
+      "contexts": [
+        {
+          "role": "admin",
+          "camera_id": 1,
+          "profile_id": "test-profile-1"
+        },
+        {
+          "role": "admin",
+          "camera_id": 2,
+          "profile_id": "test-profile-2"
+        },
+        {
+          "role": "user",
+          "camera_id": 1,
+          "profile_id": "test-profile-1"
+        },
+        {
+          "role": "user",
+          "camera_id": 2,
+          "profile_id": "test-profile-2"
+        }
+      ]
+    },
+    {
+      "id": "/indi-allsky/modern-admin/settings/storage-protection::a962d65d3125a7a9::1",
+      "label": "Require this filesystem before using the archive",
+      "references": [
+        [
+          69,
+          0,
+          59
+        ],
+        [
+          69,
+          1,
+          59
+        ],
+        [
+          69,
+          2,
+          59
+        ],
+        [
+          69,
+          3,
+          59
+        ]
+      ],
+      "kind": "added",
+      "proofs": [
+        {
+          "status": "superato",
+          "method": "real Flask integration",
+          "source": "testing/hybrid_archive_volume_settings_test.py",
+          "scope": "Pin UUID, reject stale edits/CSRF/ordinary role, recover while volume is absent, preserve source on denied access."
+        },
+        {
+          "status": "superato",
+          "method": "native isolated browser",
+          "source": "testing/evidence/hybrid-archive-volume-browser-20261003.json",
+          "records": [
+            "tests[1]",
+            "tests[2]"
+          ],
+          "scope": "No-UUID error without revision and save unpinned disk configuration. Physical external disk unavailable and untested."
+        }
+      ],
+      "contexts": [
+        {
+          "role": "admin",
+          "camera_id": 1,
+          "profile_id": "test-profile-1"
+        },
+        {
+          "role": "admin",
+          "camera_id": 2,
+          "profile_id": "test-profile-2"
+        },
+        {
+          "role": "user",
+          "camera_id": 1,
+          "profile_id": "test-profile-1"
+        },
+        {
+          "role": "user",
+          "camera_id": 2,
+          "profile_id": "test-profile-2"
+        }
+      ]
+    },
+    {
+      "id": "/indi-allsky/modern-admin/settings/storage-protection::archive-day::1",
+      "label": "Day",
+      "references": [
+        [
+          69,
+          0,
+          62
+        ],
+        [
+          69,
+          1,
+          62
+        ],
+        [
+          69,
+          2,
+          62
+        ],
+        [
+          69,
+          3,
+          62
+        ]
+      ],
+      "kind": "added",
+      "proofs": [
+        {
+          "status": "superato",
+          "method": "real Flask integration",
+          "source": "testing/hybrid_archive_policy_test.py",
+          "scope": "Admin persists night FITS/day processed with lossless compression; invalid mode, stale revision, ordinary-role write rejection and CSRF checks. Other field-value combinations are not certified here."
+        },
+        {
+          "status": "superato",
+          "method": "native isolated browser",
+          "source": "testing/evidence/hybrid-archive-volume-browser-20261003.json",
+          "record": "tests[0]",
+          "scope": "Save recommended archive formats and confirm saved day/night choices and revision. Not a native toggle of every compression/mode option."
+        }
+      ],
+      "contexts": [
+        {
+          "role": "admin",
+          "camera_id": 1,
+          "profile_id": "test-profile-1"
+        },
+        {
+          "role": "admin",
+          "camera_id": 2,
+          "profile_id": "test-profile-2"
+        },
+        {
+          "role": "user",
+          "camera_id": 1,
+          "profile_id": "test-profile-1"
+        },
+        {
+          "role": "user",
+          "camera_id": 2,
+          "profile_id": "test-profile-2"
+        }
+      ]
+    },
+    {
+      "id": "/indi-allsky/modern-admin/settings/storage-protection::archive-night::1",
+      "label": "Night",
+      "references": [
+        [
+          69,
+          0,
+          61
+        ],
+        [
+          69,
+          1,
+          61
+        ],
+        [
+          69,
+          2,
+          61
+        ],
+        [
+          69,
+          3,
+          61
+        ]
+      ],
+      "kind": "added",
+      "proofs": [
+        {
+          "status": "superato",
+          "method": "real Flask integration",
+          "source": "testing/hybrid_archive_policy_test.py",
+          "scope": "Admin persists night FITS/day processed with lossless compression; invalid mode, stale revision, ordinary-role write rejection and CSRF checks. Other field-value combinations are not certified here."
+        },
+        {
+          "status": "superato",
+          "method": "native isolated browser",
+          "source": "testing/evidence/hybrid-archive-volume-browser-20261003.json",
+          "record": "tests[0]",
+          "scope": "Save recommended archive formats and confirm saved day/night choices and revision. Not a native toggle of every compression/mode option."
+        }
+      ],
+      "contexts": [
+        {
+          "role": "admin",
+          "camera_id": 1,
+          "profile_id": "test-profile-1"
+        },
+        {
+          "role": "admin",
+          "camera_id": 2,
+          "profile_id": "test-profile-2"
+        },
+        {
+          "role": "user",
+          "camera_id": 1,
+          "profile_id": "test-profile-1"
+        },
+        {
+          "role": "user",
+          "camera_id": 2,
+          "profile_id": "test-profile-2"
+        }
+      ]
+    }
+  ],
+  "automated_execution": "All referenced Python cases passed in /home/eric/hybrid-regression-task-failure-20261005/results.json (202 checks, source unchanged).",
+  "limits": [
+    "Discovery alone certifies no effects.",
+    "Only the stated method/role/camera/option scope is supported by each proof.",
+    "Remaining historical identities and dynamically generated browser controls still require full reconciliation.",
+    "1078 label differences include corrected collector label resolution, not 1078 new functions."
+  ]
+}
