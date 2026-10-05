@@ -42,7 +42,7 @@
             }
             status.textContent = result['success-message'];
             if (payload.get('RESET_KEYS')) {
-                status.textContent += ' Security keys were reset; sign in again.';
+                status.textContent += ' New security keys were saved. Reload the web service to activate them and invalidate existing sessions, then sign in again.';
             }
         } catch (error) {
             status.textContent = 'Restore could not be confirmed: ' + error.message + ' Check Config History before retrying.';

@@ -24,7 +24,7 @@ var camera_id = {{ camera_id }};
             {{ form_config_restore.csrf_token }}
             <p>{{ form_config_restore.CONFIG_UPLOAD.label }} {{ form_config_restore.CONFIG_UPLOAD(required=true, accept='.json,application/json') }}</p>
             <p>{{ form_config_restore.FLUSH_CONFIGS() }} {{ form_config_restore.FLUSH_CONFIGS.label }} — Permanently remove previous configuration revisions.</p>
-            <p>{{ form_config_restore.RESET_KEYS() }} {{ form_config_restore.RESET_KEYS.label }} — Replace security keys and invalidate sessions. Unavailable when password encryption is enabled.</p>
+            <p>{{ form_config_restore.RESET_KEYS() }} {{ form_config_restore.RESET_KEYS.label }} — Save new security keys. Reload the web service afterwards to activate them and invalidate sessions. Unavailable when password encryption is enabled.</p>
             <button type="submit" class="btn btn-primary">Restore configuration</button>
             <p role="status" aria-live="polite" data-restore-status></p>
         </form>

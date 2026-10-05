@@ -43,7 +43,7 @@ async function run({snapshot = false, checked = false, disabled = false, respons
 (async () => {
     assert.equal(await run({snapshot: true, twice: true}), 'Restored Config');
     assert.equal(await run({twice: true}), 'Restored Config');
-    assert.match(await run({checked: true}), /sign in again/);
+    assert.match(await run({checked: true}), /Reload the web service to activate them and invalidate existing sessions, then sign in again/);
     assert.equal(await run({checked: true, disabled: true}), 'Restored Config');
     assert.match(await run({reject: true}), /offline.*Check Config History/);
     assert.match(await run({response: {ok: false, json: async () => ({CONFIG_UPLOAD: ['Invalid JSON']})}}), /CONFIG_UPLOAD: Invalid JSON/);

@@ -684,6 +684,12 @@
           "record": "targeted",
           "control": "restore: isolated concurrent HTTP write rejected without losing committed profile or queuing effects",
           "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-native-file-restore-20261005.json",
+          "record": "flow",
+          "control": "Native synthetic file upload and restore with both flags unchecked; success state, exactly one new revision, identical config and no effects queued",
+          "recorded_status": "superato"
         }
       ]
     },

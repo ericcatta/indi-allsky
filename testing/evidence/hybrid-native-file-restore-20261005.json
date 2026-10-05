@@ -1,0 +1,40 @@
+{
+  "status": "scoped_native_restore_passed",
+  "application": "24e01cc4 (runtime from 677afbab)",
+  "environment": "Disposable Flask database/config/media on Raspberry, localhost:18123 over SSH; process and DBus effects blocked; key-file writes redirected exclusively to the fixture directory",
+  "role": "Synthetic administrator test-user-1",
+  "flow": [
+    "Select synthetic configuration JSON through native browser file chooser",
+    "Verify selected filename; Flush Configs and Reset Security Keys remain unchecked",
+    "Click Restore configuration: button disabled and Restoring configuration shown",
+    "Observe Restored Config and enabled submit button",
+    "Read SQLite: exactly revisions 1 and 2, identical complete configuration dictionaries, zero queued tasks"
+  ],
+  "production_modified": false,
+  "limits": [
+    "File chooser tool stalled before completing; this was not treated as an application failure or retried blindly",
+    "Flush/key-reset native flow awaits user handoff, because browser rules reserve authentication-credential changes to the user",
+    "Earlier HTTP tests cover all four flush/reset flag combinations on disposable state; they do not substitute for native key-reset and subsequent login proof"
+  ],
+  "automated_reload_login": {
+    "status": "passed",
+    "script": "testing/evidence/hybrid-restore-relogin-20261005.py",
+    "scope": "Fresh disposable fixture, independent of pending native browser fixture",
+    "checks": [
+      "Both security keys change on disk",
+      "Existing app retains old key until reload",
+      "Fresh app process rejects old session",
+      "New real login succeeds",
+      "Flush leaves only restored revision 2"
+    ]
+  },
+  "message_correction": "UI now states that saved security keys activate and invalidate sessions after web-service reload",
+  "regression": {
+    "python_compile": 201,
+    "javascript": 35,
+    "status": "passed",
+    "sources_unchanged": true,
+    "source_manifest_sha256": "de0757bae07b0134ebf8c869d8153c0d3c37dcac4de5a5487af5b46d68b12ea8",
+    "report": "/home/eric/hybrid-regression-restore-message-20261005/results.json"
+  }
+}
