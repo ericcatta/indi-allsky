@@ -289,10 +289,10 @@ class VideoWorker(Process):
         except Exception as error:
             # A failed flush expires ORM attributes; use the queue ID until rollback.
             logger.exception('Video task %d action=%s failed', task_id, action)
-            db.session.rollback()
-            db.session.refresh(task)
-            if task.state in (TaskQueueState.QUEUED, TaskQueueState.RUNNING):
-                task.setFailed('Task failed ({0}); see service log'.format(type(error).__name__))
+            from .task_failure import record_video_failure
+            from .flask import models
+            record_video_failure(db.session, models, task_id,
+                                 'Task failed ({0}); see service log'.format(type(error).__name__))
 
 
     def generateVideo(self, task, **kwargs):

@@ -1,0 +1,30 @@
+{
+  "status": "candidate_all_regression_passed",
+  "base_revision": "e083ce66",
+  "defect": "Before the cleanup retry deployment, task 14958 remained RUNNING after the video worker exited: the failure handler encountered another SQLite lock while writing FAILED.",
+  "change": "Roll back the failed effect and perform a fresh conditional status UPDATE by immutable task ID, with at most three attempts for SQLite BUSY/LOCKED. No read snapshot precedes the write and the original effect is never replayed.",
+  "targeted_test": {
+    "path": "testing/hybrid_video_failure_test.py",
+    "result": "passed",
+    "coverage": [
+      "Real worker boundary with a competing SQLite writer during effect failure",
+      "Failure persisted after lock release and next real task executes successfully",
+      "Failed effect called exactly once",
+      "Terminal outcomes, other queues and missing tasks preserved",
+      "Persistent lock bounded and unrelated failures propagated"
+    ]
+  },
+  "regression": {
+    "python_report": "/home/eric/hybrid-regression-task-failure-20261005/results.json",
+    "source_manifest_sha256": "191cbacdfd38d597dbf4921876ce2ace7cb910d4fb7e0af16dc372709c788ff5",
+    "javascript": "35 passing checks from /tmp/hybrid-storage-contention-js-20261005.json retained; JavaScript/application frontend sources unchanged",
+    "python_compile_passed": 202,
+    "source_changed": false,
+    "result": "passed"
+  },
+  "limits": [
+    "A persistent database outage can still prevent terminal-state persistence; this is bounded transient-contention recovery, not guaranteed writes to an unavailable database.",
+    "No acquisition, scheduling or image algorithm change",
+    "Not a replacement 24-hour observation"
+  ]
+}

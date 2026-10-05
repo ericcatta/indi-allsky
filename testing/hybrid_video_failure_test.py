@@ -2,6 +2,7 @@
 """Actual video execution boundary keeps failures terminal and allows the next job."""
 import ast
 import logging
+import sqlite3
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch
@@ -9,7 +10,7 @@ from hybrid_runtime_fixture import isolated_app
 
 
 def run():
-    with isolated_app(multi_camera=True) as app:
+    with isolated_app(multi_camera=True, file_database=True) as app:
         from sqlalchemy.orm.exc import NoResultFound
         from indi_allsky.flask import db
         from indi_allsky.flask.models import IndiAllSkyDbTaskQueueTable as Task, TaskQueueState as State, TaskQueueQueue as Queue, IndiAllSkyDbCameraTable as Camera
@@ -67,6 +68,60 @@ def run():
             db.session.add(next_task); db.session.commit()
             namespace['processTask'](worker, {'task_id': next_task.id, 'profile_id': 'test-profile-2'})
             assert next_task.state == State.SUCCESS
+
+            # Actual competing SQLite writer during effect failure. The failure
+            # status must recover without replaying the effect or killing this
+            # worker's ability to execute the next queue message.
+            writer = sqlite3.connect(db.engine.url.database, timeout=0)
+            calls = []
+            def fail_locked(task, **kwargs):
+                calls.append(task.id)
+                writer.execute('BEGIN IMMEDIATE')
+                writer.execute('UPDATE camera SET name=name WHERE id=1')
+                raise RuntimeError('Effect failed while another writer is active')
+            worker.fail_locked = fail_locked
+            task = Task(queue=Queue.VIDEO, state=State.QUEUED, data={'action': 'fail_locked'})
+            db.session.add(task); db.session.commit()
+            task_id = task.id
+            db.session.execute(db.text('PRAGMA busy_timeout=0'))
+            with patch('indi_allsky.task_failure.time.sleep', side_effect=lambda delay: writer.commit()) as sleep:
+                namespace['processTask'](worker, {'task_id': task_id, 'profile_id': 'test-profile-2'})
+                assert sleep.call_count == 1
+            assert calls == [task_id] and task.state == State.FAILED
+            assert 'RuntimeError' in task.result
+            writer.close()
+            next_task = Task(queue=Queue.VIDEO, state=State.QUEUED, data={'action': 'succeed'})
+            db.session.add(next_task); db.session.commit()
+            namespace['processTask'](worker, {'task_id': next_task.id, 'profile_id': 'test-profile-2'})
+            assert next_task.state == State.SUCCESS
+
+            from indi_allsky.task_failure import record_video_failure
+            from indi_allsky.flask import models
+            # A terminal result or a different queue is never overwritten.
+            assert not record_video_failure(db.session, models, next_task.id, 'must not replace success')
+            assert next_task.state == State.SUCCESS and next_task.result == 'Effect complete'
+            other = Task(queue=Queue.UPLOAD, state=State.RUNNING, data={})
+            db.session.add(other); db.session.commit()
+            assert not record_video_failure(db.session, models, other.id, 'wrong queue')
+            assert other.state == State.RUNNING
+            assert not record_video_failure(db.session, models, -1, 'missing row')
+
+            # Bounded retry, with unrelated database/backend errors propagated.
+            from sqlalchemy.exc import OperationalError
+            busy = sqlite3.OperationalError('database is locked')
+            busy.sqlite_errorcode = sqlite3.SQLITE_BUSY
+            for original_error, attempts in ((busy, 3), (sqlite3.OperationalError('no such table'), 1),
+                                              (RuntimeError('backend unavailable'), 1)):
+                error = OperationalError('UPDATE', {}, original_error)
+                with patch.object(db.session, 'query', side_effect=error) as query, \
+                        patch('indi_allsky.task_failure.time.sleep') as sleep:
+                    try:
+                        record_video_failure(db.session, models, task_id, 'failure')
+                    except OperationalError as caught:
+                        assert caught is error
+                    else:
+                        raise AssertionError('Failure write error hidden')
+                    assert query.call_count == attempts and sleep.call_count == attempts - 1
         print('Video execution: effect exceptions roll back and mark FAILED, unknown actions terminal, next valid task succeeds: PASS')
 
 
