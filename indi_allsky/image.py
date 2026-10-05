@@ -144,7 +144,11 @@ class ImageWorker(Process):
 
         self.sensors_temp_av = sensors_temp_av  # 0 ccd_temp
         self.sensors_user_av = sensors_user_av
-        self.night_av = night_av
+        self._live_night_av = night_av
+        # Keep one local object shared by processors and upload helpers. Capture
+        # may change its live phase while a frame is being processed; archive
+        # format, rendering and metadata must all use the same phase.
+        self.night_av = list(night_av[:])
         self.astro_av = astro_av
         self.hybrid_av = None
         self.camera_shared_state_map = camera_shared_state_map or {}
@@ -1691,6 +1695,7 @@ class ImageWorker(Process):
                     profile_id,
                 )
         if not shared_state:
+            self.night_av[:] = self._live_night_av[:]
             return
 
         self.position_av = shared_state.position_av
@@ -1699,7 +1704,7 @@ class ImageWorker(Process):
         self.binning_av = shared_state.binning_av
         self.sensors_temp_av = shared_state.sensors_temp_av
         self.sensors_user_av = shared_state.sensors_user_av
-        self.night_av = shared_state.night_av
+        self.night_av[:] = shared_state.night_av[:]
         self.astro_av = shared_state.astro_av
         self.hybrid_av = getattr(shared_state, 'hybrid_av', None)
 

@@ -1,0 +1,29 @@
+{
+  "status": "regression_passed_not_deployed",
+  "defect": "A live day/night transition can change archive format and metadata within one processed frame.",
+  "production_evidence": "/home/eric/hybrid-observation-20261004/day-transition-20261005.json",
+  "change": "Freeze phase in a stable worker-local list at context selection; processors and upload helper retain that object. This is processing-start phase, not capture-start provenance.",
+  "targeted": {
+    "old_exit": 1,
+    "candidate_exit": 0,
+    "candidate_scope": "Actual ImageWorker constructor and shared-state selector loaded into isolated runtime; real processors, uploader and archive policy. No production mutation.",
+    "before_log": "/tmp/phase-before.log",
+    "after_log": "/tmp/phase-after.log",
+    "direct_checkout_exit": 0
+  },
+  "remaining": [
+    "Controlled deployment and live verification require a new authorized window: 5 October 19:15 deadline has passed",
+    "No 24h verification claim for corrected runtime"
+  ],
+  "regression": {
+    "pid": 1826529,
+    "results": "/home/eric/hybrid-regression-phase-20261005/results.json",
+    "log": "/tmp/hybrid-regression-phase.log",
+    "status": "passed",
+    "passed": 200,
+    "failed": 0,
+    "source_changed": false,
+    "local_source_manifest_matches": true,
+    "source_manifest_sha256": "ee9ba69d36d01c7aa341ac56f73b32256ad3c0d188791ca7d19a715bd1735cf7"
+  }
+}
