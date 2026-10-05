@@ -1730,6 +1730,30 @@
           "control": "Navigation drawer / Keograms",
           "recorded_status": "superato",
           "observed_page": "/modern-admin/media/keograms"
+        },
+        {
+          "source": "testing/evidence/hybrid-keogram-footer-20261005.json",
+          "record": "controls[0]",
+          "control": "ASI678MC camera filter; admin, camera 2 / asi678mc; navigation scope",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-keogram-footer-20261005.json",
+          "record": "controls[1]",
+          "control": "Open Realtime Keogram; admin, camera 2 / asi678mc; navigation scope",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-keogram-footer-20261005.json",
+          "record": "controls[2]",
+          "control": "Open Long Term Keogram; admin, camera 2 / asi678mc; navigation scope",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-keogram-footer-20261005.json",
+          "record": "controls[3]",
+          "control": "Generate media; admin, camera 2 / asi678mc; navigation scope",
+          "recorded_status": "superato"
         }
       ]
     },

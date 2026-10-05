@@ -1,0 +1,39 @@
+{
+  "revision": "98168b118c68dad075f03633992230d111421743",
+  "environment": "production Raspberry; native browser; existing administrator session",
+  "camera_id": 2,
+  "profile_id": "asi678mc",
+  "controls": [
+    {
+      "page": "/modern-admin/media/keograms",
+      "control": "ASI678MC camera filter",
+      "status": "superato",
+      "evidence": "Only camera 2 download rows remain; all three footer links carry camera_id=2 and profile_id=asi678mc."
+    },
+    {
+      "page": "/modern-admin/media/keograms",
+      "control": "Open Realtime Keogram",
+      "status": "superato",
+      "evidence": "Native click reached camera 2/profile asi678mc; matching camera heading; decoded image complete, 1000 x 700."
+    },
+    {
+      "page": "/modern-admin/media/keograms",
+      "control": "Open Long Term Keogram",
+      "status": "superato",
+      "evidence": "Native click reached camera 2/profile asi678mc; generation form explicitly names ZWO CCD ASI678MC.",
+      "limits": "Navigation and selected-camera form only. Cached image pixel inspection timed out twice; no generation or download performed."
+    },
+    {
+      "page": "/modern-admin/media/keograms",
+      "control": "Generate media",
+      "status": "superato",
+      "evidence": "Native footer click reached camera 2/profile asi678mc; camera heading, available actions and camera-specific recent tasks rendered.",
+      "limits": "Navigation and camera scope only; no new generation submitted."
+    }
+  ],
+  "limits": [
+    "Other cameras, roles and generated-media families are separate scopes.",
+    "Initial manually inferred /modern-admin/keograms URL returned 404; actual menu uses /modern-admin/media/keograms. No product-link defect inferred.",
+    "No download receipt certified."
+  ]
+}

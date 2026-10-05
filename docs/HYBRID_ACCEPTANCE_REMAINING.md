@@ -58,7 +58,7 @@ this table alone does not certify all discovered controls.
 | Source media and Output downloads | User confirms FITS, IMX708 mini-video and Highlights receipt. Exact historical mini-video 3 identity remains unspecified. Highlights now has separate processed/FITS/RAW choices, deployed and tested; source files are offered only for the same recorded exposure. |
 | Camera profiles | Hybrid Controller native Save & Sync and persistence passed on 5 October; other section variants remain distinct. [capability gating](../testing/evidence/hybrid-profile-sync-capability-20261001.json) is already covered separately. |
 | Geometry | User now explicitly confirms Geometry Copy values after receiving its location. This is user-reported completion, not an automated clipboard comparison; simulator copying has separate confirmation. |
-| Generated-media pages | Exact footer links and per-row downloads still require reconciliation with current templates. Old “Open read-only” observations must be mapped to the current controls, not blindly repeated or marked passed from a different Library link. |
+| Generated-media pages | Keograms camera-2 footer navigation now passes for Generate media, Realtime and Long Term, including preserved profile and decoded realtime pixels ([evidence](../testing/evidence/hybrid-keogram-footer-20261005.json)). Other families and per-row downloads still require reconciliation with current templates. Old “Open read-only” observations must be mapped to the current controls, not blindly repeated or marked passed from a different Library link. |
 | Account | Admin and ordinary-user save/login flows have [isolated native evidence](../testing/evidence/hybrid-account-native-20260914.json). This does not imply a production password change was performed; do not repeat destructive credential changes merely to erase a historical record. |
 | Restore | All four reset/flush combinations pass real HTTP persistence/cleanup on disposable fixtures. Native file upload and restore with both flags off also passed on 5 October. A fresh-process HTTP check also proves rejection of the old session and successful new login after key activation. The native flush/key-reset flow awaits the prepared user handoff; production keys/history were not changed. |
 | Generation and playback | Preserve successful live worker/output proofs for their exact camera/family. Camera-1 timelapse 71 now has natural-end playback evidence; mini-video 7 has generation and natural-end proof. Mini-generation recovery and other families must retain their own evidence scopes. |
@@ -99,8 +99,9 @@ necessary migrations, shared drivers/workers, APIs and dependencies rather than
 removing them to make the project look smaller.
 
 The user revoked the 20:00 deadline on 1 October and authorized continuing to
-completion. Deploy and bounded live checks can resume; the separate 24-hour
-observation remains excluded. Do not request the expired window again.
+completion. Deploy and bounded live checks can resume. This historical exclusion of the 24-hour
+observation was superseded on 4 October; use the completed-but-not-passed
+observation and current maintenance scope at the top of this document.
 
 ## Accepted archive change — 2 October (implemented candidate; not deployed)
 
