@@ -34,11 +34,15 @@ both cameras resumed with nonempty, exposure-matched FITS, services active and n
 regular-log errors in the short post-restart check. This is not a new 24-hour period.
 Before deployment, task 14958 exposed another failure: writing FAILED can itself
 collide with SQLite and strand RUNNING work after worker exit. Its orphan row was
-reconciled during maintenance. A follow-up candidate now writes FAILED using a
+reconciled during maintenance. Follow-up release `1c607d16` writes FAILED using a
 fresh conditional update, retries only SQLite contention, and never replays the
 original effect. The real competing-writer/next-task test and all 202 Python/compile
 checks pass; frontend sources are unchanged from the 35-check JavaScript pass.
-Its deployment remains pending. [Task-state evidence](../testing/evidence/hybrid-task-failure-20261005.json). [Evidence](../testing/evidence/hybrid-storage-contention-20261005.json).
+It was deployed at 23:18 CEST with configuration 119 unchanged. Both cameras
+resumed with matching nonempty FITS; services are active and the short log check
+contains no errors. Persistent database outage remains outside bounded retry
+recovery. A new 24-hour observation awaits the user’s decision after the previous
+19:15 cutoff; none has been started. [Task-state evidence](../testing/evidence/hybrid-task-failure-20261005.json). [Evidence](../testing/evidence/hybrid-storage-contention-20261005.json).
 
 ## Latest release completed
 

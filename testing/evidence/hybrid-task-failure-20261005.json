@@ -1,5 +1,5 @@
 {
-  "status": "candidate_all_regression_passed",
+  "status": "deployed_scoped_live_checks_passed",
   "base_revision": "e083ce66",
   "defect": "Before the cleanup retry deployment, task 14958 remained RUNNING after the video worker exited: the failure handler encountered another SQLite lock while writing FAILED.",
   "change": "Roll back the failed effect and perform a fresh conditional status UPDATE by immutable task ID, with at most three attempts for SQLite BUSY/LOCKED. No read snapshot precedes the write and the original effect is never replayed.",
@@ -26,5 +26,37 @@
     "A persistent database outage can still prevent terminal-state persistence; this is bounded transient-contention recovery, not guaranteed writes to an unavailable database.",
     "No acquisition, scheduling or image algorithm change",
     "Not a replacement 24-hour observation"
-  ]
+  ],
+  "deployment": {
+    "installed_commit": "1c607d165873dc0b47bf39c3de2608fb3889fb71",
+    "restart_at": "2026-10-05T23:18:24.076341+02:00",
+    "configuration_revision": 119,
+    "capture_pid": 2045339,
+    "services": [
+      "active",
+      "active"
+    ],
+    "source_hashes_verified": true,
+    "backup": "/home/eric/hybrid-backups/task-failure-20261005",
+    "checked_at": "2026-10-05T23:19:38.422516+02:00",
+    "fresh_source_files": [
+      {
+        "camera": 1,
+        "image": 226232,
+        "fits": 3366,
+        "created": "2026-10-05 23:19:01",
+        "bytes": 11436512
+      },
+      {
+        "camera": 2,
+        "image": 226233,
+        "fits": 3367,
+        "created": "2026-10-05 23:19:07",
+        "bytes": 13383556
+      }
+    ],
+    "free_bytes": 5755314176,
+    "regular_log_errors_since_restart": [],
+    "active_tasks": []
+  }
 }
