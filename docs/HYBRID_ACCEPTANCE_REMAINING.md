@@ -25,12 +25,16 @@ scoped gaps; the current update above supersedes their activation/window status.
 
 ## Storage cleanup contention repair
 
-The candidate now retries a contended SQLite deletion at most three times,
+Release `91139ece` now retries a contended SQLite deletion at most three times,
 rolling back and rechecking pending transfers and generation before each attempt.
 A real competing-writer test reproduces the thumbnail failure and verifies recovery;
 persistent contention and unrelated errors still fail visibly. All 202 Python/compile
-and 35 JavaScript checks pass with unchanged source hashes. Deployment is pending;
-this does not certify a new 24-hour period. [Evidence](../testing/evidence/hybrid-storage-contention-20261005.json).
+and 35 JavaScript checks pass with unchanged source hashes. Deployed at 22:57 CEST;
+both cameras resumed with nonempty, exposure-matched FITS, services active and no
+regular-log errors in the short post-restart check. This is not a new 24-hour period.
+Before deployment, task 14958 exposed another failure: writing FAILED can itself
+collide with SQLite and strand RUNNING work after worker exit. Its orphan row was
+reconciled during maintenance; robust terminal-state write recovery remains open. [Evidence](../testing/evidence/hybrid-storage-contention-20261005.json).
 
 ## Latest release completed
 

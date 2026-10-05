@@ -1,5 +1,5 @@
 {
-  "status": "candidate_all_regression_passed",
+  "status": "deployed_scoped_live_checks_passed",
   "base_revision": "4dfc3c0c",
   "defect": "Production cleanup task 14938 failed with SQLite database is locked while deleting a thumbnail; the next task succeeded.",
   "change": "Retry the same deletion candidate at most three times for SQLite BUSY/LOCKED only, rolling back and rechecking pending transfers, generation and source references on every attempt. Other errors propagate.",
@@ -34,5 +34,46 @@
     "Existing SQLite busy_timeout applies to each attempt",
     "No production collision or deletion is forced for acceptance",
     "Not a replacement 24-hour observation"
-  ]
+  ],
+  "deployment": {
+    "installed_commit": "91139ece6aa282850e00ae8d49741c921c4a5e8a",
+    "restart_at": "2026-10-05T22:57:51.129784+02:00",
+    "configuration_revision": 119,
+    "capture_pid": 2010002,
+    "backup": "/home/eric/hybrid-backups/storage-contention-20261005",
+    "source_hash_verified": true,
+    "services": [
+      "active",
+      "active"
+    ],
+    "orphan_task_reconciled": 14958,
+    "checked_at": "2026-10-05T22:59:29.021331+02:00",
+    "fresh_source_files": [
+      {
+        "camera": 1,
+        "image": 226181,
+        "fits": 3316,
+        "created": "2026-10-05 22:58:42",
+        "bytes": 13498749
+      },
+      {
+        "camera": 2,
+        "image": 226182,
+        "fits": 3317,
+        "created": "2026-10-05 22:59:18",
+        "bytes": 12230698
+      }
+    ],
+    "free_bytes": 5249794048,
+    "regular_log_errors_since_restart": [],
+    "active_tasks": []
+  },
+  "new_predeployment_observation": {
+    "task": 14958,
+    "old_worker": 1938730,
+    "outcome": "Old worker exited after both image-row deletion and FAILED task-state update encountered database-is-locked errors. Replacement worker was live; RUNNING row was orphaned.",
+    "evidence": "/home/eric/hybrid-backups/storage-contention-20261005/task14958-failure.log",
+    "reconciliation": "Verified old PID absent and no other active task, stopped capture, recorded previous row, conditionally changed only task 14958 RUNNING to FAILED, installed fix and restarted.",
+    "remaining_scope": "This release retries asset deletion, not task terminal-state writes; terminal-state contention recovery remains a separate defect."
+  }
 }
