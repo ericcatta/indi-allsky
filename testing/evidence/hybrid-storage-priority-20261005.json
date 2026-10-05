@@ -1,0 +1,20 @@
+{
+  "status": "automated_passed_pending_activation",
+  "requested_order": ["daytime images", "night images", "daytime generated outputs", "night generated outputs including timelapses"],
+  "retention": {"images": "Configured KEEP_DAYS, at least one day", "generated_outputs": "Configured TIMELAPSE_EXPIRE_DAYS, at least five days"},
+  "scope": "Oldest eligible files within each priority, across both cameras; stop at configured free-space target",
+  "source_only": "Reclaim an expired image's now-unreferenced FITS at the same priority before lower-priority media",
+  "targeted_test": "Real temporary files/SQLite, two cameras, younger daytime image before older night image, source-only FITS plus orphan FITS, target stop, generated fallback, five-day and pending-upload protection",
+  "regression": {
+    "python_compile_checks": 201,
+    "javascript_checks": 35,
+    "result": "passed_after_transfer_metadata_cleanup",
+    "initial_failure": "hybrid_page_heading_test.py encountered an AppleDouble ._ HTML transfer-metadata file, not a template",
+    "resolution": "Removed exactly four generated AppleDouble files in the isolated checkout; heading test passed on rerun. All other checks passed. Raw report retained with source_changed status.",
+    "real_application_and_test_sources_unchanged": true,
+    "source_manifest_sha256": "f5368f98bd86c91dcaa2c89d2e162015610af07b62c3802567446b11e91a8b70",
+    "report": "/home/eric/hybrid-regression-storage-priority-final-20261005/qualified-result.json"
+  },
+  "live_deletion_test": "No protected production media deleted to manufacture a test; existing cleanup recovered 8 GiB before this policy change",
+  "limits": ["Cannot recover the requested reserve if every remaining file is protected or in use", "SQLite cleanup contention recovery is not changed by this priority update"]
+}

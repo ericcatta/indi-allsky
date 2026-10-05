@@ -71,7 +71,8 @@ def reclaim_old_images(*, options, now, free_bytes, candidates, delete,
                        max_files=500, continuing=False):
     """Bounded reclamation using effect adapters supplied by the worker.
 
-    Candidates must be ordered oldest first and have a ``created`` attribute.
+    Candidates are ordered by retention priority, then oldest first. Each may
+    supply a stricter or family-specific ``expires_before`` cutoff.
     The adapter must protect active jobs and calibration assets. Recheck actual
     free space after each effect; file sizes alone do not prove reclaimed space.
     """
@@ -86,11 +87,12 @@ def reclaim_old_images(*, options, now, free_bytes, candidates, delete,
     count = 0
     previous = None
     for candidate in candidates(cutoff):
-        if previous is not None and candidate.created < previous:
-            raise ValueError('Cleanup candidates must be ordered oldest first.')
-        previous = candidate.created
-        if candidate.created >= cutoff:
-            break
+        order = (getattr(candidate, 'priority', 0), candidate.created)
+        if previous is not None and order < previous:
+            raise ValueError('Cleanup candidates must be ordered by priority and age.')
+        previous = order
+        if candidate.created >= (getattr(candidate, 'expires_before', None) or cutoff):
+            continue
         # Another process may have recovered space since the previous iteration.
         current_free = free_bytes()
         if current_free >= options.target_free_gib * GIB:

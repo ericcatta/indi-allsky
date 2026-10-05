@@ -1,7 +1,7 @@
 """Storage-pressure task planning and local image effects shared by workers."""
 from contextlib import contextmanager
 from dataclasses import asdict, dataclass
-from datetime import datetime
+from datetime import datetime, timedelta
 import fcntl
 import heapq
 import json
@@ -15,6 +15,7 @@ from .storage_pressure import GIB, StoragePressureOptions, reclaim_old_images
 from .source_retention import image_source, source_dependents
 
 IMAGE_FAMILIES = ('Image', 'FitsImage', 'RawImage', 'PanoramaImage')
+GENERATED_FAMILIES = ('Video', 'MiniVideo', 'Keogram', 'StarTrails', 'StarTrailsVideo', 'PanoramaVideo')
 ACTION = 'storagePressureCleanup'
 
 
@@ -27,6 +28,8 @@ class ImageCandidate:
     created: datetime
     table: object
     identity: int
+    priority: int = 0
+    expires_before: object = None
 
 
 class StoragePressureRuntime:
@@ -38,6 +41,11 @@ class StoragePressureRuntime:
         self.root = Path(image_root).resolve()
         self.disk_usage = disk_usage
         self.tables = [getattr(models, 'IndiAllSkyDb' + name + 'Table') for name in IMAGE_FAMILIES]
+        self.generated_tables = [getattr(models, 'IndiAllSkyDb' + name + 'Table') for name in GENERATED_FAMILIES]
+        days = config.get('TIMELAPSE_EXPIRE_DAYS', 365)
+        if isinstance(days, bool) or not isinstance(days, int) or days < 1:
+            raise ValueError('Timelapse retention must be a positive number of days.')
+        self.generated_keep_days = max(5, days)
 
     def free_bytes(self):
         from .archive_volume import verify_archive
@@ -90,21 +98,26 @@ class StoragePressureRuntime:
         pending = self.pending_tasks()
         device = self.root.stat().st_dev
 
-        def family(table):
+        emitted = set()
+
+        def family(table, night, expires, priority):
             after = None
             while True:
-                query = table.query.filter(table.createDate < cutoff)
+                query = table.query.filter(table.createDate < expires, table.night == night)
                 if after is not None:
                     created, identity = after
                     query = query.filter((table.createDate > created) |
                                          ((table.createDate == created) & (table.id > identity)))
                 # Materialize one page before effects commit. No open DB cursor
                 # crosses a deletion and keyset paging cannot skip shifted rows.
-                rows = query.order_by(table.createDate, table.id).limit(200).all()
+                rows = query.with_entities(table.createDate, table.id).order_by(table.createDate, table.id).limit(200).all()
                 if not rows:
                     return
-                after = (rows[-1].createDate, rows[-1].id)
-                for entry in rows:
+                after = tuple(rows[-1])
+                for created, identity in rows:
+                    entry = self.session.get(table, identity, populate_existing=True)
+                    if entry is None:
+                        continue
                     if source_dependents(entry, self.session, self.models):
                         continue
                     source = image_source(entry, self.session, self.models)
@@ -114,10 +127,38 @@ class StoragePressureRuntime:
                     except FileNotFoundError:
                         continue
                     if eligible and not self.protected(entry, pending):
-                        yield ImageCandidate(entry.createDate, table, entry.id)
+                        yield ImageCandidate(entry.createDate, table, entry.id, priority, expires)
 
-        return heapq.merge(*(family(table) for table in self.tables),
-                           key=lambda item: (item.created, item.table.__name__, item.identity))
+        now = cutoff + timedelta(days=self.options.keep_days)
+        generated_cutoff = now - timedelta(days=self.generated_keep_days)
+        groups = ((self.tables, False, cutoff), (self.tables, True, cutoff),
+                  (self.generated_tables, False, generated_cutoff),
+                  (self.generated_tables, True, generated_cutoff))
+        for priority, (tables, night, expires) in enumerate(groups):
+            merged = heapq.merge(*(family(table, night, expires, priority) for table in tables),
+                                key=lambda item: (item.created, item.table.__name__, item.identity))
+            for candidate in merged:
+                identity = (candidate.table, candidate.identity)
+                if identity in emitted:
+                    continue
+                entry = self.session.get(candidate.table, candidate.identity)
+                source = image_source(entry, self.session, self.models) if entry is not None else None
+                source_id = source.id if source is not None else None
+                emitted.add(identity)
+                yield candidate
+                # Reclaim the now-unreferenced FITS at the same priority/age,
+                # before considering any night image or generated output.
+                if source_id is not None:
+                    table = self.models.IndiAllSkyDbFitsImageTable
+                    source = self.session.get(table, source_id, populate_existing=True)
+                    identity = (table, source_id)
+                    if (source is not None and identity not in emitted and
+                            not source_dependents(source, self.session, self.models) and
+                            not self.protected(source, self.pending_tasks())):
+                        path = self.path(source)
+                        if path.is_file() and path.stat().st_dev == device:
+                            emitted.add(identity)
+                            yield ImageCandidate(source.createDate, table, source.id, priority, expires)
 
     def delete(self, candidate):
         with media_task_lock(exclusive=True):

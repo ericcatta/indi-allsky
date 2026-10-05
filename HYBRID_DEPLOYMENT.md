@@ -4,10 +4,25 @@
 
 Configuration 119 enables SD-only night FITS/day JPEG, lossless compression,
 24-hour image protection under storage pressure (5 GiB trigger, 8 GiB target),
-and five-day timelapse expiry. Pressure cleanup never selects video families.
+and five-day timelapse expiry. The updated cleanup priority is described below.
 Both cameras resumed after capture restart; day JPEG cadence is 15 seconds.
 Night source-only capture acceptance is still open.
 [Evidence](testing/evidence/hybrid-sd-policy-20261004.json).
+
+### Daytime-first storage recovery
+
+The 5 October cleanup update changes the priority of eligible assets:
+daytime images, night images, daytime generated outputs, then night generated
+outputs (including timelapses). Each group is ordered oldest first across cameras.
+FITS backing an expired display record are reclaimed at that record's priority,
+after its references are removed. Pending uploads/generations still protect files.
+
+The free-space trigger and target remain configurable in Storage Protection.
+Image protection uses `STORAGE_PRESSURE.KEEP_DAYS` (currently one day). Generated
+outputs use `TIMELAPSE_EXPIRE_DAYS`, with a five-day minimum for pressure cleanup.
+Cleanup stops at the target and never shortens these protection periods to force
+recovery. This supersedes the earlier policy excluding every video from pressure
+cleanup. No schema, configuration-key or default-setting migration is required.
 
 The previous configuration is retained as revision 118 and in the private
 `/home/eric/hybrid-backups/hybrid-sd-policy-20261004/config-before.json`.
