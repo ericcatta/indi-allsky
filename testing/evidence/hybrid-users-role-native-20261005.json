@@ -1,0 +1,26 @@
+{
+  "environment": "Native browser on loopback fixture http://127.0.0.1:18123; disposable database and accounts; production accounts untouched",
+  "application_basis": "Users view/templates unchanged from 677afbab through e083ce66; native test on disposable loopback fixture",
+  "cases": [
+    {
+      "control": "Anonymous Users entry",
+      "status": "superato",
+      "proof": "Native Sign out, then navigate to /modern-admin/users: redirected to /login?next=%2Findi-allsky%2Fmodern-admin%2Fusers; login form displayed."
+    },
+    {
+      "control": "Ordinary-user login and Users table",
+      "status": "superato",
+      "proof": "Native sign-in with existing test-user-2 credentials reaches Users with two synthetic rows; recovery buttons disabled with Administrator access is required message."
+    },
+    {
+      "control": "Ordinary-user filter and detail",
+      "status": "superato",
+      "proof": "Typing test-user-2 into Search yields one of two records; native Details click reaches /modern-admin/users/2 with matching username."
+    }
+  ],
+  "limits": [
+    "Synthetic browser acceptance, not a production ordinary-user account modification",
+    "No password change, export receipt, or credential-reset claim",
+    "Existing administrator localhost restore handoff remains separate"
+  ]
+}

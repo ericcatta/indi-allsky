@@ -6925,7 +6925,16 @@
           "source": "testing/evidence/hybrid-native-users-2026-09-08.json",
           "record": "cases[16]",
           "control": "Ordinary and anonymous sessions",
-          "recorded_status": "bloccato"
+          "recorded_status": "bloccato",
+          "additional_evidence": {
+            "source": "testing/evidence/hybrid-users-role-native-20261005.json",
+            "records": [
+              "cases[0]",
+              "cases[1]",
+              "cases[2]"
+            ],
+            "scope": "Native role switch now verified on disposable loopback fixture; historical production-session limit preserved."
+          }
         },
         {
           "source": "testing/evidence/hybrid-users-native-controls-20260929.json",
@@ -7168,6 +7177,12 @@
             "scope": "User confirms file is saved and readable. User-confirmed; browser/role/camera variants and byte equality not independently verified.",
             "historical_outcome_preserved": true
           }
+        },
+        {
+          "source": "testing/evidence/hybrid-users-role-native-20261005.json",
+          "record": "cases",
+          "control": "Native anonymous redirect and ordinary-user login/filter/detail on disposable fixture",
+          "recorded_status": "superato"
         }
       ]
     },
