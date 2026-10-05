@@ -1,3 +1,21 @@
+> **Closure at the user deadline, 5 October 2026.** The collector completed its
+> 24-hour period at 15:34 CEST and stopped. This is **not an acceptance pass**:
+> capture-worker SQLite contention, a day/night format race, and evidence gaps
+> were found. 7,730 unique frames were observed with no missing backing file at
+> sampling time; maximum saved-frame gaps were 110 seconds (camera 1) and 79
+> seconds (camera 2). Natural night-generation tasks report success for both
+> cameras; this does not certify browser playback/download of each output.
+> [Closure evidence](../testing/evidence/hybrid-observation-closure-20261005.json).
+>
+> SQLite repair `d53c72f4` and phase repair `2f850d7d` are published; the latter
+> passed 200 Python/compile checks with an identical source manifest. They and
+> mini-FITS repair `7641e966` remain **undeployed**. A browser action timed out
+> during the available window; the next reliable Pi clock read was 19:22 CEST.
+> No new tests or deployment were started after the 19:15 deadline. Capture/web
+> were left running. Deployment and essential live checks require a new window;
+> the completed observation cannot certify the corrected runtime. Historical
+> running/pending notes below describe earlier checkpoints.
+
 > **24-hour acceptance re-enabled by the user on 4 October.** The previous
 > exclusions below are superseded. Observation began at 15:34 CEST on 4 October,
 > earliest completion 15:34 CEST on 5 October, with configuration 119. It is running,

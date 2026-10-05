@@ -1,0 +1,141 @@
+{
+  "status": "observation_finished_with_defects_not_acceptance_pass",
+  "start": {
+    "event": "start",
+    "utc": "2026-10-04T13:34:09.678478+00:00",
+    "duration_seconds": 86400,
+    "checkout": "4852f93633524f389216ff53800216fc8eabf697",
+    "config_revision": 119,
+    "camera_cursors": [
+      [
+        1,
+        216080
+      ],
+      [
+        2,
+        216081
+      ]
+    ],
+    "image_cursor": 216081,
+    "log_inode": 797438,
+    "log_offset": 53097841,
+    "interval_seconds": 60
+  },
+  "end": {
+    "event": "end",
+    "utc": "2026-10-05T13:34:09.730565+00:00",
+    "elapsed_seconds": 86400.05211840902
+  },
+  "samples": 1389,
+  "max_sample_gap_seconds": 111.604,
+  "log_gap_samples": [
+    "2026-10-04T22:58:40.207991+00:00"
+  ],
+  "sample_errors": [
+    {
+      "utc": "2026-10-04T17:40:35.117193+00:00",
+      "error": "TimeoutExpired: Command '('systemctl', '--user', 'show', 'indi-allsky.service', '-p', 'ActiveState', '-p', 'MainPID', '-p', 'NRestarts')' timed out after 10 seconds"
+    },
+    {
+      "utc": "2026-10-04T21:11:44.290094+00:00",
+      "error": "TimeoutExpired: Command '('systemctl', '--user', 'show', 'indi-allsky.service', '-p', 'ActiveState', '-p', 'MainPID', '-p', 'NRestarts')' timed out after 10 seconds"
+    },
+    {
+      "utc": "2026-10-05T07:44:30.680031+00:00",
+      "error": "TimeoutExpired: Command '('systemctl', '--user', 'show', 'indi-allsky.service', '-p', 'ActiveState', '-p', 'MainPID', '-p', 'NRestarts')' timed out after 10 seconds"
+    }
+  ],
+  "log_error_lines": 16,
+  "config_revisions": [
+    119
+  ],
+  "cameras": {
+    "1": {
+      "frames": 3863,
+      "day": 2972,
+      "night": 891,
+      "missing_at_sample": 0,
+      "first": "2026-10-04 15:34:10.000000",
+      "last": "2026-10-05 15:34:03.000000",
+      "max_saved_gap_seconds": 110.0
+    },
+    "2": {
+      "frames": 3867,
+      "day": 2973,
+      "night": 894,
+      "missing_at_sample": 0,
+      "first": "2026-10-04 15:34:20.000000",
+      "last": "2026-10-05 15:34:06.000000",
+      "max_saved_gap_seconds": 79.0
+    }
+  },
+  "night_tasks_at_close": [
+    [
+      14840,
+      "SUCCESS",
+      "expireData",
+      "Expired 7 assets"
+    ],
+    [
+      14841,
+      "SUCCESS",
+      "generateKeogramStarTrails",
+      "Complete generation \u2014 Keogram: generated; Startrail: generated; Startrail video: generated"
+    ],
+    [
+      14842,
+      "SUCCESS",
+      "generateVideo",
+      "Generated timelapse: /var/www/html/allsky/images/ccd_4c12b1bd-b4a5-444a-ad41-335fa5f5e14a/timelapse/20261004/allsky-timelapse_ccd2_20261004_night_1791179133.mp4"
+    ],
+    [
+      14843,
+      "SUCCESS",
+      "generatePanoramaVideo",
+      "Generated timelapse: /var/www/html/allsky/images/ccd_4c12b1bd-b4a5-444a-ad41-335fa5f5e14a/timelapse/20261004/allsky-panorama_timelapse_ccd2_20261004_night_1791181914.mp4"
+    ],
+    [
+      14844,
+      "SUCCESS",
+      "uploadAllskyEndOfNight",
+      "Skipped EndOfNight upload: disabled in configuration"
+    ],
+    [
+      14845,
+      "SUCCESS",
+      "expireData",
+      "Expired 7 assets"
+    ],
+    [
+      14846,
+      "SUCCESS",
+      "generateKeogramStarTrails",
+      "Complete generation \u2014 Keogram: generated; Startrail: generated; Startrail video: generated"
+    ],
+    [
+      14847,
+      "SUCCESS",
+      "generateVideo",
+      "Generated timelapse: /var/www/html/allsky/images/ccd_825ea4df-f761-444f-97c2-387b78ace935/timelapse/20261004/allsky-timelapse_ccd1_20261004_night_1791185909.mp4"
+    ],
+    [
+      14848,
+      "SUCCESS",
+      "generatePanoramaVideo",
+      "Generated timelapse: /var/www/html/allsky/images/ccd_825ea4df-f761-444f-97c2-387b78ace935/timelapse/20261004/allsky-panorama_timelapse_ccd1_20261004_night_1791190023.mp4"
+    ],
+    [
+      14849,
+      "SUCCESS",
+      "uploadAllskyEndOfNight",
+      "Skipped EndOfNight upload: disabled in configuration"
+    ]
+  ],
+  "limitations": [
+    "Known capture child restarts from SQLite diagnostic write contention",
+    "Known day/night format-metadata race",
+    "Log sampling gaps and errors require retained detailed evidence; elapsed 24h does not establish acceptance",
+    "Mini-FITS, SQLite and phase fixes are not deployed; no corrected-runtime 24h claim",
+    "Browser download acceptance interrupted; no new test or deploy after deadline"
+  ]
+}
