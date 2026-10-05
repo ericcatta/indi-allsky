@@ -15,6 +15,7 @@ import dbus
 import signal
 import logging
 import traceback
+import sqlite3
 
 import ephem
 
@@ -52,6 +53,7 @@ from .flask import db
 from .flask.miscDb import miscDb
 
 from sqlalchemy.orm.exc import MultipleResultsFound
+from sqlalchemy.exc import OperationalError
 
 
 app = create_app()
@@ -425,6 +427,29 @@ class CaptureWorker(Process):
 
         self._miscDb.setState(key, value)
 
+
+    def _notify_image_backlog(self):
+        """A contended diagnostic write must not terminate an active exposure."""
+        try:
+            self._miscDb.addNotification(
+                NotificationCategory.WORKER,
+                'image_queue_depth',
+                'Image queue exceeded maximum threshold depth.  System processing might be degraded.',
+                expire=timedelta(hours=1),
+            )
+        except OperationalError as exc:
+            code = getattr(exc.orig, 'sqlite_errorcode', None)
+            if not isinstance(exc.orig, sqlite3.Error) or code is None or (code & 0xff) not in (
+                    sqlite3.SQLITE_BUSY, sqlite3.SQLITE_LOCKED):
+                raise
+            db.session.rollback()
+            # No immediate retry: keep capture moving. A subsequent backlog
+            # observation can publish the notification once SQLite is writable.
+            logger.warning(
+                'Image backlog notification deferred: SQLite busy/locked; '
+                'capture continues profile=%s camera_id=%s',
+                self.profile_id, self.camera_id,
+            )
 
     def _image_queue_depth(self):
         try:
@@ -1442,12 +1467,7 @@ class CaptureWorker(Process):
 
                             logger.warning('IMAGE QUEUE MAXIMUM EXCEEDED: %d *** ADDING ADDITIONAL %0.3fs DELAY BETWEEN EXPOSURES ***', image_queue_size, self.add_period_delay)
 
-                            self._miscDb.addNotification(
-                                NotificationCategory.WORKER,
-                                'image_queue_depth',
-                                'Image queue exceeded maximum threshold depth.  System processing might be degraded.',
-                                expire=timedelta(hours=1),
-                            )
+                            self._notify_image_backlog()
 
 
                         if self.focus_mode:

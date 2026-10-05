@@ -1,0 +1,21 @@
+{
+  "status": "verified_not_deployed",
+  "defect": "SQLite contention during image backlog notification terminated capture worker; parent service restart count did not reflect child restarts.",
+  "production_evidence": "/home/eric/hybrid-observation-20261004/journal-recovery-0628.log",
+  "test": "Real SQLite writer lock reproduces exception; candidate rolls back diagnostic write, continues, and later persists/deduplicates; other OperationalError propagates.",
+  "regression": {
+    "results": "/home/eric/hybrid-regression-notification-20261005/results.json",
+    "python_passed": 198,
+    "compile_initial": "failed due to transferred AppleDouble ._capture.py, not Python source",
+    "compile_recheck": "passed after removing only AppleDouble metadata",
+    "compile_log": "/tmp/hybrid-notification-compile-recheck.log",
+    "source_manifest_matches_local": true,
+    "source_manifest_sha256": "6b370fe40674322f86b957ec0e26d98d0b6d4ed48a77595293e77ee3ddd7785b",
+    "javascript": "35 unchanged tests previously passed"
+  },
+  "limitations": [
+    "SQLite busy timeout can still delay cadence",
+    "Live deployment and recovery verification remain open",
+    "No 24-hour claim for corrected runtime; hard stop 2026-10-05 19:15 Europe/Zurich"
+  ]
+}
