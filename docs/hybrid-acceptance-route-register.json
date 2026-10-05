@@ -1273,6 +1273,12 @@
           "control": "Navigation drawer / Library",
           "recorded_status": "superato",
           "observed_page": "/modern-admin/library"
+        },
+        {
+          "source": "testing/evidence/hybrid-worker-release-20261005.json",
+          "record": "mini_fits_generation",
+          "control": "Real FITS mini outputs 9/10, cameras 1/2: native playback reached end; download commands clicked but receipt not verified",
+          "recorded_status": "superato"
         }
       ]
     },
@@ -4073,6 +4079,12 @@
           "source": "testing/evidence/hybrid-profile-concurrency-20261001.json",
           "record": "targeted",
           "control": "Overlapping profile saves reject stale revision; fresh retry preserves both edits and global settings in isolated SQLite",
+          "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-native-sync-20261005.json",
+          "record": "steps",
+          "control": "Hybrid Controller Save & Sync on two disposable INDI profiles: native success, destination values and single revision; other variants excluded",
           "recorded_status": "superato"
         }
       ]

@@ -1,15 +1,23 @@
-> **24-hour acceptance re-enabled by the user on 4 October.** The previous
-> exclusions below are superseded. Observation began at 15:34 CEST on 4 October,
-> earliest completion 15:34 CEST on 5 October, with configuration 119. It is running,
-> not passed. A read-only collector on the Pi records new frames and runtime state
-> each minute; hourly review must inspect interval evidence and gaps.
-> Detector/AI remain excluded. [Observation record](testing/evidence/hybrid-24h-observation-20261004.json).
-
 # Hybrid acceptance status
 
-Updated 4 October 2026. **Classic frontend removal is deployed. Whole-product acceptance is not complete.**
-The user deferred the separate 24-hour day/night test and detector/AI implementation.
-Those activities are outside this acceptance run, not passed tests.
+Updated 5 October 2026. **Classic frontend removal is deployed. Whole-product acceptance is not complete.**
+
+The required 24-hour observation completed and stopped on 5 October at 15:34 CEST.
+It found defects and evidence gaps; it is not a passed acceptance test.
+The user subsequently reopened maintenance with “ok, fai tutto”.
+
+The mini-FITS, capture-notification and per-frame day/night repairs are deployed
+at `db5fc9c0`. Both cameras resumed FITS capture. Mini outputs 9/10 passed real
+worker generation, complete file decoding and native browser playback; scientific
+original hashes are unchanged. A controlled cleanup restored 8 GiB using the
+existing 24-hour image protection. Native Hybrid Controller Save & Sync also
+passed on isolated profiles with independent settings preserved.
+
+See [worker release](testing/evidence/hybrid-worker-release-20261005.json),
+[Save & Sync](testing/evidence/hybrid-native-sync-20261005.json), and the
+[current remaining work](docs/HYBRID_ACCEPTANCE_REMAINING.md).
+No new 24-hour period was started. Detector/AI remain excluded.
+The following sections are historical evidence checkpoints, superseded by this update.
 
 ## Current state — 3 October 2026
 

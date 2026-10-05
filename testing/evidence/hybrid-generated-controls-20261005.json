@@ -1,0 +1,64 @@
+{
+  "status": "scoped_partial",
+  "installed_revision": "306c594a",
+  "role": "existing administrator browser session",
+  "checks": [
+    {
+      "page": "Now",
+      "control": "Refresh status",
+      "result": "Both FITS preview images decoded",
+      "dimensions": [
+        [
+          4608,
+          2592
+        ],
+        [
+          3840,
+          2160
+        ]
+      ]
+    },
+    {
+      "page": "Mini Timelapses",
+      "control": "Table row Download",
+      "camera": 2,
+      "asset": 7,
+      "result": "Native downloadMedia command completed; downloaded byte integrity not inspected"
+    },
+    {
+      "page": "Mini Timelapses",
+      "control": "Browse the complete archive",
+      "result": "Media archive opened with Mini timelapses selected and two records matching dedicated page"
+    },
+    {
+      "page": "Media archive",
+      "control": "Media type=Keograms, Day/Night=Night, Apply filters",
+      "result": "Both natural-night keograms decoded in browser",
+      "assets": [
+        {
+          "camera": 1,
+          "id": 86,
+          "width": 888,
+          "height": 843,
+          "frames": 888
+        },
+        {
+          "camera": 2,
+          "id": 85,
+          "width": 892,
+          "height": 700,
+          "frames": 892
+        }
+      ]
+    },
+    {
+      "page": "Media archive",
+      "control": "Keogram 86 download",
+      "result": "Native downloadMedia completed, but download event not exposed within 8 seconds; file receipt/integrity remains unverified"
+    }
+  ],
+  "limitations": [
+    "Failed mini asset 8 remains a failed historical generation; new FITS generation verification awaits worker deployment",
+    "Not exhaustive acceptance of generated-media controls"
+  ]
+}

@@ -1,0 +1,47 @@
+{
+  "status": "deployed_scoped_live_checks_passed",
+  "authorization": "User reopened maintenance with ok, fai tutto after the 19:15 cutoff",
+  "installed_commit": "db5fc9c0de57df1490faefe413482f0314569949",
+  "previous_commit": "306c594aa706974f6bb82971f2a39a0379d39db2",
+  "activated_fixes": ["7641e966", "d53c72f4", "2f850d7d"],
+  "configuration_revision": 119,
+  "restart_at": "2026-10-05T21:24:26+02:00",
+  "main_pid": 1899803,
+  "backup": "/home/eric/hybrid-backups/worker-repairs-20261005/tracked-code.tar.gz",
+  "space_recovery": {
+    "started": "2026-10-05T21:13:41+02:00",
+    "method": "Capture stopped after the video queue became idle; existing bounded cleanup policy invoked until its 8 GiB target",
+    "deleted_expired_image_records": 7744,
+    "free_bytes_at_completion": 8590258176,
+    "image_protection_days": 1,
+    "generated_outputs_deleted": false,
+    "preceding_failure": "Task 14938 failed with SQLite database is locked while deleting an expired image thumbnail; next scheduled batch 14939 succeeded. No new cleanup-contention fix is claimed."
+  },
+  "live_check": {
+    "at": "2026-10-05T21:28:54+02:00",
+    "free_bytes": 8386379776,
+    "camera_1": {"image": 225943, "fits": 3078, "source_bytes": 16914013, "gaps_seconds": [45,45,45,45,45]},
+    "camera_2": {"image": 225942, "fits": 3077, "source_bytes": 12007425, "gaps_seconds": [43,45,45,45]},
+    "both_source_files_present_camera_and_exposure_matched": true,
+    "errors_in_regular_log_since_restart": []
+  },
+  "mini_fits_generation": {
+    "enqueue": "Administrative CLI through real task queue; not native generation-form acceptance",
+    "outputs": [
+      {"camera": 1, "task": 14940, "output": 9, "source_image": 225818, "source_fits": 2953, "state": "SUCCESS", "video_bytes": 13927519, "thumbnail_bytes": 19424, "original_sha256": "d27ff04656f12cf5049bec3fa7791b7dbbfd313942f15058bd42275cf4b0ea98"},
+      {"camera": 2, "task": 14941, "output": 10, "source_image": 225819, "source_fits": 2954, "state": "SUCCESS", "video_bytes": 5322779, "thumbnail_bytes": 7754, "original_sha256": "4d45cdaebffda8ce199a0bea202dabf82914061a7ee2ed03e8ea3bc2b2b57eec"}
+    ],
+    "both_original_hashes_unchanged": true,
+    "both_complete_ffmpeg_decodes_passed": true,
+    "both_native_browser_playbacks_reached_end": true,
+    "browser_duration_seconds_each": 3,
+    "browser_download_commands_clicked": true,
+    "download_receipt_integrity": "Not established: no new matching file in Downloads"
+  },
+  "limits": [
+    "Short post-deployment check, not a new 24-hour observation",
+    "No natural day/night transition after deployment observed in this window",
+    "Global control-matrix reconciliation, restore confirmation and unavailable hardware/integration effects remain separate",
+    "New daytime-first cleanup requested later is a separate release"
+  ]
+}

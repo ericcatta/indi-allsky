@@ -1,41 +1,26 @@
-> **Closure at the user deadline, 5 October 2026.** The collector completed its
-> 24-hour period at 15:34 CEST and stopped. This is **not an acceptance pass**:
-> capture-worker SQLite contention, a day/night format race, and evidence gaps
-> were found. 7,730 unique frames were observed with no missing backing file at
-> sampling time; maximum saved-frame gaps were 110 seconds (camera 1) and 79
-> seconds (camera 2). Natural night-generation tasks report success for both
-> cameras; this does not certify browser playback/download of each output.
-> [Closure evidence](../testing/evidence/hybrid-observation-closure-20261005.json).
->
-> SQLite repair `d53c72f4` and phase repair `2f850d7d` are published; the latter
-> passed 200 Python/compile checks with an identical source manifest. They and
-> mini-FITS repair `7641e966` remain **undeployed**. A browser action timed out
-> during the available window; the next reliable Pi clock read was 19:22 CEST.
-> No new tests or deployment were started after the 19:15 deadline. Capture/web
-> were left running. Deployment and essential live checks require a new window;
-> the completed observation cannot certify the corrected runtime. Historical
-> running/pending notes below describe earlier checkpoints.
-
-> **24-hour acceptance re-enabled by the user on 4 October.** The previous
-> exclusions below are superseded. Observation began at 15:34 CEST on 4 October,
-> earliest completion 15:34 CEST on 5 October, with configuration 119. It is running,
-> not passed. A read-only collector on the Pi records new frames and runtime state
-> each minute; hourly review must inspect interval evidence and gaps.
-> Detector/AI remain excluded. [Observation record](../testing/evidence/hybrid-24h-observation-20261004.json).
-
-> Current update, 4 October: the SD/retention choice is resolved and configuration
-> 119 is active (night lossless FITS, day JPEG, image pressure cutoff 24 hours,
-> timelapses retained at least five days). Both cameras resumed with 15-second
-> day JPEG cadence. Night source-only acquisition has been observed; generation and sustained acceptance remain open.
-> [Activation evidence](../testing/evidence/hybrid-sd-policy-20261004.json).
-> Older “pending activation” entries below describe earlier checkpoints.
-
 # Remaining Hybrid acceptance work
 
-Updated against application `3d87c9aa` and acceptance evidence through 3 October
-2026. This is a work queue, not a coverage percentage. Classic removal is deployed;
-whole-product acceptance remains open. The 24-hour observation is required and
-must end no later than 5 October at 19:15 Europe/Zurich. Detector/AI remain excluded.
+Updated 5 October 2026. Classic frontend removal is deployed; whole-product
+acceptance remains open. The user reopened maintenance after the 19:15 cutoff.
+
+The three worker repairs are now installed at `db5fc9c0`. Both cameras resumed
+night FITS capture; new files match their camera/exposure records. Mini timelapses
+9 and 10 generated from FITS, passed complete decoding and native browser playback,
+and left original hashes unchanged. The short live check found no regular-log
+errors. Pressure recovery reached 8 GiB after a controlled capture stop, preserving
+24-hour images and generated outputs. [Release evidence](../testing/evidence/hybrid-worker-release-20261005.json).
+
+The required 24-hour observation completed at 15:34 CEST on 5 October and stopped.
+It found defects and evidence gaps, so it is **not an acceptance pass**, nor proof
+of 24 hours on the corrected runtime. No new 24-hour period was started in the
+reopened maintenance window. [Closure](../testing/evidence/hybrid-observation-closure-20261005.json).
+
+Native Hybrid Controller Save & Sync now passes on two disposable profiles,
+including the destination page and single-revision persistence. Other sync sections
+and restore/key-reset flows retain their separate scopes.
+[Evidence](../testing/evidence/hybrid-native-sync-20261005.json).
+Detector/AI remain excluded. Sections below retain historical checkpoints and
+scoped gaps; the current update above supersedes their activation/window status.
 
 ## Latest release completed
 
@@ -49,7 +34,7 @@ Production Process FITS previews and received downloads now pass for administrat
 on both cameras. Four generated-media Open clicks also pass for camera 2.
 The filtered Tasks CSV now has a browser download-event receipt (4 October,
 filter task 14738, one row); downloaded-file byte integrity was not inspected.
-The isolated Save & Sync native confirmation remains blocked with no saved revision.
+The previous isolated Save & Sync timeout is resolved for Hybrid Controller by the 5 October native/persistence check.
 [Follow-up](../testing/evidence/hybrid-acceptance-followup-20261003.json).
 
 The earlier day-end timeout's cause remains unproven; a successful short encode
@@ -70,7 +55,7 @@ this table alone does not certify all discovered controls.
 | --- | --- |
 | Settings export | User now confirms snapshot download after receiving its location. Notifications CSV/Excel and Tasks CSV are also user-confirmed; these do not establish byte integrity for every export variant. |
 | Source media and Output downloads | User confirms FITS, IMX708 mini-video and Highlights receipt. Exact historical mini-video 3 identity remains unspecified. Highlights now has separate processed/FITS/RAW choices, deployed and tested; source files are offered only for the same recorded exposure. |
-| Camera profiles | Native Save & Sync confirmation and result; [capability gating](../testing/evidence/hybrid-profile-sync-capability-20261001.json) is already covered separately. |
+| Camera profiles | Hybrid Controller native Save & Sync and persistence passed on 5 October; other section variants remain distinct. [capability gating](../testing/evidence/hybrid-profile-sync-capability-20261001.json) is already covered separately. |
 | Geometry | User now explicitly confirms Geometry Copy values after receiving its location. This is user-reported completion, not an automated clipboard comparison; simulator copying has separate confirmation. |
 | Generated-media pages | Exact footer links and per-row downloads still require reconciliation with current templates. Old “Open read-only” observations must be mapped to the current controls, not blindly repeated or marked passed from a different Library link. |
 | Account | Admin and ordinary-user save/login flows have [isolated native evidence](../testing/evidence/hybrid-account-native-20260914.json). This does not imply a production password change was performed; do not repeat destructive credential changes merely to erase a historical record. |

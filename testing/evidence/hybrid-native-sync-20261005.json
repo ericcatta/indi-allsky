@@ -1,0 +1,18 @@
+{
+  "status": "superato",
+  "scope": "Native administrator Save & Sync, Hybrid Controller, two disposable INDI camera profiles",
+  "application_revision": "306c594a",
+  "environment": "Isolated Flask app on Raspberry, localhost:18121 over SSH; temporary database/media/config; external process and DBus effects blocked",
+  "steps": [
+    "Select Hybrid processing and Post-process RGB on test-profile-1",
+    "Click Hybrid Controller Save & Sync using native accessibility control",
+    "Browser tool reported the confirmation text; subsequent page showed saved for profile test-profile-1 and synced to test-profile-2",
+    "Open test-profile-2: Hybrid and Post-process RGB are displayed",
+    "Inspect disposable SQLite: revision IDs are exactly 1 and 2; both profiles have the requested processing and AWB modes; all pre-existing profile fields remain unchanged"
+  ],
+  "confirmation_limit": "getJsDialog returned undefined after the native click. Successful persistence and the native confirmation message are observed; a separate explicit accept() action is not evidenced.",
+  "production_configuration_changed": false,
+  "production_services_called": false,
+  "resolves": "Prior timeout-only Save & Sync result and profile persistence gap for this exact controller scope",
+  "does_not_certify": ["Other Save & Sync sections", "Ordinary-user mutation", "Restore or security-key rotation"]
+}

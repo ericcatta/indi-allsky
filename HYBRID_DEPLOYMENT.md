@@ -15,34 +15,27 @@ Restore configuration through the revision service if needed, then restart captu
 keep the deployed source-aware readers for any new FITS-only frames. Do not use
 an older code rollback that cannot read source-backed images.
 
-## Current application — 5 October, pending worker release
+## Current application — 5 October, worker release activated
 
-Production is at `306c594a`: the source-only FITS previews on Now are fixed and
-both camera images were decoded in the production browser. The web restart left
-capture PID 1687399 running. The release passed 198 Python/compile and 35
-JavaScript checks. [Evidence](testing/evidence/hybrid-now-fits-preview-20261004.json).
+Production is at `db5fc9c0`, including mini-FITS thumbnail repair `7641e966`,
+capture-notification contention repair `d53c72f4`, and stable per-frame day/night
+context `2f850d7d`. The combined candidate passed 200 Python/compile checks;
+JavaScript was unchanged from the 35-check run. Installed application hashes were
+verified before restart at 21:24:26 CEST. Both cameras published fresh FITS; mini
+outputs 9/10 passed worker/file/thumbnail checks and native playback, preserving
+original source hashes. [Release evidence](testing/evidence/hybrid-worker-release-20261005.json).
 
-`7641e966` fixes mini timelapse thumbnail generation from FITS-only exposures.
-It is published, with 198 Python/compile checks passed and the tested source
-manifest matching the local candidate. It is **not yet active in production**.
-The complete worker test creates a thumbnail and a decodable video while leaving
-the original FITS unchanged. The previous code fails that same test at
-`None.fileSize`. [Evidence](testing/evidence/hybrid-mini-fits-repair-20261004.json).
+The previous tracked application is preserved at
+`/home/eric/hybrid-backups/worker-repairs-20261005/tracked-code.tar.gz`, with revision
+and SHA-256 files. The database/configuration were not replaced. A controlled
+capture stop allowed existing retention cleanup to restore 8 GiB before activation.
+The old 24-hour observation cannot certify this corrected runtime.
 
-Two additional published fixes are pending activation: `d53c72f4` keeps a SQLite
-backlog-notification conflict from terminating capture, and `2f850d7d` freezes
-day/night state during each frame's processing so archive format, rendering and
-metadata agree. The combined candidate passed 200 Python/compile checks with
-an exact source-manifest match. JavaScript is unchanged from the 35-check run.
-See the [SQLite evidence](testing/evidence/hybrid-capture-notification-repair-20261005.json)
-and [phase evidence](testing/evidence/hybrid-frame-phase-repair-20261005.json).
+### Worker release procedure
 
-### Activate the pending worker release
-
-The collector stopped at 15:34 CEST on 5 October after 24 hours. The 19:15
-maintenance/test deadline has expired: **wait for a new user-authorized window**
-before executing these steps. The observation found defects and evidence gaps;
-it is not a passed acceptance test of either the old or corrected runtime.
+The collector stopped after 24 hours. The user authorized a new maintenance
+window after the original 19:15 cutoff; the release above used these steps.
+Future runtime changes require their own validation and live checks.
 
 1. Confirm the observer's final record, installed Git revision, configuration
    revision 119, free space, capture/web service state and running video tasks.
