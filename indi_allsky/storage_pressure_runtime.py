@@ -9,6 +9,10 @@ import tempfile
 import os
 from pathlib import Path
 import shutil
+import sqlite3
+import time
+
+from sqlalchemy.exc import OperationalError
 
 from .media_task_guard import GENERATION_ACTIONS, media_task_lock
 from .storage_pressure import GIB, StoragePressureOptions, reclaim_old_images
@@ -161,6 +165,24 @@ class StoragePressureRuntime:
                             yield ImageCandidate(source.createDate, table, source.id, priority, expires)
 
     def delete(self, candidate):
+        # Model deletion tolerates files already removed (including thumbnails).
+        # Retain this exact candidate when a commit collides with a writer: a
+        # fresh scan could omit it once its file has gone but its row remains.
+        for attempt in range(3):
+            try:
+                return self._delete_once(candidate)
+            except OperationalError as exc:
+                self.session.rollback()
+                code = getattr(exc.orig, 'sqlite_errorcode', None)
+                if (not isinstance(exc.orig, sqlite3.Error) or code is None or
+                        (code & 0xff) not in (sqlite3.SQLITE_BUSY, sqlite3.SQLITE_LOCKED) or
+                        attempt == 2):
+                    raise
+                # Release the media lock before yielding to the active writer.
+                # Every retry reloads the record and pending work protections.
+                time.sleep(0.1 * (attempt + 1))
+
+    def _delete_once(self, candidate):
         with media_task_lock(exclusive=True):
             # End the candidate scan snapshot before checking newly published tasks.
             self.session.commit()

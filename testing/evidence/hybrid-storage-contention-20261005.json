@@ -1,0 +1,38 @@
+{
+  "status": "candidate_all_regression_passed",
+  "base_revision": "4dfc3c0c",
+  "defect": "Production cleanup task 14938 failed with SQLite database is locked while deleting a thumbnail; the next task succeeded.",
+  "change": "Retry the same deletion candidate at most three times for SQLite BUSY/LOCKED only, rolling back and rechecking pending transfers, generation and source references on every attempt. Other errors propagate.",
+  "unchanged": [
+    "Daytime-first retention order",
+    "Image and timelapse protection periods",
+    "Free-space thresholds and stop target",
+    "Capture algorithms and scheduling"
+  ],
+  "targeted_test": {
+    "path": "testing/hybrid_storage_contention_test.py",
+    "result": "passed",
+    "coverage": [
+      "Real competing SQLite writer after thumbnail file unlink",
+      "Successful retry removes both asset records and files",
+      "New pending upload between attempts protects the image",
+      "Persistent contention stops after three attempts and leaves session usable",
+      "Non-lock SQLite and non-SQLite failures are not retried"
+    ]
+  },
+  "regression": {
+    "python_report": "/home/eric/hybrid-regression-storage-contention-20261005/results.json",
+    "javascript_report": "/tmp/hybrid-storage-contention-js-20261005.json",
+    "javascript_passed": 35,
+    "source_manifest_sha256": "5f6e3d994b11c15a8657e54a6f76593959d67a226df6d88df7d4fff8b011f340",
+    "python_compile_passed": 202,
+    "source_changed": false,
+    "result": "passed"
+  },
+  "limits": [
+    "No claim that unrelated filesystem/database errors are recoverable",
+    "Existing SQLite busy_timeout applies to each attempt",
+    "No production collision or deletion is forced for acceptance",
+    "Not a replacement 24-hour observation"
+  ]
+}

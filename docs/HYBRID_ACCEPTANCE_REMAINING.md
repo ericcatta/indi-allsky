@@ -23,6 +23,15 @@ and restore/key-reset flows retain their separate scopes.
 Detector/AI remain excluded. Sections below retain historical checkpoints and
 scoped gaps; the current update above supersedes their activation/window status.
 
+## Storage cleanup contention repair
+
+The candidate now retries a contended SQLite deletion at most three times,
+rolling back and rechecking pending transfers and generation before each attempt.
+A real competing-writer test reproduces the thumbnail failure and verifies recovery;
+persistent contention and unrelated errors still fail visibly. All 202 Python/compile
+and 35 JavaScript checks pass with unchanged source hashes. Deployment is pending;
+this does not certify a new 24-hour period. [Evidence](../testing/evidence/hybrid-storage-contention-20261005.json).
+
 ## Latest release completed
 
 The scientific archive implementation is deployed, with **198 Python/compile and
