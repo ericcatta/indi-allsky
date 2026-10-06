@@ -1,5 +1,5 @@
 {
-  "status": "automated_pass_deployment_pending",
+  "status": "deployed_native_labels_verified_download_receipt_open",
   "scope": "Library and Media Archive processed versus exact-exposure original downloads",
   "source_matching": "Two batch queries per image page; exact camera and createDate; omit ambiguous or missing sources",
   "tests": {
@@ -13,8 +13,27 @@
     "javascript_report": "/tmp/hybrid-archive-downloads-js-20261005.json"
   },
   "limits": [
-    "Native production verification pending",
+    "Native production download receipt remains unverified after browser timeout",
     "Not whole-product acceptance",
     "Image detail and recent-image lightbox terminology remains open"
-  ]
+  ],
+  "deployment": {
+    "commit": "7f93668b",
+    "web_reload_at": "2026-10-05T23:48:26+02:00",
+    "capture_pid_unchanged": 2045339,
+    "application_hashes_match_regression": true,
+    "backup": "/home/eric/hybrid-backups/archive-downloads-20261005/previous-files.tar.gz",
+    "services_active_rechecked_at": "2026-10-06T08:35:39+02:00"
+  },
+  "native": {
+    "camera": 1,
+    "image_id": 226308,
+    "created": "2026-10-05 23:48:27",
+    "labels": [
+      "Download processed JPEG",
+      "Download original FITS",
+      "RAW unavailable for this exposure."
+    ],
+    "download_attempt": "Browser tool timed out/reset without receipt evidence; do not count as passed"
+  }
 }

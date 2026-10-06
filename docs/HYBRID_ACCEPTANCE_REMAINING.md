@@ -50,8 +50,10 @@ Library and Media Archive now distinguish processed image downloads from exact-e
 FITS/RAW originals. Source matching is batched per page and requires the same camera
 and timestamp; missing or ambiguous originals are explicitly unavailable. The change
 preserves download authorization and stable archive pagination. Targeted real Flask
-checks pass for both roles and both archive entrypoints. All 202 Python/compile checks and 35 JavaScript checks pass. Production
-deployment evidence is pending. Image-detail wording and the recent-image lightbox
+checks pass for both roles and both archive entrypoints. All 202 Python/compile checks and 35 JavaScript checks pass. Deployed as `7f93668b` with a web-only reload at 23:48 CEST; capture was not restarted.
+Native camera-1 Library labels are verified, but the download receipt remains open
+after the browser tool timed out. Both services were active at 08:35 CEST on 6 October.
+[Evidence](../testing/evidence/hybrid-archive-downloads-20261005.json). Image-detail wording and the recent-image lightbox
 still need the same terminology review; this does not close whole-product acceptance.
 
 ## Latest release completed
