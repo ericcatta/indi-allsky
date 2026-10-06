@@ -1,0 +1,55 @@
+{
+  "status": "three_sources_recovered_prevention_fix_pending",
+  "discovered_during": "Native Library missing-source follow-up",
+  "image_id": 226246,
+  "camera_id": 1,
+  "created": "2026-10-05 23:24:13",
+  "cause": "SQLite database is locked while miscDb.addFitsImage commits; _write_archive_fit rolls back and retains processed image",
+  "log": "/var/log/indi-allsky/indi-allsky.log-20261006.gz, 2026-10-05T23:25:03.552671+02:00",
+  "source_exists": true,
+  "source_bytes": 9770725,
+  "source_sha256": "51e0fe10be0668304740a39ad6f45210e63467a63247dc9440c01bb69ecd9044",
+  "source_path": "/var/www/html/allsky/images/ccd_825ea4df-f761-444f-97c2-387b78ace935/fits/20261005/night/05_23/ccd1_20261005_232413.fit.gz",
+  "read_only_audit_since": "2026-10-05 23:18:24",
+  "audit_counts": [
+    {
+      "camera_id": 1,
+      "night_images": 595,
+      "missing_exact_source_rows": 2
+    },
+    {
+      "camera_id": 2,
+      "night_images": 591,
+      "missing_exact_source_rows": 1
+    }
+  ],
+  "required_follow_up": [
+    "Retry only the contended database registration without rewriting the FITS or duplicating records",
+    "Recover verified orphan FITS records while preserving original bytes",
+    "Verify all three missing source cases individually"
+  ],
+  "not_done": [
+    "Prevention retry not yet tested or deployed",
+    "No new 24-hour observation started",
+    "No replay recipe invented; processed JPEG retained"
+  ],
+  "missing_image_ids": [
+    226246,
+    226405,
+    226923
+  ],
+  "recovery": {
+    "at": "2026-10-06T08:47:06.900476+02:00",
+    "image_to_fits": {
+      "226246": 4549,
+      "226405": 4550,
+      "226923": 4551
+    },
+    "source_hashes_unchanged": true,
+    "processed_images_preserved": true,
+    "validation": "All three FITS decoded; embedded camera UUID, camera ID, capture time, exposure, gain and binning match image rows; no prior source row; insertion in one IMMEDIATE transaction",
+    "before_rows": "/home/eric/hybrid-observation-20261004/orphan-fits-before-recovery-20261006.json",
+    "preflight": "/home/eric/hybrid-observation-20261004/orphan-fits-preflight-20261006.json",
+    "report": "/home/eric/hybrid-observation-20261004/orphan-fits-recovered-20261006.json"
+  }
+}
