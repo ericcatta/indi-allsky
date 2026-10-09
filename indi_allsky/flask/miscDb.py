@@ -843,7 +843,7 @@ class miscDb(object):
         logger.info('Adding fits image %s to DB', filename_p)
 
 
-        fits_image = IndiAllSkyDbFitsImageTable(
+        values = dict(
             camera_id=camera_id,
             filename=str(filename_p),
             createDate=createDate,
@@ -865,10 +865,8 @@ class miscDb(object):
             thumbnail_uuid=metadata.get('thumbnail_uuid'),
         )
 
-        db.session.add(fits_image)
-        db.session.commit()
-
-        return fits_image
+        from ..fits_registration import register_fits
+        return register_fits(db.session, IndiAllSkyDbFitsImageTable, values)
 
 
     def addRawImage(self, filename, camera_id, metadata):

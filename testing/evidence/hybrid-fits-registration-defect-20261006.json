@@ -29,7 +29,7 @@
     "Verify all three missing source cases individually"
   ],
   "not_done": [
-    "Prevention retry not yet tested or deployed",
+    "Prevention deployment pending",
     "No new 24-hour observation started",
     "No replay recipe invented; processed JPEG retained"
   ],
@@ -51,5 +51,16 @@
     "before_rows": "/home/eric/hybrid-observation-20261004/orphan-fits-before-recovery-20261006.json",
     "preflight": "/home/eric/hybrid-observation-20261004/orphan-fits-preflight-20261006.json",
     "report": "/home/eric/hybrid-observation-20261004/orphan-fits-recovered-20261006.json"
+  },
+  "prevention": {
+    "implementation": "register_fits retries only SQLite BUSY/LOCKED, with rollback and fresh model instance; three attempts; never rewrites the published file",
+    "targeted_test": "testing/hybrid_fits_registration_test.py",
+    "targeted_result": "passed on Raspberry isolated SQLite: real competing writer, one row, identical source hash, persistent/non-contention failures and subsequent camera-2 registration",
+    "full_regression": "/home/eric/hybrid-regression-fits-registration-20261006/results.json",
+    "full_regression_status": "passed",
+    "deployed": false,
+    "checks": 203,
+    "source_changed": false,
+    "source_manifest_sha256": "b80ddcff0a67a753967e5c5929521c72a04fafc8db5e5dd093dfcfe13b3eefac"
   }
 }
