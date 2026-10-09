@@ -1,5 +1,5 @@
 {
-  "status": "three_sources_recovered_prevention_fix_pending",
+  "status": "recovered_and_prevention_deployed",
   "discovered_during": "Native Library missing-source follow-up",
   "image_id": 226246,
   "camera_id": 1,
@@ -29,9 +29,9 @@
     "Verify all three missing source cases individually"
   ],
   "not_done": [
-    "Prevention deployment pending",
     "No new 24-hour observation started",
-    "No replay recipe invented; processed JPEG retained"
+    "Night acquisition on this release still requires observation",
+    "No replay recipe invented during orphan recovery; processed JPEG retained"
   ],
   "missing_image_ids": [
     226246,
@@ -58,9 +58,25 @@
     "targeted_result": "passed on Raspberry isolated SQLite: real competing writer, one row, identical source hash, persistent/non-contention failures and subsequent camera-2 registration",
     "full_regression": "/home/eric/hybrid-regression-fits-registration-20261006/results.json",
     "full_regression_status": "passed",
-    "deployed": false,
+    "deployed": true,
     "checks": 203,
     "source_changed": false,
-    "source_manifest_sha256": "b80ddcff0a67a753967e5c5929521c72a04fafc8db5e5dd093dfcfe13b3eefac"
+    "source_manifest_sha256": "b80ddcff0a67a753967e5c5929521c72a04fafc8db5e5dd093dfcfe13b3eefac",
+    "commit": "13c46cd7"
+  },
+  "deployment": {
+    "at": "2026-10-09T15:11:14+02:00",
+    "capture_pid": 2339605,
+    "config": 119,
+    "installed_hashes_match_regression": true,
+    "backup": "/home/eric/hybrid-backups/fits-registration-20261009/previous-files.tar.gz",
+    "live_check": "/home/eric/hybrid-backups/fits-registration-20261009/live-check.json",
+    "live_at": "2026-10-09T15:31:47+02:00",
+    "both_services_active": true,
+    "fresh_day_images": [
+      254518,
+      254517
+    ],
+    "free_bytes": 7083716608
   }
 }

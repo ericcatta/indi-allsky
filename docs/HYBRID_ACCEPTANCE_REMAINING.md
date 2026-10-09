@@ -1,6 +1,6 @@
 # Remaining Hybrid acceptance work
 
-Updated 5 October 2026. Classic frontend removal is deployed; whole-product
+Updated 9 October 2026. Classic frontend removal is deployed; whole-product
 acceptance remains open. The user reopened maintenance after the 19:15 cutoff.
 
 The three worker repairs are installed at `db5fc9c0`, followed by daytime-first
@@ -53,8 +53,8 @@ preserves download authorization and stable archive pagination. Targeted real Fl
 checks pass for both roles and both archive entrypoints. All 202 Python/compile checks and 35 JavaScript checks pass. Deployed as `7f93668b` with a web-only reload at 23:48 CEST; capture was not restarted.
 Native camera-1 Library labels are verified, but the download receipt remains open
 after the browser tool timed out. Both services were active at 08:35 CEST on 6 October.
-[Evidence](../testing/evidence/hybrid-archive-downloads-20261005.json). Image-detail wording and the recent-image lightbox
-still need the same terminology review; this does not close whole-product acceptance.
+[Evidence](../testing/evidence/hybrid-archive-downloads-20261005.json). Image-detail wording, exact FITS/RAW links and the recent-image lightbox
+are corrected in `67b2db08`; native detail labels pass while browser download receipt and native lightbox remain open; this does not close whole-product acceptance.
 
 ## Latest release completed
 
@@ -436,3 +436,18 @@ were received on the Mac; original FITS hashes and configuration 118 are unchang
 This resolves the historical production preview and download-receipt gaps for
 this exact scope, not every role or parameter combination.
 [Evidence](../testing/evidence/hybrid-process-fits-production-20261003.json).
+
+## 9 October deployment
+
+Deployed `67b2db08` (image detail/originals and lightbox links) and `13c46cd7`
+(FITS registration retry). All 203 Python/compile and 35 JavaScript checks pass.
+Installed application hashes match the regression. Capture restarted at 15:11 CEST
+with config 119 unchanged. At 15:31 both services were active and both cameras had
+new nonempty daytime JPEGs, with about 6.6 GiB available. Three orphan FITS sources
+were recovered on 6 October without changing source bytes or deleting JPEGs.
+The native detail page presents separate processed/FITS downloads; the browser
+download tool timed out again, so receipt remains unverified. No new 24-hour
+observation has been started. Night operation on this release and the other
+acceptance matrix gaps remain open.
+[Registration/recovery evidence](../testing/evidence/hybrid-fits-registration-defect-20261006.json).
+[Detail evidence](../testing/evidence/hybrid-image-download-details-20261009.json).
