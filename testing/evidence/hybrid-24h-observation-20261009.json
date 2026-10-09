@@ -1,0 +1,18 @@
+{
+  "status": "authorized_window_remote_collection_unconfirmed",
+  "start_utc": "2026-10-09T13:11:14Z",
+  "end_utc": "2026-10-10T13:11:14Z",
+  "timezone": "Europe/Zurich",
+  "start_local": "2026-10-09T15:11:14+02:00",
+  "end_local": "2026-10-10T15:11:14+02:00",
+  "basis": "User explicitly authorized evaluating 24 hours from the documented corrected-runtime deployment, superseding the previous cutoff",
+  "runtime_change_commit": "13c46cd7",
+  "last_verified_deployed_checkout": "60174ad2",
+  "last_verified_config_revision": 119,
+  "existing_evidence": [
+    "hybrid-postdeploy-cadence-20261009.json",
+    "hybrid-fits-registration-defect-20261006.json"
+  ],
+  "collection_note": "At 2026-10-09 19:23 UTC SSH timed out during banner exchange. No remote collector start or continuity was confirmed. Heartbeat reactivated to recover access and inspect existing evidence. Retrospective window is not a backdated collector start.",
+  "acceptance": "Inspect all intermediate frame intervals and logs, day/night source formats, backlog, services, storage and cleanup. Missing historical measurements remain explicit gaps. No automatic extension after window end."
+}

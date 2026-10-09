@@ -478,3 +478,15 @@ handoff, unavailable external hardware/integrations, and the wider matrix remain
 separate open scopes. A new 24-hour period has been requested after the expired
 user deadline; it has not been started or backdated. No code changed during these
 checks, so the passing 203 Python/compile and 35 JavaScript regression was not repeated.
+
+
+### Authorized corrected-runtime window
+
+The user now authorizes evaluating 9 October 2026 15:11:14 CEST through
+10 October 15:11:14 CEST, starting from the recorded FITS-registration deployment.
+This supersedes the expired cutoff and the pending authorization above. Existing
+evidence will be evaluated retrospectively; no collector start is backdated.
+SSH access timed out on the evening check, so live collection is unconfirmed.
+The hourly heartbeat is active to recover access and evaluate the window; gaps
+remain open and no automatic extension is authorized.
+[Window record](../testing/evidence/hybrid-24h-observation-20261009.json).
