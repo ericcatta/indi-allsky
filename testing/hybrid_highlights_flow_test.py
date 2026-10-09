@@ -50,6 +50,12 @@ def run():
                 assert 'attachment;' in delivered.headers['Content-Disposition']
                 assert '/media/%s/' % kind not in cards[1]
             assert 'FITS unavailable for this exposure.' in cards[1]
+            detail = client.get('/indi-allsky/modern-admin/media/images/100?camera_id=1')
+            assert detail.status_code == 200 and 'Download processed JPEG' in detail.text
+            for kind in ('fits', 'raw'):
+                assert '/media/%s/1/1/download' % kind in detail.text
+            other_detail = client.get('/indi-allsky/modern-admin/media/images/101?camera_id=1')
+            assert '/media/fits/' not in other_detail.text and '/media/raw/' not in other_detail.text
 
             # Library and archive must offer the same exact-exposure originals,
             # rather than calling the processed JPEG an original.
@@ -101,6 +107,8 @@ def run():
         ambiguous=client.get(endpoint+'?camera_id=1').text
         first=re.findall(r'<article.*?</article>',ambiguous,re.S)[0]
         assert '/media/fits/' not in first and '/media/raw/1/1/download' in first
+        detail = client.get('/indi-allsky/modern-admin/media/images/100?camera_id=1')
+        assert '/media/fits/' not in detail.text and '/media/raw/1/1/download' in detail.text
         for archive in ('library', 'media/archive'):
             ambiguous = client.get('/indi-allsky/modern-admin/' + archive +
                                    '?camera_id=1&search=archive-image-100.jpg')

@@ -7887,7 +7887,12 @@ class ModernAdminMediaListView(ModernAdminMediaBrowseView, TemplateView):
 
 
     def serialize_media_entry(self, media_entry):
-        return self.get_media_item_serializer().serialize(media_entry)
+        item = self.get_media_item_serializer().serialize(media_entry)
+        if self.modern_admin_media_kind == 'image':
+            item['detail_url'] = url_for('indi_allsky.modern_admin_media_image_detail_view',
+                image_id=media_entry.id, camera_id=media_entry.camera_id,
+                profile_id=request.args.get('profile_id', ''))
+        return item
 
 
     def get_media_item_serializer(self):
@@ -8122,6 +8127,10 @@ class ModernAdminMediaImageDetailView(ModernAdminMediaImagesView):
         except NoResultFound:
             abort(404)
 
+        from .media_archive import exposure_source_downloads
+        context['modern_admin_image_downloads'] = ModernAdminMediaArchive(
+            'image', entry.camera_id, self.verify_admin_network).item(entry)
+        context['modern_admin_image_downloads']['source_downloads'] = exposure_source_downloads([entry])[entry.id]
         context['modern_admin_image_detail'] = {
             'id'              : entry.id,
             'created'         : self.format_image_datetime(entry.createDate),

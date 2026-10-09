@@ -37,6 +37,12 @@ def run(runtime_config):
             second=client.get(page+'?camera_id=1&limit=72&before_id='+str(cursor))
             assert len(second.json['images'])==39 and not second.json['has_more']
             assert not first.intersection(item['id'] for item in second.json['images'])
+            for item in response.json['images'] + second.json['images']:
+                assert item['detail_url'].startswith('/indi-allsky/modern-admin/media/images/' + str(item['id']) + '?')
+                assert 'camera_id=' + str(item['camera_id']) in item['detail_url']
+            scoped = client.get(page+'?profile_id=test-profile-2').json['images'][0]
+            assert 'profile_id=test-profile-2' in scoped['detail_url']
+            assert client.get(scoped['detail_url']).status_code == 200
         client=login_client(app,2)
         with app.app_context():
             cam=db.session.get(IndiAllSkyDbCameraTable,2)

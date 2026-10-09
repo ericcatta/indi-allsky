@@ -40,6 +40,25 @@ function galleryFunction(name) {
     return asyncPrefix + source.slice(start, source.indexOf('\n}', start) + 2);
 }
 
+// Advancing a lightbox must change the exposure's detail/original link, and
+// hide and clear it for a FITS entry that has no image detail destination.
+{
+    const element = () => ({setAttribute(k,v){this[k]=v;},removeAttribute(k){delete this[k];}});
+    const details = element();
+    const items = [{url:'/processed-1.jpg',detail_url:'/images/1?camera_id=1'},
+        {url:'/processed-2.jpg',detail_url:'/images/2?camera_id=2'}, {url:'/source.fit'}];
+    const c = {modernAdminLightboxItem:i=>items[i],modernAdminLightboxDisplayUrl:i=>i.url,
+        modernAdminLightboxDetails:details,modernAdminLightboxImage:element(),
+        modernAdminLightboxStatus:element(),modernAdminLightboxTitle:element(),
+        modernAdminLightboxDownload:element(),
+        modernAdminLightbox:{...element(),getAttribute:()=> 'true',querySelector:()=>({focus(){}})},
+        document:{activeElement:{},documentElement:{classList:{add(){}}},body:{classList:{add(){}}}}};
+    vm.createContext(c);vm.runInContext(galleryFunction('modernAdminOpenLightbox'),c);
+    c.modernAdminOpenLightbox(0);assert.equal(details.href,items[0].detail_url);assert.equal(details.hidden,false);
+    c.modernAdminOpenLightbox(1);assert.equal(details.href,items[1].detail_url);
+    c.modernAdminOpenLightbox(2);assert.equal(details.hidden,true);assert.equal(details.href,undefined);
+}
+
 async function galleryStateChecks() {
     const count = {}, label = {}, requests = [], rendered = [];
     const filters = ['ASI678MC', 'IMX708 Wide'].map((textContent, i) => {

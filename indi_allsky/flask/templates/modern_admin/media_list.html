@@ -197,7 +197,8 @@ var camera_id = {{ camera_id }};
             <p id="modern-admin-lightbox-status" role="status" hidden></p>
             <figcaption>
                 <span id="modern-admin-lightbox-title"></span>
-                <a id="modern-admin-lightbox-download" href="#" download>Download original</a>
+                <a id="modern-admin-lightbox-download" href="#" download>{{ 'Download original FITS' if modern_admin_media_kind == 'fits' else 'Download processed image' }}</a>
+                <a id="modern-admin-lightbox-details" hidden>Image details and originals</a>
             </figcaption>
         </figure>
         <button class="modern-admin-lightbox-nav modern-admin-lightbox-next" type="button" id="modern-admin-lightbox-next" aria-label="Next image">Next</button>
@@ -213,11 +214,12 @@ const modernAdminLightboxStatus = document.getElementById('modern-admin-lightbox
 let modernAdminLightboxOpener = null;
 modernAdminLightboxImage.addEventListener('error', () => {
     modernAdminLightboxImage.hidden = true;
-    modernAdminLightboxStatus.textContent = 'Preview could not be loaded. Try downloading the original to inspect it.';
+    modernAdminLightboxStatus.textContent = 'Preview could not be loaded. Use the download or details link to inspect this exposure.';
     modernAdminLightboxStatus.hidden = false;
 });
 const modernAdminLightboxTitle = document.getElementById('modern-admin-lightbox-title');
 const modernAdminLightboxDownload = document.getElementById('modern-admin-lightbox-download');
+const modernAdminLightboxDetails = document.getElementById('modern-admin-lightbox-details');
 const modernAdminDownloadSelected = document.getElementById('modern-admin-download-selected');
 const modernAdminSelectionCount = document.getElementById('modern-admin-selection-count');
 const modernAdminGalleryGrid = document.getElementById('modern-admin-gallery-grid');
@@ -270,7 +272,7 @@ function modernAdminOpenLightbox(index) {
     const displayUrl = modernAdminLightboxDisplayUrl(item);
     modernAdminLightboxImage.hidden = !displayUrl;
     modernAdminLightboxStatus.hidden = Boolean(displayUrl);
-    modernAdminLightboxStatus.textContent = displayUrl ? '' : 'No local preview is available. Use Download original to open the recorded source.';
+    modernAdminLightboxStatus.textContent = displayUrl ? '' : 'No local preview is available. Use the download or details link to inspect this exposure.';
     if (displayUrl) {
         modernAdminLightboxImage.src = displayUrl;
     } else {
@@ -280,6 +282,12 @@ function modernAdminOpenLightbox(index) {
     modernAdminLightboxTitle.textContent = item.filename + ' · ' + item.created;
     modernAdminLightboxDownload.href = item.url || item.preview_url;
     modernAdminLightboxDownload.setAttribute('download', item.filename || '');
+    modernAdminLightboxDetails.hidden = !item.detail_url;
+    if (item.detail_url) {
+        modernAdminLightboxDetails.href = item.detail_url;
+    } else {
+        modernAdminLightboxDetails.removeAttribute('href');
+    }
     modernAdminLightbox.inert = false;
     modernAdminLightbox.setAttribute('aria-hidden', 'false');
     modernAdminLightbox.querySelector('.modern-admin-lightbox-close').focus();

@@ -85,12 +85,17 @@ var camera_id = {{ camera_id }};
             <div><dt>Metadata</dt><dd>{{ modern_admin_image_detail.metadata }}</dd></div>
         </dl>
 
-        <p class="modern-admin-note">Inspect capture metadata, download the original or use this image as the centre of a mini timelapse.</p>
+        <p class="modern-admin-note">Download the processed image with its saved appearance, or an available original from the same exposure.</p>
 
         <section class="modern-admin-link-grid">
             {% set archive_back = request.args.get('archive_return') | archive_return_url %}
             {% if archive_back %}<a href="{{ archive_back }}" data-archive-return>Back to results</a>{% else %}<a href="{{ url_for('indi_allsky.modern_admin_media_images_view', camera_id=modern_admin_image_detail.camera_id, profile_id=modern_admin_detail_profile_id) }}">Back to Images</a>{% endif %}
-            <a href="{{ url_for('indi_allsky.modern_admin_source_download_view', kind='image', camera_id=modern_admin_image_detail.camera_id, media_id=modern_admin_image_detail.id) }}">Download image</a>
+            <a href="{{ modern_admin_image_downloads.download_url }}">Download processed {{ modern_admin_image_downloads.processed_format }}</a>
+            {% for kind in ('fits', 'raw') %}
+            {% if modern_admin_image_downloads.source_downloads.get(kind) %}
+            <a href="{{ modern_admin_image_downloads.source_downloads[kind] }}">Download original {{ kind|upper }}</a>
+            {% else %}<span>{{ kind|upper }} unavailable for this exposure.</span>{% endif %}
+            {% endfor %}
             <a href="{{ url_for('indi_allsky.modern_admin_mini_generate_view', camera_id=modern_admin_image_detail.camera_id, image_id=modern_admin_image_detail.id, profile_id=modern_admin_detail_profile_id) }}">Create mini timelapse around this image</a>
         </section>
     </section>

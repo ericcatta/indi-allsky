@@ -889,7 +889,9 @@ def test_media_list_view_delegates_item_serialization_to_runtime_service():
 
     assert_true('ModernAdminMediaItemSerializer' in source, 'views must import Hybrid media item serializer')
     assert_true('def get_media_item_serializer(self):' in body, 'media list view must construct item serializer')
-    assert_true('return self.get_media_item_serializer().serialize(media_entry)' in body, 'media list view must delegate item serialization')
+    assert_true('item = self.get_media_item_serializer().serialize(media_entry)' in body, 'media list view must delegate item serialization')
+    serialization = body[body.index('    def serialize_media_entry'):body.index('    def get_media_item_serializer')]
+    assert_true('return item' in serialization, 'media list view must preserve the delegated item')
     assert_true("'preview_url' :" not in body, 'media list view must not own preview item shape')
     assert_true("'dimensions'  :" not in body, 'media list view must not own dimensions item shape')
 

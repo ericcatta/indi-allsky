@@ -1,0 +1,11 @@
+{
+  "status": "automated_pass_deployment_pending",
+  "scope": "Image detail processed and exact-exposure originals; lightbox detail link follows current frame including dynamic gallery pages",
+  "python_checks": 203,
+  "javascript_checks": 35,
+  "report": "/home/eric/hybrid-regression-fits-registration-20261006/results.json",
+  "javascript_report": "/tmp/hybrid-image-download-details-js-20261006.json",
+  "source_changed": false,
+  "initial_regression": "202 image-details checks completed with one syntax-specific ownership guardrail failure; delegation assertion updated while preserving shape ownership guards; final 203-check suite passed",
+  "native_verification": "pending"
+}
