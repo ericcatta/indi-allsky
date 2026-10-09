@@ -451,3 +451,30 @@ observation has been started. Night operation on this release and the other
 acceptance matrix gaps remain open.
 [Registration/recovery evidence](../testing/evidence/hybrid-fits-registration-defect-20261006.json).
 [Detail evidence](../testing/evidence/hybrid-image-download-details-20261009.json).
+
+
+### 9 October scoped native follow-up
+
+Production administrator checks passed for image lightboxes on both cameras:
+processed pixels decoded, Next/Right updated the exact image-detail target,
+Escape closed the preview and restored focus, and AJAX camera switching preserved
+camera/profile scope. Selecting and deselecting toggled Download selected correctly;
+no receipt is claimed. At 390×844, the ZWO lightbox and detail navigation worked
+without horizontal overflow. Existing morning FITS 9974 and 9976 decoded at full
+camera dimensions; the FITS lightbox exposed its original download and cleared the
+inapplicable image-detail link. This closes only these scoped native controls.
+[Native evidence](../testing/evidence/hybrid-image-download-details-20261009.json).
+
+Read-only postdeploy capture evidence covers 15:12–15:51 CEST: 156/157 daytime
+frames, median interval 15 seconds and maximum 16 seconds for both cameras,
+no interval above 30 seconds, no pending queued/running/manual tasks, and both
+latest JPEG files present with matching byte counts. Available storage was
+6,962,888,704 bytes. The earlier Starlink catalogue HTTP 403 remains a provider
+limitation; this is not an error-free or 24-hour acceptance claim.
+[Cadence evidence](../testing/evidence/hybrid-postdeploy-cadence-20261009.json).
+
+Actual browser download receipt for the new detail flow, credential-reset native
+handoff, unavailable external hardware/integrations, and the wider matrix remain
+separate open scopes. A new 24-hour period has been requested after the expired
+user deadline; it has not been started or backdated. No code changed during these
+checks, so the passing 203 Python/compile and 35 JavaScript regression was not repeated.

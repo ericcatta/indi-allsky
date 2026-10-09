@@ -17,7 +17,70 @@
     ],
     "source_download_target": "/indi-allsky/modern-admin/media/fits/1/9974/download",
     "download_receipt": "Browser downloadMedia timed out; not counted as passed",
-    "lightbox_native": "pending"
+    "lightbox_native": {
+      "status": "passed_for_scoped_controls",
+      "date": "2026-10-09",
+      "role": "production administrator",
+      "camera_1": {
+        "first_image": 254642,
+        "next_image": 254640,
+        "decoded_dimensions": [
+          4608,
+          2592
+        ],
+        "details_navigation": "matches second image and camera 1",
+        "day_sources": "processed JPEG; FITS and RAW explicitly unavailable"
+      },
+      "camera_2": {
+        "ajax_filter": "ASI678MC selected, cards and detail links scoped to camera 2 / asi678mc",
+        "first_image": 254663,
+        "next_image": 254661,
+        "decoded_dimensions": [
+          3840,
+          2160
+        ],
+        "keyboard": "Right changes current image/details; Escape closes dialog and returns focus to opening figure",
+        "selection": "select enables Download selected; deselect disables it; receipt not attempted",
+        "mobile": {
+          "viewport": [
+            390,
+            844
+          ],
+          "next_and_details": "passed",
+          "detail_horizontal_overflow": false,
+          "decoded_preview": [
+            3840,
+            2160
+          ]
+        },
+        "browser_console_errors": []
+      },
+      "limits": [
+        "Actual download receipt remains unverified for this flow",
+        "This is not all-controls or all-roles acceptance"
+      ]
+    },
+    "fits_lightbox": {
+      "camera_2": {
+        "fits_id": 9976,
+        "preview_dimensions": [
+          3840,
+          2160
+        ],
+        "download_label": "Download original FITS",
+        "download_target": "/indi-allsky/modern-admin/media/fits/2/9976/download",
+        "image_detail_link_hidden_and_href_cleared": true
+      },
+      "camera_1": {
+        "fits_id": 9974,
+        "preview_dimensions": [
+          4608,
+          2592
+        ],
+        "filter_scope": "camera 1 / imx708-wide"
+      },
+      "limits": "Existing morning FITS read back on current release; not evidence of new night capture or download receipt"
+    }
   },
   "deployment_commit": "67b2db08"
 }
