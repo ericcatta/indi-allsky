@@ -490,3 +490,11 @@ SSH access timed out on the evening check, so live collection is unconfirmed.
 The hourly heartbeat is active to recover access and evaluate the window; gaps
 remain open and no automatic extension is authorized.
 [Window record](../testing/evidence/hybrid-24h-observation-20261009.json).
+
+At 22:16 CEST SSH recovered. Observer 2357391 now collects until the original
+10 October 15:11:14 CEST endpoint. Its real start is 20:16:14 UTC, not the
+retrospective window start. Both cameras are saving FITS and services are active.
+Retrospective records show one IMX708 timeout with a 93-second frame gap and a
+failed long-term keogram sample under SQLite contention; these remain defects,
+not a passing 24-hour result. Frame/task records and selected error logs are
+preserved under /home/eric/hybrid-observation-20261009.

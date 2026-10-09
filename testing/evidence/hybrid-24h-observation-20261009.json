@@ -1,5 +1,5 @@
 {
-  "status": "authorized_window_remote_collection_unconfirmed",
+  "status": "collecting_with_retrospective_gaps_and_defects",
   "start_utc": "2026-10-09T13:11:14Z",
   "end_utc": "2026-10-10T13:11:14Z",
   "timezone": "Europe/Zurich",
@@ -13,6 +13,40 @@
     "hybrid-postdeploy-cadence-20261009.json",
     "hybrid-fits-registration-defect-20261006.json"
   ],
-  "collection_note": "At 2026-10-09 19:23 UTC SSH timed out during banner exchange. No remote collector start or continuity was confirmed. Heartbeat reactivated to recover access and inspect existing evidence. Retrospective window is not a backdated collector start.",
-  "acceptance": "Inspect all intermediate frame intervals and logs, day/night source formats, backlog, services, storage and cleanup. Missing historical measurements remain explicit gaps. No automatic extension after window end."
+  "collection_note": "SSH recovered at 20:15 UTC; no existing observer found. Collector started at the actual time recorded, bounded to original window end. Prior frames and tasks retained in retrospective JSON; earlier continuous free-space/service samples unavailable.",
+  "acceptance": "Inspect all intermediate frame intervals and logs, day/night source formats, backlog, services, storage and cleanup. Missing historical measurements remain explicit gaps. No automatic extension after window end.",
+  "observer_pid": 2357391,
+  "collector_start_utc": "2026-10-09T20:16:14.617440+00:00",
+  "remote_directory": "/home/eric/hybrid-observation-20261009",
+  "checkpoint": {
+    "utc": "2026-10-09T20:16:34.943033+00:00",
+    "config": 119,
+    "capture_pid": 2339605,
+    "capture_and_web": "active",
+    "free_bytes": 6488846336,
+    "pending_tasks": 0,
+    "camera_1": {
+      "frames_since_deploy": 1219,
+      "night_frames": 233,
+      "max_gap_seconds": 93,
+      "latest_fits_bytes": 16556616
+    },
+    "camera_2": {
+      "frames_since_deploy": 1221,
+      "night_frames": 234,
+      "max_gap_seconds": 75,
+      "latest_fits_bytes": 12130001
+    },
+    "cleanup": "Task15701 recovered 8.01 GiB at19:18:51; retention details still to inspect",
+    "errors": [
+      "15:16:35 Starlink HTTP403, previous catalogue retained",
+      "19:33:43 rpicam-still timeout camera1; frame gap93s then resumed",
+      "20:21:47 camera1 longterm-keogram sample save failed: SQLite contention"
+    ],
+    "limits": [
+      "Not an acceptance pass",
+      "Intermediate intervals preserved remotely; irregular night cadence needs investigation",
+      "Collector sample continuity must be checked on next heartbeat"
+    ]
+  }
 }
