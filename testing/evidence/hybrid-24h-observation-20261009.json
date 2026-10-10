@@ -75,5 +75,34 @@
     },
     "day_transition": "Both cameras produced daytime JPEG frames after night FITS.",
     "verdict": "Defects remain; 24h acceptance not passed. No runtime or scheduling changes made."
+  },
+  "midday_checkpoint": {
+    "checked_utc": "2026-10-10T10:29:48.935163+00:00",
+    "remote_report": "/home/eric/hybrid-observation-20261009/checkpoint-1015.json",
+    "samples_since_previous": 61,
+    "maximum_sample_gap_seconds": 87.168,
+    "collector_errors": 0,
+    "new_error_lines": 2,
+    "services": "active",
+    "capture_pid": 2339605,
+    "config": 119,
+    "free_bytes": 8551858176,
+    "pending_tasks": 0,
+    "camera1": {
+      "frames": 246,
+      "max_gap_seconds": 42,
+      "missing_files": 0
+    },
+    "camera2": {
+      "frames": 246,
+      "max_gap_seconds": 30,
+      "missing_files": 0
+    },
+    "queue_recovery": "Task15764 SUCCESS: keogram,startrail,startrail video generated. Cleanup15775 SUCCESS, follow-up15804 recovered8.01GiB. Queue drained without operator changes.",
+    "remaining_defects": [
+      "IMX708 daytime timeouts at10:29 and11:37 CEST, followed by resumed capture",
+      "Camera2 longterm-keogram sample save failed at11:44 CEST"
+    ],
+    "verdict": "Recovery observed; earlier defects and evidence gaps still prevent a passing acceptance verdict"
   }
 }
