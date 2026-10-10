@@ -48,5 +48,32 @@
       "Intermediate intervals preserved remotely; irregular night cadence needs investigation",
       "Collector sample continuity must be checked on next heartbeat"
     ]
+  },
+  "overnight_checkpoint": {
+    "checked_utc": "2026-10-10T06:16:59.699852+00:00",
+    "remote_report": "/home/eric/hybrid-observation-20261009/checkpoint-2328.json",
+    "samples_since_previous": 458,
+    "maximum_sample_gap_seconds": 94.041,
+    "collector_errors": 0,
+    "log_rotation_gaps": 1,
+    "error_lines": 143,
+    "error_note": "Includes multiline traceback reporting; not 143 distinct failures. Logs confirm SQLite lock on FITS metadata UPDATE and image-worker exception at05:52 CEST. Overnight error lines preserved remotely.",
+    "capture_pid": 2339605,
+    "services": "active",
+    "config": 119,
+    "free_bytes": 3927633920,
+    "pending": "13 queued,1 running. generateKeogramStarTrails15764 running since05:04; cleanup15775 queued since05:23.",
+    "camera1": {
+      "frames": 812,
+      "max_gap_seconds": 96,
+      "missing_files_at_sample": 0
+    },
+    "camera2": {
+      "frames": 811,
+      "max_gap_seconds": 90,
+      "missing_files_at_sample": 0
+    },
+    "day_transition": "Both cameras produced daytime JPEG frames after night FITS.",
+    "verdict": "Defects remain; 24h acceptance not passed. No runtime or scheduling changes made."
   }
 }
