@@ -1,5 +1,5 @@
 {
-  "status": "collecting_with_retrospective_gaps_and_defects",
+  "status": "closed_not_passed",
   "start_utc": "2026-10-09T13:11:14Z",
   "end_utc": "2026-10-10T13:11:14Z",
   "timezone": "Europe/Zurich",
@@ -104,5 +104,77 @@
       "Camera2 longterm-keogram sample save failed at11:44 CEST"
     ],
     "verdict": "Recovery observed; earlier defects and evidence gaps still prevent a passing acceptance verdict"
+  },
+  "closure": {
+    "collector_end_utc": "2026-10-10T13:11:14.502118+00:00",
+    "observer_process_absent": true,
+    "continuous_samples": 978,
+    "collector_start_utc": "2026-10-09T20:16:14.617440+00:00",
+    "max_sample_gap_seconds": 99.032,
+    "collector_errors": 0,
+    "log_rotation_gaps": 1,
+    "log_error_lines": 146,
+    "error_count_note": "Traceback lines are not independent failures",
+    "free_min_bytes": 3648069632,
+    "free_end_bytes": 7489327104,
+    "configuration_revisions": [
+      119
+    ],
+    "capture_and_web_at_end": "active",
+    "capture_pid": 2339605,
+    "parent_restarts": 0,
+    "parent_restart_limit": "Does not exclude child image-worker recovery; child exception was observed",
+    "pending_tasks_at_end": 0,
+    "merged_frames": {
+      "1": {
+        "count": 3832,
+        "day": 2915,
+        "night": 917,
+        "first_local": "2026-10-09 15:11:27",
+        "last_local": "2026-10-10 15:11:05",
+        "max_gap_seconds": 96,
+        "gaps_above_60_seconds": 36
+      },
+      "2": {
+        "count": 3832,
+        "day": 2919,
+        "night": 913,
+        "first_local": "2026-10-09 15:11:37",
+        "last_local": "2026-10-10 15:11:09",
+        "max_gap_seconds": 90,
+        "gaps_above_60_seconds": 44
+      }
+    },
+    "observed_file_checks": {
+      "camera1": 2613,
+      "camera2": 2612,
+      "missing_at_sample": 0,
+      "limit": "Files checked when samples collected, not proof of complete archive integrity for all24hours"
+    },
+    "sample_file_sha256": "717c52a7015dbe71dd1805bc2551ac04b68ad2f8781fb796cddd4848f7e71574",
+    "remote_reports": [
+      "/home/eric/hybrid-observation-20261009/final-summary.json",
+      "/home/eric/hybrid-observation-20261009/merged-frame-summary.json"
+    ],
+    "passed_scopes": [
+      "Both cameras acquired during day and night and were fresh at endpoint",
+      "Sampled night FITS and day JPEG publication with no missing files at sample",
+      "Generation task15764 and queued cleanup completed without operator intervention; final queue drained",
+      "Collector stopped at authorized endpoint; capture and web left active"
+    ],
+    "defects": [
+      "IMX708 rpicam-still exposure timeouts with recovery",
+      "SQLite contention caused longterm-keogram sample failures and FITS metadata UPDATE image-worker exception",
+      "Generation delayed cleanup for hours while free space fell below configured trigger",
+      "Night frame intervals exceeded nominal45second cadence"
+    ],
+    "evidence_gaps": [
+      "Continuous services/free-space sampling starts7h05m after requested start; retrospective frame/task data do not reconstruct all historical metrics",
+      "One log rotation gap; selected error lines were recovered but complete byte continuity not certified",
+      "Three transient storage_format null observations resolved to FITS on reread; publication timing is not instantaneous",
+      "Five-day timelapse protection and all deletion eligibility not exhaustively verified by this observation",
+      "Native download/credential handoff, unavailable integrations/hardware and wider acceptance matrix remain separate open scopes"
+    ],
+    "verdict": "24-hour window ended; acceptance not passed. No extension. Overall plan not complete."
   }
 }

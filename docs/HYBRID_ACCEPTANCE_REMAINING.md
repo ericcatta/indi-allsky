@@ -498,3 +498,26 @@ Retrospective records show one IMX708 timeout with a 93-second frame gap and a
 failed long-term keogram sample under SQLite contention; these remain defects,
 not a passing 24-hour result. Frame/task records and selected error logs are
 preserved under /home/eric/hybrid-observation-20261009.
+
+
+## 10 October: authorized observation closed, acceptance not passed
+
+The observer ended at 13:11:14.502 UTC (15:11 CEST) and its process is absent.
+Capture and web remain active; no acquisition or scheduling changes were made.
+978 samples cover the actual collection from 9 October 20:16 UTC, while preserved
+retrospective frame records extend coverage back to the authorized deployment.
+Merged evidence contains 3,832 frames per camera across day and night. The sampled
+5,225 frames had no missing files at observation time. Final queue was drained and
+7,489,327,104 bytes were free; minimum sampled free space was 3,648,069,632 bytes.
+
+Acceptance is **not passed**: IMX708 exposure timeouts, SQLite keogram/FITS metadata
+failures and image-worker recovery, irregular night intervals (maximum 96/90 s),
+and generation delaying queued cleanup remain real defects. Automatic queue and
+space recovery was observed but does not erase those defects. The first 7h05m lack
+continuous service/space samples, and one log rotation gap remains a coverage limit.
+The wider functional matrix and five-day retention validation are not closed by
+this run. No automatic extension is authorized. The hourly automation is paused
+at closure; future correction and verification must not be reported as covered
+by this historical runtime window.
+
+[Final evidence](../testing/evidence/hybrid-24h-observation-20261009.json).
