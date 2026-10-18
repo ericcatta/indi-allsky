@@ -5,10 +5,11 @@ acceptance remains open. SQLite metadata/keogram retries are deployed at
 `a40ec0e0`, with config 119 unchanged and a passing short daytime recovery check.
 
 Current remaining work:
-- Correct generation overwrite failure safety: the Keogram/Startrail worker currently
-  deletes existing outputs before rendering when `TIMELAPSE_OVERWRITE=True`.
-  A later failure can lose those products. The replacement-lifecycle correction now
-  passes isolated failure, rollback, recovery and transfer tests and awaits deployment.
+- Observe the corrected generation overwrite lifecycle in sustained operation.
+  Previously the Keogram/Startrail worker deleted old outputs before rendering
+  with `TIMELAPSE_OVERWRITE=True`. The correction preserves them until publish,
+  passes isolated failure, rollback, recovery and transfer tests, and is deployed
+  in `cffd7002` (runtime fix `4b694b3e`).
   The 211-case regression had 210 passes and one test-default-path failure; that
   entrypoint passes after correcting its default, with application sources unchanged.
   [Evidence](../testing/evidence/hybrid-overwrite-safety-20261018.json). Production
@@ -28,7 +29,10 @@ Current remaining work:
   window closed without acceptance. On 18 October the user authorized a fresh
   24-hour period once corrections are verified and deployed, with lightweight
   collection and notifications only for problems or completion. That new period
-  has not started; record a verifiable start/version/configuration when ready.
+  started at **18 October 17:12:10 CEST**, ending **19 October 17:12:10 CEST**,
+  on `cffd7002`, configuration 119. Collector PID 488769 records persistent samples
+  on the Pi. [Observation](../testing/evidence/hybrid-24h-observation-20261018.json).
+  This is an active observation, not an acceptance pass.
 
 The sections below preserve earlier release evidence and their original scopes.
 

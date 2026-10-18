@@ -1,5 +1,5 @@
 {
-  "status": "verified_pending_deploy",
+  "status": "deployed_short_recovery_pass",
   "scope": "Keogram, Startrail and Startrail-video replacement preserves durable outputs until successful publish; observer log collection improvements",
   "regression": {
     "report": "/home/eric/hybrid-regression-overwrite-final-20261018/results.json",
@@ -28,6 +28,18 @@
   "limits": [
     "Crash after database publish and before old-file unlink may leave an orphan; new output remains durable",
     "Isolated fixtures do not certify scientific live quality or sustained production concurrency",
-    "New 24-hour observation not yet started"
-  ]
+    "Fresh observation started separately; sustained acceptance remains open"
+  ],
+  "deployment": {
+    "commit": "cffd70029282338aa4fce1b5f30211e653958af7",
+    "runtime_fix_commit": "4b694b3e",
+    "restart_completed_local": "2026-10-18T17:10:39+02:00",
+    "config_revision": 119,
+    "installed_source_manifest": "3f7c863d4979486654c9d8785117f532765fc675ac94e34c41b7091c6cc40601",
+    "rollback_directory": "/home/eric/hybrid-backups/overwrite-safety-20261018",
+    "capture_pid": 488645,
+    "services": "capture and web active",
+    "post_restart_frames": "7 daytime frames across cameras 1 and 2 through17:11:45; all files exist and sizes match database",
+    "post_restart_errors": []
+  }
 }

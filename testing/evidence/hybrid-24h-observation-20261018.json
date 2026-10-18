@@ -1,0 +1,49 @@
+{
+  "status": "collecting",
+  "start_utc": "2026-10-18T15:12:10.507804+00:00",
+  "end_utc": "2026-10-19T15:12:10.507804+00:00",
+  "start_local": "2026-10-18T17:12:10.507804+02:00",
+  "end_local": "2026-10-19T17:12:10.507804+02:00",
+  "timezone": "Europe/Zurich",
+  "basis": "Explicit user authorization to start a fresh24h period once corrections verified and deployed; no retrodating",
+  "runtime_checkout": "cffd70029282338aa4fce1b5f30211e653958af7",
+  "config_revision": 119,
+  "config_data_sha256": "01bfa68cbc1b3ca183109a2ee21ae20e8f39ee4f8544183db7e3f496da6fb599",
+  "policy": {
+    "IMAGE_ARCHIVE": {
+      "NIGHT": "fits",
+      "DAY": "processed"
+    },
+    "STORAGE_PRESSURE": {
+      "ENABLE": true,
+      "MIN_FREE_GIB": 5.0,
+      "TARGET_FREE_GIB": 8.0,
+      "KEEP_DAYS": 1
+    },
+    "TIMELAPSE_EXPIRE_DAYS": 5,
+    "IMAGE_EXPIRE_DAYS": 10
+  },
+  "observer_pid": 488769,
+  "remote_directory": "/home/eric/hybrid-observation-20261018",
+  "samples_file": "samples.jsonl",
+  "baseline_file": "baseline-config.json",
+  "first_sample": {
+    "utc": "2026-10-18T15:12:10.521065+00:00",
+    "free_bytes": 6715899904,
+    "capture_pid": 488645,
+    "capture_and_web": "active",
+    "pending_tasks": 0,
+    "camera1_latest_local": "2026-10-18 17:12:05",
+    "camera2_latest_local": "2026-10-18 17:12:00",
+    "log_gap": false,
+    "log_error_lines": 0
+  },
+  "acceptance": "Review every intermediate frame interval, observed files, services, backlog, logs, storage and cleanup; confirm day/night transition and retention. No pass from endpoint samples alone. Unavailable evidence remains a gap.",
+  "limits": [
+    "New period not yet complete",
+    "Log tail explicitly marks rotation ambiguity, read caps and copytruncate; absence of a flag is not proof against all possible unobservable loss",
+    "Collector does not itself certify every deletion eligibility or original hash",
+    "Whole-product functional matrix remains separate from this runtime period"
+  ],
+  "previous_period": "hybrid-24h-observation-20261009.json remains closed_not_passed"
+}
