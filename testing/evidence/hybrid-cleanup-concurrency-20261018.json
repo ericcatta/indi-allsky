@@ -1,5 +1,5 @@
 {
-  "status": "regression_passed_not_deployed",
+  "status": "deployed_initial_daytime_check_passed",
   "date": "2026-10-18",
   "purpose": "Prevent media generation from starving storage-pressure cleanup while retaining generation inputs and user retention policy",
   "changes": [
@@ -50,10 +50,9 @@
     "testing/hybrid_video_dispatch_test.py": "5c9a47c50be55ed20f9b5c9c4a7c22c84e4a02935aec9a3374fb7b10a8d191b2"
   },
   "pending": [
-    "Commit/push and controlled deployment after validation",
-    "Observe concurrent generation/cleanup without deleting outside retention policy"
+    "Observe concurrent production generation/cleanup without deleting outside retention policy"
   ],
-  "limitations": "Fixture effects use dedicated disposable files. No new production cleanup or capture change in this mission yet.",
+  "limitations": "Concurrent generation/deletion effect verified with real worker and disposable files in isolated tests. Production worker starts and capture resumes; sustained production concurrency remains open.",
   "initial_regression": {
     "report": "/home/eric/hybrid-regression-cleanup-20261018/results.json",
     "completed": 207,
@@ -68,5 +67,77 @@
     "reviewer": "planner (GPT-5.6-sol medium)",
     "finding": "Recovery failure could escape to capture supervisor",
     "resolution": "Rollback/log and defer replacement to next supervisor iteration; injected failure and later successful restart test passes"
+  },
+  "deployment": {
+    "commit": "884f2337",
+    "previous_commit": "68c565a5",
+    "capture_restart_completed_at": "2026-10-18T16:03:56+02:00",
+    "backup": "/home/eric/hybrid-backups/runtime-recovery-20261018",
+    "installed_implementation_matches_regression": true,
+    "config_id": 119
+  },
+  "live_check": {
+    "checked_at": "2026-10-18T16:05:14.112092+02:00",
+    "config_id": 119,
+    "cameras": {
+      "1": [
+        {
+          "id": 322868,
+          "at": "2026-10-18 16:04:22.000000",
+          "file_ok": true,
+          "size_matches": true
+        },
+        {
+          "id": 322870,
+          "at": "2026-10-18 16:04:37.000000",
+          "file_ok": true,
+          "size_matches": true
+        },
+        {
+          "id": 322872,
+          "at": "2026-10-18 16:04:52.000000",
+          "file_ok": true,
+          "size_matches": true
+        },
+        {
+          "id": 322874,
+          "at": "2026-10-18 16:05:07.000000",
+          "file_ok": true,
+          "size_matches": true
+        }
+      ],
+      "2": [
+        {
+          "id": 322867,
+          "at": "2026-10-18 16:04:18.000000",
+          "file_ok": true,
+          "size_matches": true
+        },
+        {
+          "id": 322869,
+          "at": "2026-10-18 16:04:32.000000",
+          "file_ok": true,
+          "size_matches": true
+        },
+        {
+          "id": 322871,
+          "at": "2026-10-18 16:04:47.000000",
+          "file_ok": true,
+          "size_matches": true
+        },
+        {
+          "id": 322873,
+          "at": "2026-10-18 16:05:02.000000",
+          "file_ok": true,
+          "size_matches": true
+        }
+      ]
+    },
+    "errors": [],
+    "storage_start": [
+      "2026-10-18T16:03:57.860971+02:00 allsky-pi [INFO] MainProcess-449113/MainThread allsky._startStorageWorker() [922]: Starting Storage-1 worker"
+    ],
+    "services": "MainPID=449113\nActiveState=active\n\nMainPID=375630\nActiveState=active\n",
+    "free_bytes": 7159361536
   }
 }

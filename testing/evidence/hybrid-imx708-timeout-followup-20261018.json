@@ -1,5 +1,5 @@
 {
-  "status": "recovery_and_diagnostics_regression_passed_not_deployed",
+  "status": "recovery_and_diagnostics_deployed_initial_daytime_check_passed",
   "observed_at": "2026-10-18",
   "source": "/var/log/indi-allsky/indi-allsky.log on production Raspberry",
   "current_log_timeout_count": 4,
@@ -62,11 +62,20 @@
     "capture_timeout_policy_test.py": "PASS locally"
   },
   "regression_report": "/home/eric/hybrid-regression-runtime-final-20261018/results.json",
-  "remaining": "Root cause of intermittent process stall still open; no claim that recovery changes eliminate hardware/driver timeouts. Await controlled deployment and actual diagnostics.",
+  "remaining": "Root cause of intermittent process stall still open. Await actual timeout diagnostics; successful short recovery check does not prove hardware/driver stalls eliminated.",
   "regression": {
     "passed": 209,
     "failed": 0,
     "source_changed": false,
     "source_manifest_sha256": "ca198621f85a0ea0a88ec76dfde9f7a132ad5e36ecb321ab55dc712002fe0481"
-  }
+  },
+  "deployment": {
+    "commit": "884f2337",
+    "previous_commit": "68c565a5",
+    "capture_restart_completed_at": "2026-10-18T16:03:56+02:00",
+    "backup": "/home/eric/hybrid-backups/runtime-recovery-20261018",
+    "installed_implementation_matches_regression": true,
+    "config_id": 119
+  },
+  "live_check_reference": "hybrid-cleanup-concurrency-20261018.json"
 }

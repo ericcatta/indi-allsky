@@ -5,9 +5,15 @@ acceptance remains open. SQLite metadata/keogram retries are deployed at
 `a40ec0e0`, with config 119 unchanged and a passing short daytime recovery check.
 
 Current remaining work:
-- Deploy the dedicated cleanup worker and scoped generation protection
-  (209 Python/compile and 35 JavaScript checks passed; not yet deployed).
-- Diagnose intermittent IMX708 timeouts; they remain present in the 18 October log.
+- Verify sustained production generation/cleanup concurrency. The dedicated cleanup
+  worker and scoped generation protection are deployed in `884f2337` after
+  209 Python/compile and 35 JavaScript checks passed. Both cameras resumed
+  daytime JPEG capture around 15-second intervals; files match database sizes.
+  Config 119 is unchanged; the short post-restart log has no errors.
+  [Release evidence](../testing/evidence/hybrid-cleanup-concurrency-20261018.json).
+- Diagnose intermittent IMX708 timeouts. Bounded diagnostics, confirmed process
+  reaping and failed-frame accounting are deployed in `884f2337`; the underlying
+  intermittent stall remains unproven and requires actual timeout diagnostics.
 - Complete the scoped functional/control-matrix items below, distinguishing unavailable
   hardware and native handoffs from demonstrated product defects.
 - Verify corrected runtime under night/load conditions. The 9–10 October 24-hour
