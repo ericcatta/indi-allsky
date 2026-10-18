@@ -1,24 +1,19 @@
-"""Register an already-published FITS without replaying filesystem effects."""
-import sqlite3
-import time
-
-from sqlalchemy.exc import OperationalError
+"""Persist an already-published FITS without replaying filesystem effects."""
+from .sqlite_transactions import insert_with_retry, retry_sqlite_transaction
 
 
 def register_fits(session, model, values):
-    for attempt in range(3):
-        entry = model(**values)
-        try:
-            session.add(entry)
-            session.commit()
-            return entry
-        except OperationalError as exc:
-            session.rollback()
-            code = getattr(exc.orig, 'sqlite_errorcode', None)
-            if (not isinstance(exc.orig, sqlite3.Error) or code is None or
-                    (code & 0xff) not in (sqlite3.SQLITE_BUSY, sqlite3.SQLITE_LOCKED) or
-                    attempt == 2):
-                raise
-            # A new instance and transaction avoid an expired read snapshot or
-            # a rolled-back pending INSERT. The FITS has already been published.
-            time.sleep(0.1 * (attempt + 1))
+    return insert_with_retry(session, model, values)
+
+
+def update_fits_metadata(session, model, entry_id, file_size, recipe):
+    def write():
+        # Rollback expires the previous instance. Reload and merge on every
+        # attempt so unrelated metadata committed by another writer survives.
+        entry = session.get(model, entry_id)
+        if entry is None:
+            raise LookupError('FITS entry no longer exists: {0}'.format(entry_id))
+        entry.fileSize = file_size
+        entry.data = dict(entry.data or {}, render_source=recipe)
+        return entry
+    return retry_sqlite_transaction(session, write)

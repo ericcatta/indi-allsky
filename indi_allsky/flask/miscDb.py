@@ -1410,7 +1410,7 @@ class miscDb(object):
         #logger.info('r1: %s, g1: %s, b1: %s', type(r1), type(g1), type(b1))
         #logger.info('r1: %d, g1: %d, b1: %d', r1, g1, b1)
 
-        keogram_entry = IndiAllSkyDbLongTermKeogramTable(
+        values = dict(
             ts=int(ts),
             camera_id=camera_id,
             r1=int(r1),  # 1
@@ -1429,8 +1429,6 @@ class miscDb(object):
             g5=int(g5),
             b5=int(b5),
         )
-        db.session.add(keogram_entry)
-        db.session.commit()
-
-        return keogram_entry
+        from ..sqlite_transactions import insert_with_retry
+        return insert_with_retry(db.session, IndiAllSkyDbLongTermKeogramTable, values)
 

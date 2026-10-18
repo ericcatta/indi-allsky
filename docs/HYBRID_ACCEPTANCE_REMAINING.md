@@ -521,3 +521,16 @@ at closure; future correction and verification must not be reported as covered
 by this historical runtime window.
 
 [Final evidence](../testing/evidence/hybrid-24h-observation-20261009.json).
+
+
+## 18 October: SQLite persistence correction validated
+
+FITS metadata finalization and long-term keogram insertion now retry only SQLite
+BUSY/LOCKED failures in bounded fresh transactions. FITS publication and uploads
+are not replayed; concurrent metadata is reloaded after rollback. Persistent
+failures remain visible. Real SQLite conflict tests reproduce the old failures
+and pass after the change. All 205 Python/compile checks and 35 JavaScript checks
+passed, including one installer rerun after restoring an omitted test archive file.
+Source hashes match. Deployment and live verification are still pending; timeout,
+cleanup scheduling and remaining functional acceptance are separate open items.
+[Evidence](../testing/evidence/hybrid-fits-metadata-retry-20261012.json).

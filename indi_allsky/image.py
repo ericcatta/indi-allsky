@@ -3728,10 +3728,10 @@ class ImageWorker(Process):
                 logger.exception('Unable to publish complete FITS rendering context')
                 recipe = None
         from .flask.models import IndiAllSkyDbFitsImageTable
-        entry = db.session.get(IndiAllSkyDbFitsImageTable, result['db_id'])
-        entry.fileSize = Path(result['path']).stat().st_size
-        entry.data = dict(entry.data or {}, render_source=recipe)
-        db.session.commit()
+        from .fits_registration import update_fits_metadata
+        entry = update_fits_metadata(
+            db.session, IndiAllSkyDbFitsImageTable, result['db_id'],
+            Path(result['path']).stat().st_size, recipe)
         metadata = dict(result['metadata'], fileSize=entry.fileSize, data=entry.data)
         # Queue uploads only after the final context and its size are persisted.
         if upload:

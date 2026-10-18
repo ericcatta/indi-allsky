@@ -1,0 +1,57 @@
+{
+  "status": "regression_passed_not_deployed",
+  "defect": "FITS metadata UPDATE can terminate image worker on SQLite contention after source recipe publication",
+  "change": "Bounded SQLite BUSY/LOCKED transaction retry; reload and merge metadata after rollback; do not replay source-file publication or uploads",
+  "verification": {
+    "standalone_sqlite_test": "PASS on macOS Python3.13 SQLAlchemy2.1.4",
+    "previous_behavior": "Same file-backed writer-conflict test fails with database is locked using previous one-commit implementation",
+    "checks": [
+      "Concurrent metadata survives retry",
+      "Persistent lock propagates after3attempts",
+      "Failed update rolled back",
+      "Session remains usable",
+      "Missing row is not fabricated"
+    ],
+    "syntax": "AST parsing passed for all changed implementation and test modules",
+    "worker_finalization": "Actual _finalize_fits_source method exercised with real SQLAlchemy database conflict: publication once despite retry; uploads only after commit; persistent update failure queues no uploads. Mock publication/upload effects; scientific-file integrity covered separately by existing Linux suite, passed in full Linux suite."
+  },
+  "pending": [
+    "Deployment and runtime verification"
+  ],
+  "access": "Raspberry reachable again via allsky-pi.local; production remains60174ad2",
+  "additional_keogram_fix": {
+    "change": "Shared bounded transaction retry also wraps longterm-keogram insert; field conversions and worker failure handling unchanged",
+    "local_test": "hybrid_keogram_transaction_test.py PASS; actual miscDb method under real file-backedSQLite lock, one row after retry, original RGB/timestamp conversion, persistent failure rollback, second camera recovery",
+    "shared_helper": "indi_allsky/sqlite_transactions.py",
+    "full_linux_regression": "205 checks passed, including targeted rerun after restoring omitted installer fixture"
+  },
+  "queue_followup": {
+    "finding": "StoragePressureRuntime.enqueue dispatches to VIDEO; run and per-asset deletion reject all pending GENERATION_ACTIONS. Increasing queue priority alone cannot preempt an active generation or bypass the global protection.",
+    "next_requirement": "Separate cleanup execution plus precise protection of generation inputs, with concurrent publication/deletion tests; preserve24h image and5day generated retention.",
+    "status": "not implemented; no deletion guard weakened"
+  },
+  "linux_targeted_tests": {
+    "hybrid_fits_registration_test.py": "PASS",
+    "hybrid_fits_metadata_transaction_test.py": "PASS",
+    "hybrid_keogram_transaction_test.py": "PASS"
+  },
+  "regression": {
+    "pid": 4243,
+    "root": "/home/eric/hybrid-sqlite-candidate-20261012",
+    "report": "/home/eric/hybrid-regression-sqlite-20261012/results.json",
+    "log": "/tmp/hybrid-regression-sqlite-20261012.log",
+    "planned_python_compile": 205,
+    "last_verified_completed": 205,
+    "failures_at_check": 0,
+    "source_manifest_sha256": "bcb24e48aa2be167f6fb702cf7d372f31b3d80bd1e6690e671777474a0f9340f",
+    "local_matches_remote": true,
+    "javascript_checks": 35,
+    "javascript_failed": 0,
+    "javascript_report": "/tmp/hybrid-sqlite-js-20261012.json",
+    "note": "Observe existing PID/report; do not restart solely because a session expires.",
+    "initial_result": "204 passed; installer test could not start because misc/hybrid_sqlite_runtime.py was omitted from test archive",
+    "installer_rerun": "PASS; /home/eric/hybrid-regression-sqlite-20261012/installer-rerun.log",
+    "installer_sha256": "c4837bad4660a1eded362a79d520badfe368150329892d36e315b39bf019b504",
+    "source_changed": false
+  }
+}

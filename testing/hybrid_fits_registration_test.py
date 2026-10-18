@@ -3,6 +3,7 @@
 from datetime import datetime
 from pathlib import Path
 import hashlib
+import json
 import sqlite3
 from unittest.mock import patch
 
@@ -34,7 +35,7 @@ with isolated_app(multi_camera=True, file_database=True) as app:
             assert hashlib.sha256(source.read_bytes()).hexdigest() == digest
             writer.commit()
             delays.append(delay)
-        with patch('indi_allsky.fits_registration.time.sleep', release):
+        with patch('indi_allsky.sqlite_transactions.time.sleep', release):
             entry = miscDb({}).addFitsImage(source, 1, metadata)
         assert delays == [0.1]
         assert Fits.query.filter_by(filename=str(source)).count() == 1
@@ -46,7 +47,7 @@ with isolated_app(multi_camera=True, file_database=True) as app:
         busy = sqlite3.OperationalError('database is locked')
         busy.sqlite_errorcode = sqlite3.SQLITE_BUSY
         with patch.object(db.session, 'commit', side_effect=OperationalError('INSERT', {}, busy)) as commit, \
-                patch('indi_allsky.fits_registration.time.sleep') as sleep:
+                patch('indi_allsky.sqlite_transactions.time.sleep') as sleep:
             try: miscDb({}).addFitsImage(root/'blocked.fit', 2, metadata)
             except OperationalError: pass
             else: raise AssertionError('Persistent contention hidden')
@@ -54,7 +55,7 @@ with isolated_app(multi_camera=True, file_database=True) as app:
         assert Fits.query.filter_by(filename=str(root/'blocked.fit')).count() == 0
         for original in (sqlite3.OperationalError('no such table'), RuntimeError('other backend')):
             with patch.object(db.session, 'commit', side_effect=OperationalError('INSERT', {}, original)) as commit, \
-                    patch('indi_allsky.fits_registration.time.sleep') as sleep:
+                    patch('indi_allsky.sqlite_transactions.time.sleep') as sleep:
                 try: miscDb({}).addFitsImage(root/'invalid.fit', 2, metadata)
                 except OperationalError: pass
                 else: raise AssertionError('Non-contention error hidden')
@@ -64,4 +65,32 @@ with isolated_app(multi_camera=True, file_database=True) as app:
         other = miscDb({}).addFitsImage(root/'camera2.fit', 2, metadata)
         assert other.camera_id == 2 and other.id != entry.id
         assert hashlib.sha256(source.read_bytes()).hexdigest() == digest
+        from indi_allsky.fits_registration import update_fits_metadata
+        entry_id = other.id
+        db.session.rollback()
+        db.session.execute(db.text('PRAGMA busy_timeout=0'))
+        writer = sqlite3.connect(db.engine.url.database, timeout=0)
+        writer.execute('BEGIN IMMEDIATE')
+        writer.execute('UPDATE fitsimage SET data=? WHERE id=?',
+                       (json.dumps({'context': 'preserved', 'concurrent': True}), entry_id))
+        delays.clear()
+        recipe = {'version': 1, 'basis': {'camera_id': 2}}
+        with patch('indi_allsky.sqlite_transactions.time.sleep', release):
+            updated = update_fits_metadata(db.session, Fits, entry_id, 1234, recipe)
+        assert delays == [0.1]
+        assert updated.fileSize == 1234
+        assert updated.data == {'context': 'preserved', 'concurrent': True,
+                                'render_source': recipe}
+        assert updated.camera_id == 2
+        assert hashlib.sha256(source.read_bytes()).hexdigest() == digest
+        writer.close()
+
+        with patch.object(db.session, 'commit', side_effect=OperationalError('UPDATE', {}, busy)) as commit, \
+                patch('indi_allsky.sqlite_transactions.time.sleep') as sleep:
+            try: update_fits_metadata(db.session, Fits, entry_id, 5678, None)
+            except OperationalError: pass
+            else: raise AssertionError('Persistent update contention hidden')
+            assert commit.call_count == 3 and sleep.call_count == 2
+        assert db.session.get(Fits, entry_id).fileSize == 1234
+        assert db.session.get(Fits, entry_id).data['render_source'] == recipe
 print('FITS registration: real writer conflict, one row, preserved source bytes/metadata, bounded retry and session recovery PASS')
