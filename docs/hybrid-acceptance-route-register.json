@@ -6152,6 +6152,18 @@
             "source": "testing/evidence/hybrid-acceptance-followup-20261003.json",
             "record": "controls[1]",
             "scope": "Current read-only recheck; historical aggregate status retained. Exact limits in source."
+          },
+          "scoped_resolution_20261018": {
+            "status": "superato",
+            "scope": "Keogram/Startrail/Startrail-video request through real Flask authenticated CSRF POST, coordinator, VideoWorker, actual image/FFmpeg outputs and downloads on isolated fixtures for both cameras. Historical aggregate record remains unchanged; this is not a native-browser/live-scientific acceptance claim.",
+            "source": "testing/evidence/hybrid-startrail-empty-2026-09-08.json",
+            "test": "testing/hybrid_keogram_encoding_flow_test.py",
+            "latest_regression": {
+              "report": "/home/eric/hybrid-regression-runtime-final-20261018/results.json",
+              "log": "/home/eric/hybrid-regression-runtime-final-20261018/080.log",
+              "exit_code": 0,
+              "source_changed": false
+            }
           }
         },
         {

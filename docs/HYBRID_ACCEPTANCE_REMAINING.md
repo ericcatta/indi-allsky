@@ -5,6 +5,10 @@ acceptance remains open. SQLite metadata/keogram retries are deployed at
 `a40ec0e0`, with config 119 unchanged and a passing short daytime recovery check.
 
 Current remaining work:
+- Correct generation overwrite failure safety: the Keogram/Startrail worker currently
+  deletes existing outputs before rendering when `TIMELAPSE_OVERWRITE=True`.
+  A later failure can lose those products. A correction is in progress; production
+  regeneration of preserved products is not used as an acceptance shortcut.
 - Verify sustained production generation/cleanup concurrency. The dedicated cleanup
   worker and scoped generation protection are deployed in `884f2337` after
   209 Python/compile and 35 JavaScript checks passed. Both cameras resumed
@@ -122,6 +126,12 @@ recorded Starlink HTTP 403 at 16:09:14. This is a short runtime check, not a 24-
 or sustained-night pass.
 These close the corresponding camera-1 admin receipt/native-submit scopes, not
 all roles, families or runtime acceptance. [Evidence](../testing/evidence/hybrid-native-archive-mini-20261018.json).
+
+The historical generation record marked “Worker execution: blocked” predates the
+real isolated Keogram/Startrail/FFmpeg flow. Its exact request-to-effect scope has
+now been linked to the newer proof and the passing 18 October regression in the
+route register; it does not require repeating a destructive production generation.
+Native browser submission and scientific/live acceptance remain distinct scopes.
 
 ## Named interaction gaps
 
