@@ -98,6 +98,18 @@ On 2 October the user confirmed mini-video 7 downloads and opens, both Users CSV
 files save and are readable, and the simulator copies an URL. [Confirmation and
 limits](../testing/evidence/hybrid-user-confirmed-delivery-20261002.json).
 
+## Native archive acceptance — 18 October
+
+Production admin now has actual browser receipts for camera-1 daytime JPEG and
+same-exposure nighttime FITS/processed JPEG. The received FITS hash matches the
+Pi original; both JPEGs decode at 4608 × 2592. The nighttime permanent JPEG is
+absent, so that export exercises source-only archive rendering.
+Mini task 17177 was submitted from the native form, completed successfully and
+produced seven frames at 2 FPS plus a thumbnail. Native playback reached its
+natural 3.5-second end without errors; all five FITS inputs retained their hashes.
+These close the corresponding camera-1 admin receipt/native-submit scopes, not
+all roles, families or runtime acceptance. [Evidence](../testing/evidence/hybrid-native-archive-mini-20261018.json).
+
 ## Named interaction gaps
 
 These are known gaps in addition to the complete matrix reconciliation. Closing

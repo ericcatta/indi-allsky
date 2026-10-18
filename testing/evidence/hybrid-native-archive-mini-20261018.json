@@ -1,0 +1,78 @@
+{
+  "date": "2026-10-18",
+  "revision": "4db4a3f7",
+  "environment": "production Raspberry, authenticated existing admin browser session",
+  "day_jpeg_download": {
+    "image_id": 322886,
+    "camera_id": 1,
+    "receipt": "/Users/ericcattaneo/Downloads/ccd1_20261018_160637.jpg",
+    "sha256": "729052ee8785bd95b7fc90ea3ee6d059d6f4959219eb0c9e9833aea70e68a9aa",
+    "matches_remote": true,
+    "decoded_dimensions": [
+      4608,
+      2592
+    ]
+  },
+  "night_downloads": {
+    "image_id": 318694,
+    "fits_id": 26688,
+    "camera_id": 1,
+    "fits_receipt": "/Users/ericcattaneo/Downloads/ccd1_20261018_071440.fit.gz",
+    "fits_sha256": "f77fc61986209acfaab9cf72ccfd0f50f17c5a6b62641104f76185319f3616c7",
+    "fits_bytes": 1081170,
+    "matches_remote": true,
+    "fits_gzip_header": "SIMPLE = T",
+    "jpeg_receipt": "/Users/ericcattaneo/Downloads/ccd1_20261018_071440.jpg",
+    "jpeg_sha256": "69b33268dda36d6cf17198ff131b83bbc4a3e50618816923e0a9e960ad8009db",
+    "jpeg_bytes": 321662,
+    "decoded_dimensions": [
+      4608,
+      2592
+    ],
+    "permanent_jpeg_absent_on_pi": true,
+    "receipt_method": "Native link click and browser download event/path, followed by filesystem inspection"
+  },
+  "mini_generation": {
+    "task_id": 17177,
+    "state": "SUCCESS",
+    "camera_id": 1,
+    "image_id": 318694,
+    "pre_seconds": 180,
+    "post_seconds": 60,
+    "framerate": 2,
+    "native_preview_frames": 7,
+    "native_submit_confirmed": true,
+    "submit_disabled_while_pending": true,
+    "output_id": 1,
+    "output_filename": "allsky-minitimelapse_ccd1_20261018_night_1792332862.mp4",
+    "output_bytes": 32692040,
+    "frames": 7,
+    "thumbnail_bytes": 3684,
+    "native_playback": {
+      "current_time": 3.5,
+      "duration": 3.5,
+      "ended": true,
+      "error": null,
+      "dimensions": [
+        4608,
+        2592
+      ]
+    },
+    "fits_source_hashes_unchanged": 5,
+    "source_manifest_on_pi": "/tmp/hybrid-native-mini-source-before-20261018.json",
+    "screenshot": "/tmp/hybrid-mini-native-20261018.jpg",
+    "ffmpeg_full_decode": "PASS"
+  },
+  "limits": [
+    "Specific production admin/camera-1 flows only; not every role or output family.",
+    "Keogram per-row download receipt remains open.",
+    "Native restore/key handoff and sustained runtime acceptance remain separate."
+  ],
+  "other_observation": {
+    "task_id": 17176,
+    "action": "updateSatelliteTleData",
+    "state": "FAILED",
+    "reason": "starlink HTTP 403; visual and stations updated",
+    "scope": "Provider failure observed, not attributed to recent deployment; follow-up remains open"
+  }
+}
