@@ -21,7 +21,10 @@ Current remaining work:
 - Complete the scoped functional/control-matrix items below, distinguishing unavailable
   hardware and native handoffs from demonstrated product defects.
 - Verify corrected runtime under night/load conditions. The 9–10 October 24-hour
-  window closed without acceptance; it is not automatically extended or restarted.
+  window closed without acceptance. On 18 October the user authorized a fresh
+  24-hour period once corrections are verified and deployed, with lightweight
+  collection and notifications only for problems or completion. That new period
+  has not started; record a verifiable start/version/configuration when ready.
 
 The sections below preserve earlier release evidence and their original scopes.
 
