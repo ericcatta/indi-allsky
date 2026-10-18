@@ -9,10 +9,159 @@ import datetime as dt
 import json
 import os
 from pathlib import Path
+import re
 import shutil
 import sqlite3
 import subprocess
 import time
+
+
+MAX_LOG_READ_BYTES = 8 * 1024 * 1024
+MAX_LOG_ERROR_LINES = 100
+MAX_LOG_LINE_BYTES = 4096
+SENSITIVE_LOG_VALUE = re.compile(
+    r'(?i)(password|passwd|secret|token|api[_-]?key|authorization)(\s*[:=]\s*)([^\s,;]+)')
+
+
+def safe_log_line(line):
+    text = line[:MAX_LOG_LINE_BYTES].decode('utf-8', 'replace')
+    return SENSITIVE_LOG_VALUE.sub(r'\1\2[REDACTED]', text)
+
+
+class LogTail:
+    """Bounded persistent tail which drains a renamed file before reopening."""
+
+    def __init__(self, path, *, start_at_end=True, max_bytes=MAX_LOG_READ_BYTES):
+        self.path = Path(path)
+        self.max_bytes = max_bytes
+        self.stream = self.path.open('rb')
+        self.inode = os.fstat(self.stream.fileno()).st_ino
+        self.line_prefix = b''
+        self.line_tail = b''
+        self.line_bytes = 0
+        self.line_matches = False
+        if start_at_end:
+            self.stream.seek(0, os.SEEK_END)
+
+    @property
+    def offset(self):
+        return self.stream.tell()
+
+    def close(self):
+        self.stream.close()
+
+    def _open_current(self):
+        new_stream = self.path.open('rb')
+        new_inode = os.fstat(new_stream.fileno()).st_ino
+        old_stream = self.stream
+        self.stream = new_stream
+        self.inode = new_inode
+        old_stream.close()
+
+    def _error_records(self, data):
+        count = 0
+        details = []
+        truncated = False
+        parts = data.split(b'\n')
+        for index, part in enumerate(parts):
+            joined = self.line_tail + part
+            if any(marker in joined for marker in (b'[ERROR]', b'[CRITICAL]', b'Traceback')):
+                self.line_matches = True
+            available = MAX_LOG_LINE_BYTES - len(self.line_prefix)
+            if available > 0:
+                self.line_prefix += part[:available]
+            self.line_bytes += len(part)
+            self.line_tail = joined[-16:]
+            if index == len(parts) - 1:
+                continue
+            if self.line_matches:
+                count += 1
+                if len(details) < MAX_LOG_ERROR_LINES:
+                    details.append(safe_log_line(self.line_prefix))
+            truncated = truncated or self.line_bytes > MAX_LOG_LINE_BYTES
+            self.line_prefix = b''
+            self.line_tail = b''
+            self.line_bytes = 0
+            self.line_matches = False
+        return count, details, truncated or self.line_bytes > MAX_LOG_LINE_BYTES
+
+    def read(self):
+        chunks = []
+        remaining = self.max_bytes
+        rotated = False
+        copytruncate = False
+        rotation_pending = False
+        gap_reasons = []
+
+        try:
+            path_stat = self.path.stat()
+        except FileNotFoundError:
+            return {
+                'bytes': 0, 'inode': self.inode, 'offset': self.offset,
+                'read_capped': False, 'rotation_detected': False,
+                'rotation_pending_old_fd': True, 'rotation_gap_possible': True,
+                'copytruncate_detected': False, 'gap_detected': True,
+                'gap_reasons': ['rotation_path_missing'], 'gap': True,
+                'error_count': 0, 'error_lines': 0, 'error_details': [],
+                'error_details_capped': False,
+                'line_fragment_truncated': self.line_bytes > MAX_LOG_LINE_BYTES,
+            }
+        if path_stat.st_ino == self.inode and path_stat.st_size < self.offset:
+            # Bytes written and removed between samples cannot be reconstructed.
+            copytruncate = True
+            gap_reasons.append('copytruncate')
+            self.stream.seek(0)
+
+        if path_stat.st_ino != self.inode:
+            rotated = True
+            chunk = self.stream.read(remaining)
+            chunks.append(chunk)
+            remaining -= len(chunk)
+            if remaining == 0:
+                rotation_pending = bool(self.stream.read(1))
+                if rotation_pending:
+                    self.stream.seek(-1, os.SEEK_CUR)
+            if not rotation_pending:
+                # The old descriptor reached EOF. A second rotation before this
+                # reopen cannot be reconstructed from the current pathname.
+                before = self.path.stat().st_ino
+                try:
+                    self._open_current()
+                except FileNotFoundError:
+                    rotation_pending = True
+                    gap_reasons.append('rotation_path_missing')
+                else:
+                    after = self.inode
+                    if before != after:
+                        gap_reasons.append('multiple_rotations_during_reopen')
+
+        if remaining and not rotation_pending:
+            chunk = self.stream.read(remaining)
+            chunks.append(chunk)
+            remaining -= len(chunk)
+
+        current_stat = os.fstat(self.stream.fileno())
+        capped = remaining == 0 and self.offset < current_stat.st_size
+        data = b''.join(chunks)
+        error_count, error_details, fragment_truncated = self._error_records(data)
+        return {
+            'bytes': len(data),
+            'inode': self.inode,
+            'offset': self.offset,
+            'read_capped': capped or rotation_pending,
+            'rotation_detected': rotated,
+            'rotation_pending_old_fd': rotation_pending,
+            'rotation_gap_possible': rotated,
+            'copytruncate_detected': copytruncate,
+            'gap_detected': bool(gap_reasons),
+            'gap_reasons': gap_reasons,
+            'gap': bool(gap_reasons) or rotated,
+            'error_count': error_count,
+            'error_lines': error_count,
+            'error_details': error_details,
+            'error_details_capped': error_count > len(error_details),
+            'line_fragment_truncated': fragment_truncated,
+        }
 
 
 def command(*args):
@@ -36,18 +185,25 @@ def run(args):
         start = time.monotonic()
         started = dt.datetime.now(dt.timezone.utc).isoformat()
         log = Path(args.log)
-        stat = log.stat()
-        log_inode, offset = stat.st_ino, stat.st_size
+        log_tail = LogTail(log)
         emit(dict(event='start', utc=started, duration_seconds=args.hours * 3600,
                   checkout=command('git', '-C', args.repository, 'rev-parse', 'HEAD'),
                   config_revision=db.execute('SELECT MAX(id) FROM config').fetchone()[0],
                   camera_cursors=latest, image_cursor=cursor,
-                  log_inode=log_inode, log_offset=offset, interval_seconds=60))
+                  log_inode=log_tail.inode, log_offset=log_tail.offset,
+                  log_read_limit_bytes=MAX_LOG_READ_BYTES,
+                  log_error_line_limit=MAX_LOG_ERROR_LINES,
+                  log_rotation_limit='A persistent descriptor drains one renamed file; multiple rotations between samples may leave an unobservable gap.',
+                  log_copytruncate_limit='Copytruncate is detected when size falls below the saved offset; truncate-and-regrow beyond that offset between samples is not observable.',
+                  interval_seconds=60))
         previous = start
+        sample_index = 0
         try:
             while True:
                 now = time.monotonic()
+                sample_index += 1
                 record = dict(event='sample', utc=dt.datetime.now(dt.timezone.utc).isoformat(),
+                              sample_index=sample_index,
                               elapsed_seconds=round(now-start, 3),
                               sample_gap_seconds=round(now-previous, 3))
                 try:
@@ -78,25 +234,12 @@ def run(args):
                     record['service'] = command('systemctl', '--user', 'show',
                         'indi-allsky.service', '-p', 'ActiveState', '-p', 'MainPID', '-p', 'NRestarts')
                     record['web'] = command('systemctl', '--user', 'is-active', 'gunicorn-indi-allsky.service')
-                    stat = log.stat()
-                    record['log_gap'] = stat.st_ino != log_inode or stat.st_size < offset
-                    if record['log_gap']:
-                        offset = 0
-                    with log.open('rb') as logstream:
-                        logstream.seek(offset)
-                        chunk = logstream.read(8 * 1024 * 1024)
-                        record['log_read_capped'] = logstream.tell() < stat.st_size
-                        next_offset = logstream.tell()
-                    record['log_error_lines'] = sum(
-                        b'[ERROR]' in line or b'[CRITICAL]' in line or b'Traceback' in line
-                        for line in chunk.splitlines())
-                    record['log_bytes'] = len(chunk)
-                    record['log_inode'] = stat.st_ino
-                    record['log_offset'] = next_offset
+                    log_sample = log_tail.read()
+                    for key, value in log_sample.items():
+                        record['log_' + key] = value
                     emit(record)
                     if rows:
                         cursor = rows[-1][0]
-                    offset, log_inode = next_offset, stat.st_ino
                 except Exception as error:
                     record['error'] = type(error).__name__ + ': ' + str(error)
                     emit(record)
@@ -107,6 +250,7 @@ def run(args):
                     break
                 time.sleep(min(60, max(0, args.hours * 3600-(time.monotonic()-start))))
         finally:
+            log_tail.close()
             db.close()
 
 

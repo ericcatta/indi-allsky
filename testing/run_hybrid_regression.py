@@ -18,6 +18,7 @@ import time
 
 
 EXTRA_TESTS = (
+    'observe_archive_log_test.py',
     'generation_result_test.py', 'capture_profiles_test.py',
     'capture_timeout_policy_test.py', 'sftp_adapter_test.py',
     'modern_safe_action_test.py', 'full_config_parser_parity_test.py',
