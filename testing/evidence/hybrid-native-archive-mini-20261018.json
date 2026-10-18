@@ -32,6 +32,23 @@
     "permanent_jpeg_absent_on_pi": true,
     "receipt_method": "Native link click and browser download event/path, followed by filesystem inspection"
   },
+  "keogram_archive_download": {
+    "keogram_id": 137,
+    "camera_id": 2,
+    "profile_id": "asi678mc",
+    "production_role": "admin",
+    "navigation": "Keograms -> ASI678MC -> Browse complete archive -> Night -> Apply filters",
+    "filtered_rows": 5,
+    "receipt": "/Users/ericcattaneo/Downloads/allsky-keogram_ccd2_20261017_night_1792300480.jpg",
+    "sha256": "848a0347a67df8849e932fc2f718a5772741c5b9cc5c121c68e4798a0094725c",
+    "matches_remote": true,
+    "decoded_dimensions": [
+      944,
+      700
+    ],
+    "receipt_method": "Download original on the archive row, received through the browser download event",
+    "scope": "Certifies the per-row complete-archive download only. The summary page offers Open read-only, not a separate download control."
+  },
   "mini_generation": {
     "task_id": 17177,
     "state": "SUCCESS",
@@ -63,9 +80,34 @@
     "screenshot": "/tmp/hybrid-mini-native-20261018.jpg",
     "ffmpeg_full_decode": "PASS"
   },
+  "bounded_runtime_check": {
+    "production_query_at": "2026-10-18 16:42:27 CEST",
+    "restart_at": "2026-10-18 16:03:56 CEST",
+    "camera_1": {
+      "frames": 153,
+      "first_frame": "2026-10-18 16:04:22 CEST",
+      "last_frame": "2026-10-18 16:42:27 CEST",
+      "max_gap_seconds": 16,
+      "gaps_over_20_seconds": 0
+    },
+    "camera_2": {
+      "frames": 153,
+      "first_frame": "2026-10-18 16:04:18 CEST",
+      "last_frame": "2026-10-18 16:42:23 CEST",
+      "max_gap_seconds": 16,
+      "gaps_over_20_seconds": 0
+    },
+    "capture_errors_after_restart": 0,
+    "only_error_after_restart": {
+      "at": "2026-10-18 16:09:14 CEST",
+      "event": "Starlink HTTP 403",
+      "previously_recorded": true
+    },
+    "scope": "Bounded post-restart check only; not a 24-hour observation or sustained-night acceptance pass."
+  },
   "limits": [
-    "Specific production admin/camera-1 flows only; not every role or output family.",
-    "Keogram per-row download receipt remains open.",
+    "Specific production admin flows only; not every role, camera or output family.",
+    "Keogram 137 per-row archive download is certified for production admin/camera 2; other roles and families retain their own scopes.",
     "Native restore/key handoff and sustained runtime acceptance remain separate."
   ],
   "other_observation": {

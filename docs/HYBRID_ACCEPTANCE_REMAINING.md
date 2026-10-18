@@ -104,9 +104,22 @@ Production admin now has actual browser receipts for camera-1 daytime JPEG and
 same-exposure nighttime FITS/processed JPEG. The received FITS hash matches the
 Pi original; both JPEGs decode at 4608 × 2592. The nighttime permanent JPEG is
 absent, so that export exercises source-only archive rendering.
+The camera-2 Keograms archive also has a production admin browser receipt: from
+Keograms, filtering ASI678MC and opening Browse complete archive with Night selected
+returned five nighttime rows for camera 2/profile `asi678mc`. Download original on
+Keogram 137 delivered `allsky-keogram_ccd2_20261017_night_1792300480.jpg`; its local
+SHA-256 matches the Pi at `848a0347a67df8849e932fc2f718a5772741c5b9cc5c121c68e4798a0094725c`
+and it decodes at 944 × 700. This certifies the archive's per-row download only;
+the summary page exposes Open read-only rather than a separate download control.
 Mini task 17177 was submitted from the native form, completed successfully and
 produced seven frames at 2 FPS plus a thumbnail. Native playback reached its
 natural 3.5-second end without errors; all five FITS inputs retained their hashes.
+At the bounded 16:42:27 CEST production query after the 16:03:56 restart, camera 1
+had 153 frames from 16:04:22 through 16:42:27 and camera 2 had 153 frames from
+16:04:18 through 16:42:23. Both had a maximum 16-second gap and no gap over 20
+seconds. The post-restart log had no capture errors; its sole ERROR was the already
+recorded Starlink HTTP 403 at 16:09:14. This is a short runtime check, not a 24-hour
+or sustained-night pass.
 These close the corresponding camera-1 admin receipt/native-submit scopes, not
 all roles, families or runtime acceptance. [Evidence](../testing/evidence/hybrid-native-archive-mini-20261018.json).
 
@@ -121,7 +134,7 @@ this table alone does not certify all discovered controls.
 | Source media and Output downloads | User confirms FITS, IMX708 mini-video and Highlights receipt. Exact historical mini-video 3 identity remains unspecified. Highlights now has separate processed/FITS/RAW choices, deployed and tested; source files are offered only for the same recorded exposure. |
 | Camera profiles | Hybrid Controller native Save & Sync and persistence passed on 5 October; other section variants remain distinct. [capability gating](../testing/evidence/hybrid-profile-sync-capability-20261001.json) is already covered separately. |
 | Geometry | User now explicitly confirms Geometry Copy values after receiving its location. This is user-reported completion, not an automated clipboard comparison; simulator copying has separate confirmation. |
-| Generated-media pages | Keograms camera-2 footer navigation now passes for Generate media, Realtime and Long Term, including preserved profile and decoded realtime pixels ([evidence](../testing/evidence/hybrid-keogram-footer-20261005.json)). Other families and per-row downloads still require reconciliation with current templates. Old “Open read-only” observations must be mapped to the current controls, not blindly repeated or marked passed from a different Library link. |
+| Generated-media pages | Keograms camera-2 footer navigation now passes for Generate media, Realtime and Long Term, including preserved profile and decoded realtime pixels ([evidence](../testing/evidence/hybrid-keogram-footer-20261005.json)). Keogram 137 now has a matching production admin per-row original-download receipt from the filtered camera-2 nighttime archive ([evidence](../testing/evidence/hybrid-native-archive-mini-20261018.json)). Other families still require reconciliation with current templates; the Keograms summary page offers Open read-only, so this receipt does not certify a direct summary-page download. |
 | Account | Admin and ordinary-user save/login flows have [isolated native evidence](../testing/evidence/hybrid-account-native-20260914.json). This does not imply a production password change was performed; do not repeat destructive credential changes merely to erase a historical record. |
 | Restore | All four reset/flush combinations pass real HTTP persistence/cleanup on disposable fixtures. Native file upload and restore with both flags off also passed on 5 October. A fresh-process HTTP check also proves rejection of the old session and successful new login after key activation. The native flush/key-reset flow awaits the prepared user handoff; production keys/history were not changed. |
 | Generation and playback | Preserve successful live worker/output proofs for their exact camera/family. Camera-1 timelapse 71 now has natural-end playback evidence; mini-video 7 has generation and natural-end proof. Mini-generation recovery and other families must retain their own evidence scopes. |
