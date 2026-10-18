@@ -2,7 +2,9 @@
 
 
 def finish_keogram_task(task, *, camera_id, night, keogram, startrail, video,
-                        frames, min_frames, video_enabled, startrail_frames=None):
+                        frames, min_frames, video_enabled, startrail_frames=None,
+                        preserved=()):
+    preserved = frozenset(preserved)
     outputs = []
     for kind, label, pair in (('keogram', 'Keogram', keogram),
                               ('startrail', 'Startrail', startrail),
@@ -13,15 +15,24 @@ def finish_keogram_task(task, *, camera_id, night, keogram, startrail, video,
         if kind != 'keogram' and not night:
             row.update(status='not_requested', reason='Night-only output')
         elif kind == 'startrail' and startrail_frames == 0:
-            row.update(status='skipped', reason='No eligible frames',
+            reason = 'No eligible frames'
+            if kind in preserved:
+                reason += '; existing output preserved'
+            row.update(status='skipped', reason=reason,
                        eligible_frames=0, minimum_frames=1)
-            if entry is not None:
+            if entry is not None and kind not in preserved:
                 entry.success = False
         elif kind == 'startrail-video' and not video_enabled:
             row.update(status='not_requested', reason='Disabled in configuration')
         elif kind == 'startrail-video' and frames < min_frames:
-            row.update(status='skipped', reason='Insufficient eligible frames',
+            reason = 'Insufficient eligible frames'
+            if kind in preserved:
+                reason += '; existing output preserved'
+            row.update(status='skipped', reason=reason,
                        eligible_frames=frames, minimum_frames=min_frames)
+        elif kind == 'startrail-video' and kind in preserved:
+            row.update(status='failed',
+                       reason='Generation failed; existing output preserved')
         else:
             try:
                 exists = path.is_file() and path.stat().st_size > 0

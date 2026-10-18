@@ -1,0 +1,33 @@
+{
+  "status": "verified_pending_deploy",
+  "scope": "Keogram, Startrail and Startrail-video replacement preserves durable outputs until successful publish; observer log collection improvements",
+  "regression": {
+    "report": "/home/eric/hybrid-regression-overwrite-final-20261018/results.json",
+    "total": 211,
+    "initial_passed": 210,
+    "initial_failed": 1,
+    "failure": "New test default referenced missing flask.json_template; runtime logic did not execute",
+    "fix": "Use /etc/indi-allsky/flask.json, matching existing integration entrypoints",
+    "corrected_default_retest": "/tmp/hybrid-overwrite-default-retest-20261018.log",
+    "retest_exit": 0,
+    "source_manifest_before": "7c4898493292be3ec4d262e8528a0205f75fe2cd796a4f2c75c4271ee7db459b",
+    "source_manifest_after": "3f7c863d4979486654c9d8785117f532765fc675ac94e34c41b7091c6cc40601",
+    "final_source_delta": "Only the runtime-config default of the failed test; no application changes after regression",
+    "javascript": "35 checks previously passed; JavaScript unchanged"
+  },
+  "targeted_cases": [
+    "Render failure preserves predecessor records and bytes",
+    "Publish failure rolls back candidates",
+    "Interrupted candidate recovery",
+    "Same-second output-name collision",
+    "Successful replacement",
+    "Partial generation preserves prior startrail/video",
+    "Encoder failure reports failed while preserving old video",
+    "Pending thumbnail transfer prevents replacement"
+  ],
+  "limits": [
+    "Crash after database publish and before old-file unlink may leave an orphan; new output remains durable",
+    "Isolated fixtures do not certify scientific live quality or sustained production concurrency",
+    "New 24-hour observation not yet started"
+  ]
+}

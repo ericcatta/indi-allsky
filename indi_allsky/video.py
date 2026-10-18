@@ -23,6 +23,7 @@ from .modern_admin_media_cleanup import MediaCleanupIncomplete, flush_media_batc
 from .end_of_night import prepare_end_of_night_payload, handoff_end_of_night_upload
 
 from .generation_frames import read_generation_frame
+from .generated_output_replacement import GeneratedOutputReplacement, PendingGeneratedOutputTransfer
 from .timelapse import TimelapseGenerator
 from .keogram import KeogramGenerator
 from .starTrails import StarTrailGenerator
@@ -53,6 +54,7 @@ from .flask.models import IndiAllSkyDbPanoramaImageTable
 from .flask.models import IndiAllSkyDbPanoramaVideoTable
 from .flask.models import IndiAllSkyDbRawImageTable
 from .flask.models import IndiAllSkyDbTaskQueueTable
+from .flask.models import IndiAllSkyDbThumbnailTable
 
 from sqlalchemy import func
 from sqlalchemy import or_
@@ -123,6 +125,7 @@ class VideoWorker(Process):
         )
 
         self.f_lock = None
+        self._generated_output_replacement = None
 
 
         if self.config.get('IMAGE_FOLDER'):
@@ -205,6 +208,7 @@ class VideoWorker(Process):
 
 
         ### use this as a method to log uncaught exceptions
+        self._generated_output_replacement = None
         try:
             self.saferun()
         except Exception as e:
@@ -287,12 +291,17 @@ class VideoWorker(Process):
                 verify_archive(self.image_dir, self.config['ARCHIVE_VOLUME'], writable=True)
             action_method(task, **kwargs)
         except Exception as error:
+            replacement = getattr(self, '_generated_output_replacement', None)
+            if replacement is not None:
+                replacement.abort()
             # A failed flush expires ORM attributes; use the queue ID until rollback.
             logger.exception('Video task %d action=%s failed', task_id, action)
             from .task_failure import record_video_failure
             from .flask import models
             record_video_failure(db.session, models, task_id,
                                  'Task failed ({0}); see service log'.format(type(error).__name__))
+        finally:
+            self._generated_output_replacement = None
 
 
     def generateVideo(self, task, **kwargs):
@@ -1170,138 +1179,88 @@ class VideoWorker(Process):
 
         vid_folder = self._getVideoFolder(d_dayDate, camera)
 
-        keogram_file = vid_folder.joinpath(
-            'allsky-keogram_ccd{0:d}_{1:s}_{2:s}_{3:d}.{4:s}'.format(
-                camera.id,
-                d_dayDate.strftime('%Y%m%d'),
-                timeofday,
-                int(now.timestamp()),
-                self.config['IMAGE_FILE_TYPE'],
+        def output_paths(token):
+            return (
+                vid_folder.joinpath(
+                    'allsky-keogram_ccd{0:d}_{1:s}_{2:s}_{3:d}.{4:s}'.format(
+                        camera.id, d_dayDate.strftime('%Y%m%d'), timeofday, token,
+                        self.config['IMAGE_FILE_TYPE'])),
+                vid_folder.joinpath(
+                    'allsky-startrail_ccd{0:d}_{1:s}_{2:s}_{3:d}.{4:s}'.format(
+                        camera.id, d_dayDate.strftime('%Y%m%d'), timeofday, token,
+                        self.config['IMAGE_FILE_TYPE'])),
+                vid_folder.joinpath(
+                    'allsky-startrail_timelapse_ccd{0:d}_{1:s}_{2:s}_{3:d}.{4:s}'.format(
+                        camera.id, d_dayDate.strftime('%Y%m%d'), timeofday, token,
+                        video_format)),
             )
+
+
+        replacement = GeneratedOutputReplacement(
+            db.session,
+            IndiAllSkyDbTaskQueueTable,
+            IndiAllSkyDbThumbnailTable,
+            TaskQueueQueue,
+            TaskQueueState,
+            self.image_dir,
         )
 
-        startrail_file = vid_folder.joinpath(
-            'allsky-startrail_ccd{0:d}_{1:s}_{2:s}_{3:d}.{4:s}'.format(
-                camera.id,
-                d_dayDate.strftime('%Y%m%d'),
-                timeofday,
-                int(now.timestamp()),
-                self.config['IMAGE_FILE_TYPE'],
-            )
+        def scoped_outputs(model):
+            entries = model.query.join(model.camera).filter(
+                and_(
+                    IndiAllSkyDbCameraTable.id == camera.id,
+                    model.dayDate == d_dayDate,
+                    model.night == night,
+                )
+            ).all()
+            stable = [entry for entry in entries if not replacement.is_candidate(entry)]
+            replacement.discard_abandoned(entries)
+            if len(stable) > 1:
+                raise RuntimeError('Multiple existing generated outputs require manual reconciliation')
+            return stable[0] if stable else None
+
+        old_keogram_entry = scoped_outputs(IndiAllSkyDbKeogramTable)
+        old_startrail_entry = scoped_outputs(IndiAllSkyDbStarTrailsTable)
+        old_startrail_video_entry = scoped_outputs(IndiAllSkyDbStarTrailsVideoTable)
+
+
+        existing_outputs = (
+            ('Keogram', old_keogram_entry),
+            ('Star trail', old_startrail_entry),
+            ('Star trail timelapse', old_startrail_video_entry),
         )
-
-        startrail_video_file = vid_folder.joinpath(
-            'allsky-startrail_timelapse_ccd{0:d}_{1:s}_{2:s}_{3:d}.{4:s}'.format(
-                camera.id,
-                d_dayDate.strftime('%Y%m%d'),
-                timeofday,
-                int(now.timestamp()),
-                video_format,
-            )
-        )
+        if not self.config.get('TIMELAPSE_OVERWRITE'):
+            for label, old_entry in existing_outputs:
+                if old_entry is not None:
+                    message = '{0} already exists, overwrite not permitted'.format(label)
+                    logger.error(message)
+                    task.setFailed(message)
+                    return
 
 
+        replacement.set_existing('keogram', old_keogram_entry)
+        replacement.set_existing('startrail', old_startrail_entry)
+        replacement.set_existing('startrail-video', old_startrail_video_entry)
         try:
-            # delete old keogram entry if it exists
-            old_keogram_entry = IndiAllSkyDbKeogramTable.query\
-                .join(IndiAllSkyDbKeogramTable.camera)\
-                .filter(
-                    and_(
-                        IndiAllSkyDbCameraTable.id == camera.id,
-                        IndiAllSkyDbKeogramTable.dayDate == d_dayDate,
-                        IndiAllSkyDbKeogramTable.night == night,
-                    )
-                )\
-                .one()
+            replacement.ensure_replaceable()
+        except PendingGeneratedOutputTransfer as error:
+            logger.error(str(error))
+            task.setFailed(str(error))
+            return
+        self._generated_output_replacement = replacement
 
 
-            if not self.config.get('TIMELAPSE_OVERWRITE'):
-                logger.error('Keogram already exists, overwrite not permitted')
-                task.setFailed('Keogram already exists, overwrite not permitted')
-                return
-
-
-            logger.warning('Removing old keogram db entry')
-
-            old_keogram_entry.deleteAsset()
-
-            db.session.delete(old_keogram_entry)
-            db.session.commit()
-        except NoResultFound:
-            pass
-
-
-        try:
-            # delete old star trail entry if it exists
-            old_startrail_entry = IndiAllSkyDbStarTrailsTable.query\
-                .join(IndiAllSkyDbStarTrailsTable.camera)\
-                .filter(
-                    and_(
-                        IndiAllSkyDbCameraTable.id == camera.id,
-                        IndiAllSkyDbStarTrailsTable.dayDate == d_dayDate,
-                        IndiAllSkyDbStarTrailsTable.night == night,
-                    )
-                )\
-                .one()
-
-
-            if not self.config.get('TIMELAPSE_OVERWRITE'):
-                logger.error('Star trail already exists, overwrite not permitted')
-                task.setFailed('Star trail already exists, overwrite not permitted')
-                return
-
-
-            logger.warning('Removing old star trail db entry')
-
-            old_startrail_entry.deleteAsset()
-
-            db.session.delete(old_startrail_entry)
-            db.session.commit()
-        except NoResultFound:
-            pass
-
-
-        try:
-            # delete old star trail video entry if it exists
-            old_startrail_video_entry = IndiAllSkyDbStarTrailsVideoTable.query\
-                .join(IndiAllSkyDbStarTrailsVideoTable.camera)\
-                .filter(
-                    and_(
-                        IndiAllSkyDbCameraTable.id == camera.id,
-                        IndiAllSkyDbStarTrailsVideoTable.dayDate == d_dayDate,
-                        IndiAllSkyDbStarTrailsVideoTable.night == night,
-                    )
-                )\
-                .one()
-
-
-            if not self.config.get('TIMELAPSE_OVERWRITE'):
-                logger.error('Star trail timelapse already exists, overwrite not permitted')
-                task.setFailed('Star trail timelapse already exists, overwrite not permitted')
-                return
-
-
-            logger.warning('Removing old star trail video db entry')
-
-            old_startrail_video_entry.deleteAsset()
-
-            db.session.delete(old_startrail_video_entry)
-            db.session.commit()
-        except NoResultFound:
-            pass
-
-
-        if keogram_file.exists():
-            logger.warning('Removing orphaned keogram file: %s', keogram_file)
-            keogram_file.unlink()
-
-        if startrail_file.exists():
-            logger.warning('Removing orphanded Star trail file: %s', startrail_file)
-            startrail_file.unlink()
-
-        if startrail_video_file.exists():
-            logger.warning('Removin orphaned Star trail timelapse file: %s', startrail_video_file)
-            startrail_video_file.unlink()
+        output_token = int(now.timestamp())
+        while True:
+            keogram_file, startrail_file, startrail_video_file = output_paths(output_token)
+            candidate_paths = (keogram_file, startrail_file, startrail_video_file)
+            old_paths = set()
+            for unused_label, old_entry in existing_outputs:
+                if old_entry is not None:
+                    old_paths.add(Path(old_entry.getFilesystemPath()))
+            if not any(path.exists() or path in old_paths for path in candidate_paths):
+                break
+            output_token += 1
 
 
         # find all files
@@ -1402,6 +1361,7 @@ class VideoWorker(Process):
             'avg_stars'         : avg_stars,
             'max_moonphase'     : max_moonphase,
             'avg_sqm'           : avg_sqm,
+            '_replacement_candidate': {'task_id': task.id, 'token': output_token},
         }
 
 
@@ -1425,6 +1385,7 @@ class VideoWorker(Process):
             'avg_stars'         : avg_stars,
             'max_moonphase'     : max_moonphase,
             'avg_sqm'           : avg_sqm,
+            '_replacement_candidate': {'task_id': task.id, 'token': output_token},
         }
 
 
@@ -1447,6 +1408,7 @@ class VideoWorker(Process):
             'avg_stars'         : avg_stars,
             'max_moonphase'     : max_moonphase,
             'max_sqm'           : avg_sqm,
+            '_replacement_candidate': {'task_id': task.id, 'token': output_token},
         }
 
 
@@ -1456,6 +1418,7 @@ class VideoWorker(Process):
             camera.id,
             keogram_metadata,
         )
+        replacement.register('keogram', keogram_entry)
 
 
         if night:
@@ -1464,6 +1427,7 @@ class VideoWorker(Process):
                 camera.id,
                 startrail_metadata,
             )
+            replacement.register('startrail', startrail_entry)
         else:
             startrail_entry = None
             startrail_video_entry = None
@@ -1548,6 +1512,7 @@ class VideoWorker(Process):
 
         keogram_entry.success = True
         db.session.commit()
+        replacement.mark_ready('keogram')
 
 
         keogram_thumbnail_metadata = {
@@ -1605,6 +1570,7 @@ class VideoWorker(Process):
 
             startrail_entry.success = True
             db.session.commit()
+            replacement.mark_ready('startrail')
 
 
             startrail_thumbnail_metadata = {
@@ -1640,6 +1606,7 @@ class VideoWorker(Process):
                     camera.id,
                     startrail_video_metadata,
                 )
+                replacement.register('startrail-video', startrail_video_entry)
 
 
                 # Star Trails only generated at night
@@ -1676,6 +1643,7 @@ class VideoWorker(Process):
 
                     startrail_video_entry.success = True
                     db.session.commit()
+                    replacement.mark_ready('startrail-video')
                 except TimelapseException:
                     logger.error('Failed to generate startrails timelapse')
 
@@ -1692,6 +1660,13 @@ class VideoWorker(Process):
 
         processing_elapsed_s = time.time() - processing_start
         logger.warning('Total keogram/star trail processing in %0.1f s', processing_elapsed_s)
+
+
+        # Candidates are now complete. Publish replacements before creating any
+        # transfer tasks so queued work never references an aborted candidate.
+        replacement.finalize()
+        for metadata in (keogram_metadata, startrail_metadata, startrail_video_metadata):
+            metadata['data'].pop('_replacement_candidate', None)
 
 
         if keogram_entry:
@@ -1740,13 +1715,17 @@ class VideoWorker(Process):
         from .generation_result import finish_keogram_task
         finish_keogram_task(
             task, camera_id=camera.id, night=night,
-            keogram=(keogram_entry, keogram_file),
-            startrail=(startrail_entry, startrail_file),
-            video=(startrail_video_entry, startrail_video_file),
+            keogram=(replacement.result_entry('keogram'),
+                     replacement.result_path('keogram', keogram_file)),
+            startrail=(replacement.result_entry('startrail'),
+                       replacement.result_path('startrail', startrail_file)),
+            video=(replacement.result_entry('startrail-video'),
+                   replacement.result_path('startrail-video', startrail_video_file)),
             frames=stg.timelapse_frame_count if night else 0,
             startrail_frames=stg.trail_count if night else 0,
             min_frames=self.config.get('STARTRAILS_TIMELAPSE_MINFRAMES', 250),
             video_enabled=bool(self.config.get('STARTRAILS_TIMELAPSE', True)),
+            preserved=replacement.preserved,
         )
 
 

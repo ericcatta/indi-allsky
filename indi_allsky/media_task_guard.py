@@ -12,7 +12,8 @@ GENERATION_ACTIONS = frozenset(('generateVideo', 'generateMiniVideo',
                               'generateKeogramStarTrails', 'generatePanoramaVideo'))
 
 PROTECTED_MODELS = frozenset('IndiAllSkyDb' + family + 'Table' for family in
-                            ('Image', 'FitsImage', 'RawImage', 'PanoramaImage', 'Thumbnail'))
+                            ('Image', 'FitsImage', 'RawImage', 'PanoramaImage', 'Thumbnail',
+                             'Keogram', 'StarTrails', 'StarTrailsVideo'))
 
 
 @contextmanager

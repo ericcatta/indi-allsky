@@ -7,7 +7,11 @@ acceptance remains open. SQLite metadata/keogram retries are deployed at
 Current remaining work:
 - Correct generation overwrite failure safety: the Keogram/Startrail worker currently
   deletes existing outputs before rendering when `TIMELAPSE_OVERWRITE=True`.
-  A later failure can lose those products. A correction is in progress; production
+  A later failure can lose those products. The replacement-lifecycle correction now
+  passes isolated failure, rollback, recovery and transfer tests and awaits deployment.
+  The 211-case regression had 210 passes and one test-default-path failure; that
+  entrypoint passes after correcting its default, with application sources unchanged.
+  [Evidence](../testing/evidence/hybrid-overwrite-safety-20261018.json). Production
   regeneration of preserved products is not used as an acceptance shortcut.
 - Verify sustained production generation/cleanup concurrency. The dedicated cleanup
   worker and scoped generation protection are deployed in `884f2337` after

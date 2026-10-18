@@ -48,7 +48,7 @@ def run():
     original=ast.parse(frozen['loop']).body[0]
     assert hashlib.sha256(ast.dump(original,include_attributes=False).encode()).hexdigest()=='f6d418094431db242589f2af460f9594bdea86699fab7e62123db8c1fd6d45a7'
     method.body[method.body.index(loop)]=original
-    assert hashlib.sha256(ast.dump(method,include_attributes=False).encode()).hexdigest()=='ee2e28ea1bb9fd38ccb542adcf939bfcb9572939b1179e60cf3955eece0878ba'
+    assert hashlib.sha256(ast.dump(method,include_attributes=False).encode()).hexdigest()=='b578ae0be86e07c3cb58296fcb00517a516310c7924eafacad557baedfbfeb95'
     with tempfile.TemporaryDirectory() as folder:
         paths=[Path(folder)/str(i) for i in range(3)]
         for path in paths:path.write_bytes(b'generated fixture')
@@ -73,6 +73,12 @@ def run():
         assert 'Startrail: skipped (0/1 eligible frames)' in task.result
         task,outcome,_=finish(startrail_frames=0,frames=0,video_enabled=False)
         assert outcome['status']=='partial' and outcome['outputs'][2]['status']=='not_requested'
+        task,outcome,entries=finish(startrail_frames=0,frames=0,preserved={'startrail','startrail-video'})
+        assert outcome['outputs'][1]['status']=='skipped' and entries[1].success
+        assert 'existing output preserved' in outcome['outputs'][1]['reason']
+        task,outcome,entries=finish(frames=300,preserved={'startrail-video'})
+        assert task.state=='FAILED' and entries[2].success
+        assert outcome['outputs'][2]['reason']=='Generation failed; existing output preserved'
         paths[2].write_bytes(b'')
         task,outcome,entries=finish();assert task.state=='FAILED' and not entries[2].success
         assert outcome['outputs'][0]['status']=='generated' and outcome['outputs'][2]['status']=='failed'
