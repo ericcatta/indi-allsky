@@ -37,8 +37,8 @@ def run():
         method=next(node for node in ast.walk(tree) if isinstance(node,ast.FunctionDef) and node.name=='_queue_video_task')
         namespace={'db':db,'IndiAllSkyDbCameraTable':Camera,'logger':logging.getLogger('dispatch-test'),'multicamera_rejection':multicamera_rejection,'video_task_profile_id':video_task_profile_id}
         exec(compile(ast.fix_missing_locations(ast.Module(body=[method],type_ignores=[])),str(source),'exec'),namespace)
-        queue=LocalQueue()
-        coordinator=SimpleNamespace(config={'MULTI_CAMERA':{'profiles':[{'profile_id':'test-profile-'+str(cid),'db_camera_id':cid} for cid in (1,2)]}},multi_camera_capture_enable=True,capture_profiles=[SimpleNamespace(profile_id='test-profile-1')],video_q=queue)
+        queue=LocalQueue(); storage_queue=LocalQueue()
+        coordinator=SimpleNamespace(config={'MULTI_CAMERA':{'profiles':[{'profile_id':'test-profile-'+str(cid),'db_camera_id':cid} for cid in (1,2)]}},multi_camera_capture_enable=True,capture_profiles=[SimpleNamespace(profile_id='test-profile-1')],video_q=queue,storage_q=storage_queue)
         cases=[(action,cid,True) for action in ('generateVideo','generateMiniVideo','generateKeogramStarTrails','generatePanoramaVideo','updateAuroraData','updateSmokeData','uploadAllskyEndOfNight','expireData') for cid in (1,2)]
         cases += [(action,None,True) for action in ('backupDatabase','updateSatelliteTleData','systemHealthCheck','storagePressureCleanup')]
         cases += [(action,None,False) for action in ('generateVideo','generateMiniVideo','updateAuroraData','updateSmokeData','uploadAllskyEndOfNight','expireData')]
@@ -53,11 +53,16 @@ def run():
                 db.session.refresh(task)
                 assert task.data==original
                 if allowed:
-                    payload=queue.get_nowait()
-                    assert payload=={'task_id':task.id,'profile_id':'test-profile-'+str(cid or 1),**({'camera_id':cid} if cid else {})}
+                    if action == 'storagePressureCleanup':
+                        assert storage_queue.get_nowait()=={'task_id':task.id}
+                        assert queue.empty() and storage_queue.empty()
+                    else:
+                        payload=queue.get_nowait()
+                        assert payload=={'task_id':task.id,'profile_id':'test-profile-'+str(cid or 1),**({'camera_id':cid} if cid else {})}
+                        assert storage_queue.empty()
                     assert task.state==State.QUEUED and task.result is None
                 else:
-                    assert queue.empty() and task.state==State.EXPIRED and task.result
+                    assert queue.empty() and storage_queue.empty() and task.state==State.EXPIRED and task.result
             coordinator.config={'MULTI_CAMERA':{'profiles':[{'profile_id':'named-'+str(cid),'indi':{'camera_name':'Test Camera '+str(cid)}} for cid in (1,2)]}}
             for cid in (1,2):
                 task=Task(queue=Queue.VIDEO,state=State.QUEUED,data={'action':'generateMiniVideo','kwargs':{'camera_id':cid}})

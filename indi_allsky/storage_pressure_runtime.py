@@ -17,6 +17,7 @@ from sqlalchemy.exc import OperationalError
 from .media_task_guard import GENERATION_ACTIONS, media_task_lock
 from .storage_pressure import GIB, StoragePressureOptions, reclaim_old_images
 from .source_retention import image_source, source_dependents
+from .generation_retention import generation_scope
 
 IMAGE_FAMILIES = ('Image', 'FitsImage', 'RawImage', 'PanoramaImage')
 GENERATED_FAMILIES = ('Video', 'MiniVideo', 'Keogram', 'StarTrails', 'StarTrailsVideo', 'PanoramaVideo')
@@ -88,6 +89,10 @@ class StoragePressureRuntime:
                     assets.append(thumbnail)
         for task in pending:
             data = task.data or {}
+            if data.get('action') in GENERATION_ACTIONS:
+                scope = self.generation_scope(data)
+                if scope is None or scope.protects(entry):
+                    return True
             for asset in assets:
                 if data.get('model') == type(asset).__name__ and data.get('id') == asset.id:
                     return True
@@ -95,6 +100,10 @@ class StoragePressureRuntime:
                 if local and Path(local).resolve() == self.path(asset).resolve():
                     return True
         return False
+
+    def generation_scope(self, data):
+        return generation_scope(data, lambda identity: self.session.get(
+            self.models.IndiAllSkyDbImageTable, identity, populate_existing=True))
 
     def candidates(self, cutoff):
         # Streaming each family avoids starving eligible files behind an arbitrary
@@ -190,8 +199,12 @@ class StoragePressureRuntime:
             if entry is None:
                 raise RuntimeError('An image changed during storage cleanup; retry on the next check.')
             pending = self.pending_tasks()
-            if any((task.data or {}).get('action') in GENERATION_ACTIONS for task in pending):
-                raise RuntimeError('A generation was queued during storage cleanup; retry later.')
+            for task in pending:
+                data = task.data or {}
+                if data.get('action') in GENERATION_ACTIONS:
+                    scope = self.generation_scope(data)
+                    if scope is None or scope.protects(entry):
+                        raise RuntimeError('A generation was queued during storage cleanup; retry later.')
             if self.protected(entry, pending):
                 raise RuntimeError('An image was queued for transfer during storage cleanup; retry later.')
             if source_dependents(entry, self.session, self.models):
@@ -277,7 +290,8 @@ class StoragePressureRuntime:
                 self.set_recovering(False)
                 return {'status': 'not_needed', 'deleted': 0, 'free_bytes': self.free_bytes()}
             self.set_recovering(True)
-            if any((task.data or {}).get('action') in GENERATION_ACTIONS for task in self.pending_tasks()):
+            if any((task.data or {}).get('action') in GENERATION_ACTIONS and
+                   self.generation_scope(task.data) is None for task in self.pending_tasks()):
                 return {'status': 'generation_pending', 'deleted': 0, 'free_bytes': self.free_bytes()}
             from .render_asset_lifecycle import collect_assets, archive_references
             collected = collect_assets(self.root / '.render-assets',

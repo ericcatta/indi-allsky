@@ -1,0 +1,72 @@
+{
+  "status": "regression_passed_not_deployed",
+  "date": "2026-10-18",
+  "purpose": "Prevent media generation from starving storage-pressure cleanup while retaining generation inputs and user retention policy",
+  "changes": [
+    "Separate storage consumer and in-memory queue, retaining VIDEO database task history",
+    "Camera/day/night generation protection; inclusive mini-video input range; unknown task scope remains globally protected",
+    "Recheck pending generation under existing media publication/deletion lock",
+    "Recover interrupted cleanup task records after storage consumer exits"
+  ],
+  "targeted_passed": [
+    "hybrid_generation_retention_test.py including actual task recovery and worker action gate",
+    "hybrid_storage_dispatch_test.py",
+    "hybrid_storage_pressure_flow_test.py",
+    "hybrid_storage_priority_test.py",
+    "hybrid_storage_contention_test.py",
+    "hybrid_media_task_guard_test.py",
+    "hybrid_storage_worker_test.py",
+    "hybrid_storage_process_test.py: real child, file SQLite, scoped source retained and unrelated file removed",
+    "hybrid_generation_task_guard_test.py: four concurrent publication actions",
+    "hybrid_video_dispatch_test.py: exact dedicated queue routing and unchanged camera/global actions"
+  ],
+  "javascript": {
+    "passed": 35,
+    "failed": 0,
+    "report": "/tmp/hybrid-cleanup-js-20261018.json"
+  },
+  "regression": {
+    "pid": 413348,
+    "root": "/home/eric/hybrid-sqlite-candidate-20261012",
+    "report": "/home/eric/hybrid-regression-runtime-final-20261018/results.json",
+    "planned": 209,
+    "completed_at_check": 209,
+    "failed_at_check": 0,
+    "live_process_verified": false,
+    "source_manifest_sha256": "ca198621f85a0ea0a88ec76dfde9f7a132ad5e36ecb321ab55dc712002fe0481",
+    "local_matches_remote": true,
+    "scope": "Final combined cleanup and timeout recovery candidate",
+    "status": "passed",
+    "source_changed": false
+  },
+  "source_hashes": {
+    "indi_allsky/allsky.py": "6044ea5b2092ed949fbefe3178dc0871fced690c3e5f03b348665f9036219d9c",
+    "indi_allsky/storage_worker.py": "5202f5cc7efbd404a2f126aba46bbef4eda06d2e7a1cd35fde629cfa708f2d08",
+    "indi_allsky/generation_retention.py": "d4d7948b45f7260f2ea0728d27ad1cafe6fffac053a913744619dbb92b950f76",
+    "indi_allsky/storage_pressure_runtime.py": "4e3a2dcc18f41bcbd1ff11b62eaad30262b546dd0bea910640e9ec89d123bd90",
+    "testing/hybrid_generation_retention_test.py": "0a64482a0c2644e401c458be1ab1dfad0e1756c625f7b14a84ed5ca0156ed69d",
+    "testing/hybrid_storage_dispatch_test.py": "98b3118977e0b5617466eab26a3a719609b57d48cf1608e49c1d3e581e060275",
+    "testing/hybrid_storage_process_test.py": "2a3c9f13859918c52028253ed177fead9bf61d55782a5e85e8922c05ca2e76a1",
+    "testing/hybrid_video_dispatch_test.py": "5c9a47c50be55ed20f9b5c9c4a7c22c84e4a02935aec9a3374fb7b10a8d191b2"
+  },
+  "pending": [
+    "Commit/push and controlled deployment after validation",
+    "Observe concurrent generation/cleanup without deleting outside retention policy"
+  ],
+  "limitations": "Fixture effects use dedicated disposable files. No new production cleanup or capture change in this mission yet.",
+  "initial_regression": {
+    "report": "/home/eric/hybrid-regression-cleanup-20261018/results.json",
+    "completed": 207,
+    "passed": 205,
+    "failures": [
+      "hybrid_generation_task_guard_test.py: changed error message; original distinct wording restored",
+      "hybrid_video_dispatch_test.py: fixture lacked new storage queue; routing assertions updated"
+    ],
+    "affected_reruns": "Both passed on final candidate; original failed report retained"
+  },
+  "review": {
+    "reviewer": "planner (GPT-5.6-sol medium)",
+    "finding": "Recovery failure could escape to capture supervisor",
+    "resolution": "Rollback/log and defer replacement to next supervisor iteration; injected failure and later successful restart test passes"
+  }
+}

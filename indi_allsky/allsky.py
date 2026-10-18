@@ -256,6 +256,11 @@ class IndiAllSky(object):
         self.video_worker = None
         self.video_worker_idx = 0
 
+        self.storage_q = Queue()
+        self.storage_error_q = Queue()
+        self.storage_worker = None
+        self.storage_worker_idx = 0
+
         self.sensor_q = Queue()
         self.sensor_error_q = Queue()
         self.sensor_worker = None
@@ -676,6 +681,9 @@ class IndiAllSky(object):
 
     def _queue_video_task(self, task):
         action = task.data.get('action') if task.data else None
+        if action == 'storagePressureCleanup':
+            self.storage_q.put({'task_id': task.id})
+            return
         kwargs = task.data.get('kwargs', {}) if task.data else {}
         camera_id = kwargs.get('camera_id')
         profile_id = self.capture_profiles[0].profile_id
@@ -882,6 +890,76 @@ class IndiAllSky(object):
         self.video_worker.join()
 
 
+    def _startStorageWorker(self):
+        from .storage_worker import StorageWorker
+
+        if self.storage_worker:
+            if self.storage_worker.is_alive():
+                return
+
+
+            try:
+                storage_error, storage_traceback = self.storage_error_q.get_nowait()
+                for line in storage_traceback.split('\n'):
+                    logger.error('Storage worker exception: %s', line)
+            except queue.Empty:
+                pass
+
+            # A dead consumer may have removed its message before updating the
+            # database. Release only cleanup tasks for the next pressure check.
+            with app.app_context():
+                from .storage_worker import recover_interrupted_cleanup
+                try:
+                    recover_interrupted_cleanup()
+                except Exception:
+                    db.session.rollback()
+                    logger.exception('Storage worker recovery failed; retrying on the next supervisor loop')
+                    return
+
+
+        self.storage_worker_idx += 1
+
+        logger.info('Starting Storage-%d worker', self.storage_worker_idx)
+        self.storage_worker = StorageWorker(
+            self.storage_worker_idx,
+            self.config,
+            self.storage_error_q,
+            self.storage_q,
+            self.upload_q,
+            self.night_av,
+            self.binning_av,
+        )
+        self.storage_worker.start()
+
+
+        if self.storage_worker_idx % 10 == 0:
+            # notify if worker is restarted more than 10 times
+            with app.app_context():
+                self._miscDb.addNotification(
+                    NotificationCategory.WORKER,
+                    'StorageWorker',
+                    'WARNING: StorageWorker was restarted more than 10 times',
+                    expire=timedelta(hours=2),
+                )
+
+
+    def _stopStorageWorker(self):
+        if not self.storage_worker:
+            return
+
+        if not self.storage_worker.is_alive():
+            return
+
+        if self._terminate:
+            logger.info('Terminating Storage worker')
+            self.storage_worker.terminate()
+
+        logger.info('Stopping Storage worker')
+
+        self.storage_q.put({'stop' : True})
+        self.storage_worker.join()
+
+
     def _startSensorWorker(self):
         from .sensor import SensorWorker
 
@@ -1058,6 +1136,7 @@ class IndiAllSky(object):
                 self._stopCaptureWorker()  # stop this first so image queue is cleared out
                 self._stopImageWorker()
                 self._stopVideoWorker()
+                self._stopStorageWorker()
                 self._stopSensorWorker()
                 self._stopFileUploadWorkers()
 
@@ -1081,6 +1160,7 @@ class IndiAllSky(object):
                 self._stopCaptureWorker()  # stop this first so image queue is cleared out
                 self._stopImageWorker()
                 self._stopVideoWorker()
+                self._stopStorageWorker()
                 self._stopSensorWorker()
                 self._stopFileUploadWorkers()
                 # processes will start at the next loop
@@ -1099,6 +1179,7 @@ class IndiAllSky(object):
             self._startCaptureWorker()
             self._startImageWorker()
             self._startVideoWorker()
+            self._startStorageWorker()
             self._startSensorWorker()
             self._startFileUploadWorkers()
 
