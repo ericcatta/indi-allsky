@@ -531,6 +531,13 @@ are not replayed; concurrent metadata is reloaded after rollback. Persistent
 failures remain visible. Real SQLite conflict tests reproduce the old failures
 and pass after the change. All 205 Python/compile checks and 35 JavaScript checks
 passed, including one installer rerun after restoring an omitted test archive file.
-Source hashes match. Deployment and live verification are still pending; timeout,
+Source hashes match. Deployed as a40ec0e0 on 18 October at 15:29:15 CEST,
+with config 119 unchanged and rollback files under
+`/home/eric/hybrid-backups/sqlite-finalization-20261018/`. Capture and web are active.
+Seven postrestart JPEG frames per camera were checked: all files exist with
+matching database byte counts; intervals were 15 seconds for camera 1 and
+13–16 seconds for camera 2. HTTPS Now redirects anonymous requests to login.
+No ERROR/CRITICAL/Traceback lines appeared through 15:31:24. This brief daytime
+check does not validate nighttime FITS or eliminate intermittent failures. Timeout,
 cleanup scheduling and remaining functional acceptance are separate open items.
 [Evidence](../testing/evidence/hybrid-fits-metadata-retry-20261012.json).

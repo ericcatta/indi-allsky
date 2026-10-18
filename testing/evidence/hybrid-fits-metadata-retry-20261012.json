@@ -1,5 +1,5 @@
 {
-  "status": "regression_passed_not_deployed",
+  "status": "deployed_initial_daytime_check_passed",
   "defect": "FITS metadata UPDATE can terminate image worker on SQLite contention after source recipe publication",
   "change": "Bounded SQLite BUSY/LOCKED transaction retry; reload and merge metadata after rollback; do not replay source-file publication or uploads",
   "verification": {
@@ -16,9 +16,10 @@
     "worker_finalization": "Actual _finalize_fits_source method exercised with real SQLAlchemy database conflict: publication once despite retry; uploads only after commit; persistent update failure queues no uploads. Mock publication/upload effects; scientific-file integrity covered separately by existing Linux suite, passed in full Linux suite."
   },
   "pending": [
-    "Deployment and runtime verification"
+    "Nighttime FITS finalization under production load; short daytime observation does not establish absence of intermittent contention",
+    "Separate IMX708 timeout and cleanup scheduling defects remain open"
   ],
-  "access": "Raspberry reachable again via allsky-pi.local; production remains60174ad2",
+  "access": "Production reachable via allsky-pi.local; deployed a40ec0e0",
   "additional_keogram_fix": {
     "change": "Shared bounded transaction retry also wraps longterm-keogram insert; field conversions and worker failure handling unchanged",
     "local_test": "hybrid_keogram_transaction_test.py PASS; actual miscDb method under real file-backedSQLite lock, one row after retry, original RGB/timestamp conversion, persistent failure rollback, second camera recovery",
@@ -53,5 +54,55 @@
     "installer_rerun": "PASS; /home/eric/hybrid-regression-sqlite-20261012/installer-rerun.log",
     "installer_sha256": "c4837bad4660a1eded362a79d520badfe368150329892d36e315b39bf019b504",
     "source_changed": false
+  },
+  "deployment": {
+    "commit": "a40ec0e0",
+    "services_started_at": "2026-10-18T15:29:15+02:00",
+    "config_id": 119,
+    "backup": "/home/eric/hybrid-backups/sqlite-finalization-20261018/",
+    "previous_commit": "60174ad2",
+    "implementation_hashes_match_regression": true,
+    "capture_pid": 375629,
+    "web_pid": 375630
+  },
+  "live_check": {
+    "checked_at": "2026-10-18T15:31:15.752852+02:00",
+    "camera_1": {
+      "postrestart_frames_checked": 7,
+      "first_id": 322596,
+      "latest_id": 322608,
+      "first_at": "2026-10-18 15:29:42",
+      "latest_at": "2026-10-18 15:31:12",
+      "intervals_seconds": [
+        15,
+        15,
+        15,
+        15,
+        15,
+        15
+      ]
+    },
+    "camera_2": {
+      "postrestart_frames_checked": 7,
+      "first_id": 322595,
+      "latest_id": 322607,
+      "first_at": "2026-10-18 15:29:39",
+      "latest_at": "2026-10-18 15:31:08",
+      "intervals_seconds": [
+        13,
+        15,
+        15,
+        15,
+        16,
+        15
+      ]
+    },
+    "all_checked_files_exist_and_match_db_size": true,
+    "format": "daytime JPEG",
+    "free_bytes": 7362805760,
+    "errors_since_restart_through_153124": 0,
+    "https_now": "302 to /indi-allsky/login?next=%2Findi-allsky%2Fmodern-admin%2Fnow",
+    "services": "capture and gunicorn active",
+    "limitations": "Brief daytime check only; not a new 24-hour run or nighttime FITS acceptance."
   }
 }
