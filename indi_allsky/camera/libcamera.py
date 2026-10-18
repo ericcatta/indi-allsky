@@ -1,4 +1,5 @@
 import io
+import os
 import shutil
 from datetime import datetime
 from collections import OrderedDict
@@ -761,7 +762,13 @@ class IndiClientLibCameraGeneric(IndiClient):
                 self.libcamera_process.wait(timeout=wait_timeout)
             except subprocess.TimeoutExpired:
                 elapsed = time.time() - self.exposureStartTime
-                self._abortTimedOutLibcameraExposure(elapsed, wait_timeout, sync=True)
+                reaped = self._abortTimedOutLibcameraExposure(elapsed, wait_timeout, sync=True)
+                # A synchronous caller may unwind and release this camera on
+                # exception. Keep ownership until the child is confirmed gone.
+                # The first abort records diagnostics; retries avoid log tails.
+                while not reaped:
+                    time.sleep(0.1)
+                    reaped = self.abortCcdExposure()
                 raise TimeOutException('Timeout waiting for exposure')
 
 
@@ -814,11 +821,17 @@ class IndiClientLibCameraGeneric(IndiClient):
 
     def getCcdExposureStatus(self):
         # returns camera_ready, exposure_state
+        if getattr(self, '_libcamera_abort_pending', False):
+            if self.abortCcdExposure(timeout_diagnostics=True):
+                return True, 'TIMEOUT'
+            return False, 'BUSY'
+
         if self.active_exposure and self._libcameraProcessTimedOut():
             timeout = self._libcameraExposureTimeout()
             elapsed = time.time() - self.exposureStartTime
-            self._abortTimedOutLibcameraExposure(elapsed, timeout, sync=False)
-            return True, 'TIMEOUT'
+            if self._abortTimedOutLibcameraExposure(elapsed, timeout, sync=False):
+                return True, 'TIMEOUT'
+            return False, 'BUSY'
 
         if self._libCameraProcessRunning():
             return False, 'BUSY'
@@ -913,6 +926,7 @@ class IndiClientLibCameraGeneric(IndiClient):
 
 
     def _resetLibcameraProcessState(self):
+        self._libcamera_abort_pending = False
         self.libcamera_process = None
         self.current_exposure_file_p = None
         self.current_metadata_file_p = None
@@ -983,7 +997,38 @@ class IndiClientLibCameraGeneric(IndiClient):
             metadata_stats,
         )
 
-        self.abortCcdExposure()
+        return self.abortCcdExposure(timeout_diagnostics=True)
+
+
+    def _logLibcameraTimeoutOutput(self):
+        # The subprocess has exited, or termination failed. Read only a bounded
+        # tail from its regular file; never wait on a live stdout pipe here.
+        output = self.libcamera_output_f
+        if output is None:
+            return
+
+        limit = 16384
+        try:
+            descriptor = output.fileno()
+            size = os.fstat(descriptor).st_size
+            # Child stdout shares this file's offset. pread leaves that offset
+            # untouched even if an unreaped child is still writing diagnostics.
+            tail = os.pread(descriptor, limit, max(0, size - limit)).decode('utf-8', errors='replace')
+        except (OSError, ValueError) as exc:
+            logger.warning('Unable to read rpicam-still timeout output: %s', exc)
+            return
+
+        logger.error(
+            'rpicam-still timeout output profile=%s camera_id=%s pid=%s returncode=%s bytes=%d tail_bytes=%d truncated=%s output=%r',
+            getattr(self, 'profile_id', 'default'),
+            getattr(self, 'camera_id', 'unknown'),
+            getattr(self.libcamera_process, 'pid', None),
+            getattr(self.libcamera_process, 'returncode', None),
+            size,
+            min(size, limit),
+            size > limit,
+            tail,
+        )
 
 
     def _libcameraProcessTimedOut(self):
@@ -1143,23 +1188,33 @@ class IndiClientLibCameraGeneric(IndiClient):
 
 
 
-    def abortCcdExposure(self):
+    def abortCcdExposure(self, timeout_diagnostics=False):
         logger.warning('Aborting exposure')
 
+        process = self.libcamera_process
+        if process is not None:
+            try:
+                if process.poll() is None:
+                    process.terminate()
+                process.wait(timeout=2.5)
+            except subprocess.TimeoutExpired:
+                process.kill()
+                try:
+                    process.wait(timeout=2.5)
+                except subprocess.TimeoutExpired:
+                    # Retain ownership and BUSY state. A new process must not
+                    # compete for the sensor while this child may still exist.
+                    self.active_exposure = True
+                    self._libcamera_abort_pending = True
+                    logger.error('rpicam-still pid=%s did not exit after SIGKILL; retaining busy process', process.pid)
+                    if timeout_diagnostics:
+                        self._logLibcameraTimeoutOutput()
+                    return False
+
+        if timeout_diagnostics:
+            self._logLibcameraTimeoutOutput()
+
         self.active_exposure = False
-
-        for _ in range(5):
-            if not self._libCameraProcessRunning():
-                break
-
-            self.libcamera_process.terminate()
-            time.sleep(0.5)
-            continue
-
-
-        if self._libCameraProcessRunning():
-            self.libcamera_process.kill()
-            self.libcamera_process.poll()  # close out the process
 
         self._closeLibcameraOutput()
 
@@ -1178,6 +1233,7 @@ class IndiClientLibCameraGeneric(IndiClient):
             pass
 
         self._resetLibcameraProcessState()
+        return True
 
 
     def _queueImage(self):

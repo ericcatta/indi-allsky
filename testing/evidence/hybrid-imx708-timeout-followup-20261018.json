@@ -1,0 +1,72 @@
+{
+  "status": "recovery_and_diagnostics_regression_passed_not_deployed",
+  "observed_at": "2026-10-18",
+  "source": "/var/log/indi-allsky/indi-allsky.log on production Raspberry",
+  "current_log_timeout_count": 4,
+  "examples": [
+    {
+      "time": "2026-10-18T09:11:27.986192+02:00",
+      "exposure_seconds": 9,
+      "deadline_seconds": 21,
+      "elapsed_seconds": 21.0421
+    },
+    {
+      "time": "2026-10-18T09:29:54.818685+02:00",
+      "exposure_seconds": 9,
+      "deadline_seconds": 21,
+      "elapsed_seconds": 21.0216
+    },
+    {
+      "time": "2026-10-18T10:47:24.944641+02:00",
+      "exposure_seconds": 5.2547617,
+      "deadline_seconds": 17.3,
+      "elapsed_seconds": 17.2634
+    }
+  ],
+  "last_example": {
+    "image_exists_at_timeout": false,
+    "metadata_exists_at_timeout": false,
+    "command_has_immediate": false,
+    "command_has_timeout": false,
+    "next_attempt_same_exposure_succeeded_seconds": 10.5709,
+    "next_attempt_at": "2026-10-18T10:47:25.444094+02:00",
+    "successful_exit_at": "2026-10-18T10:47:36.014659+02:00"
+  },
+  "code_findings": [
+    "Exposures >=1 second remove --immediate via _libcameraImmediateAllowed",
+    "Profile watchdog uses exposure+12 seconds",
+    "Process output uses temporary file (pipe deadlock already addressed)",
+    "abortCcdExposure closes diagnostic output without logging it"
+  ],
+  "conclusions": [
+    "Intermittent failure confirmed, not simply absent preview",
+    "Current evidence does not distinguish sensor stall from startup/capture overhead",
+    "Do not claim a larger timeout alone fixes cadence"
+  ],
+  "next_step": "Preserve bounded subprocess diagnostics on timeout and correlate with sensor/driver logs; avoid changing exposure or cadence without evidence.",
+  "candidate_changes": [
+    "16KiB subprocess output tail read via pread without changing child file offset",
+    "Bounded terminate/wait and kill/wait; retain ownership until confirmed exit in sync and async paths",
+    "Driver TIMEOUT no longer counts as successful capture or updates successful-frame timestamps"
+  ],
+  "preserved": [
+    "exposure",
+    "gain",
+    "cadence",
+    "timeout values",
+    "immediate-mode policy"
+  ],
+  "targeted_tests": {
+    "hybrid_libcamera_timeout_recovery_test.py": "PASS locally: real SIGTERM/SIGKILL child, offset, unreaped process, sync owner retention, failed-frame accounting",
+    "hybrid_libcamera_output_test.py": "PASS locally",
+    "capture_timeout_policy_test.py": "PASS locally"
+  },
+  "regression_report": "/home/eric/hybrid-regression-runtime-final-20261018/results.json",
+  "remaining": "Root cause of intermittent process stall still open; no claim that recovery changes eliminate hardware/driver timeouts. Await controlled deployment and actual diagnostics.",
+  "regression": {
+    "passed": 209,
+    "failed": 0,
+    "source_changed": false,
+    "source_manifest_sha256": "ca198621f85a0ea0a88ec76dfde9f7a132ad5e36ecb321ab55dc712002fe0481"
+  }
+}

@@ -1,7 +1,19 @@
 # Remaining Hybrid acceptance work
 
-Updated 9 October 2026. Classic frontend removal is deployed; whole-product
-acceptance remains open. The user reopened maintenance after the 19:15 cutoff.
+Updated 18 October 2026. Classic frontend removal is deployed; whole-product
+acceptance remains open. SQLite metadata/keogram retries are deployed at
+`a40ec0e0`, with config 119 unchanged and a passing short daytime recovery check.
+
+Current remaining work:
+- Deploy the dedicated cleanup worker and scoped generation protection
+  (209 Python/compile and 35 JavaScript checks passed; not yet deployed).
+- Diagnose intermittent IMX708 timeouts; they remain present in the 18 October log.
+- Complete the scoped functional/control-matrix items below, distinguishing unavailable
+  hardware and native handoffs from demonstrated product defects.
+- Verify corrected runtime under night/load conditions. The 9–10 October 24-hour
+  window closed without acceptance; it is not automatically extended or restarted.
+
+The sections below preserve earlier release evidence and their original scopes.
 
 The three worker repairs are installed at `db5fc9c0`, followed by daytime-first
 pressure cleanup in `677afbab`. Both cameras resumed

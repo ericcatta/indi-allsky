@@ -1227,6 +1227,13 @@ class CaptureWorker(Process):
                         camera_ready_time = now_time
 
 
+                    if exposure_state == 'TIMEOUT':
+                        waiting_for_frame = False
+                        waiting_for_sqm_frame = False
+                        self._libcamera_watchdog_cycles += 1
+                        logger.warning('Exposure timed out; retaining next scheduled capture time')
+
+
                     if waiting_for_frame:
                         frame_elapsed = now_time - frame_start_time
                         frame_delta = frame_elapsed - self.exposure_av[constants.EXPOSURE_CURRENT]
