@@ -1,6 +1,6 @@
 # Remaining Hybrid acceptance work
 
-Updated 18 October 2026. Classic frontend removal is deployed; whole-product
+Updated 19 October 2026. Classic frontend removal is deployed; whole-product
 acceptance remains open. SQLite metadata/keogram retries are deployed at
 `a40ec0e0`, with config 119 unchanged and a passing short daytime recovery check.
 
@@ -32,7 +32,11 @@ Current remaining work:
   started at **18 October 17:12:10 CEST**, ending **19 October 17:12:10 CEST**,
   on `cffd7002`, configuration 119. Collector PID 488769 records persistent samples
   on the Pi. [Observation](../testing/evidence/hybrid-24h-observation-20261018.json).
-  This is an active observation, not an acceptance pass.
+  It ended at19October17:12:14CEST with1383samples and is **not passed**.
+  Nine IMX708 timeouts, irregular night intervals and SQLite INSERT failures
+  (panorama and image-worker exception) remain. Three service-query timeouts,
+  one copytruncate gap and incomplete retention eligibility evidence are recorded
+  separately. Capture/web remain active; no new period was started.
 
 The sections below preserve earlier release evidence and their original scopes.
 

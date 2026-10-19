@@ -1,5 +1,5 @@
 {
-  "status": "collecting",
+  "status": "closed_not_passed",
   "start_utc": "2026-10-18T15:12:10.507804+00:00",
   "end_utc": "2026-10-19T15:12:10.507804+00:00",
   "start_local": "2026-10-18T17:12:10.507804+02:00",
@@ -101,5 +101,89 @@
     ],
     "raw_copy": "/tmp/hybrid-observation-20261018-samples.jsonl",
     "raw_sha256": "94a768c1030d1bc8d2390fe029a1b6bf8eb03a7273ad4cec62921920d851b6d9"
+  },
+  "closure": {
+    "verdict": "closed_not_passed",
+    "collector_end": {
+      "event": "end",
+      "utc": "2026-10-19T15:12:14.641546+00:00",
+      "elapsed_seconds": 86404.13377162296
+    },
+    "observer_process_absent": true,
+    "samples": 1383,
+    "last_sample_utc": "2026-10-19T15:12:10.507867+00:00",
+    "max_sample_gap_seconds": 120.905,
+    "service_query_timeouts": 3,
+    "copytruncate_gap_samples": [
+      "2026-10-18T22:41:54.774877+00:00"
+    ],
+    "capped_error_details_samples": [
+      "2026-10-19T13:19:54.689810+00:00"
+    ],
+    "free_min_bytes": 5172654080,
+    "free_end_bytes": 8279719936,
+    "pending_tasks_at_end": 0,
+    "capture_pid": 488645,
+    "capture_parent_restarts": 0,
+    "services_at_end": "capture and web active; independently confirmed after collector ended",
+    "configuration_revisions": [
+      119
+    ],
+    "camera_summary": {
+      "1": {
+        "frames": 3715,
+        "day": 2772,
+        "night": 943,
+        "first_local": "2026-10-18 17:12:20.000000",
+        "last_local": "2026-10-19 17:12:03.000000",
+        "max_gap_seconds": 118.0,
+        "gaps_over60_seconds": 58,
+        "missing_files_at_sample": 0
+      },
+      "2": {
+        "frames": 3736,
+        "day": 2790,
+        "night": 946,
+        "first_local": "2026-10-18 17:12:15.000000",
+        "last_local": "2026-10-19 17:11:51.000000",
+        "max_gap_seconds": 76.0,
+        "gaps_over60_seconds": 59,
+        "missing_files_at_sample": 0
+      }
+    },
+    "night_metadata_recheck": {
+      "ids": [
+        324594,
+        324920,
+        325270,
+        325496,
+        325706,
+        325825
+      ],
+      "result": "All six transient null storage_format records now resolve to fits with source_fits_id"
+    },
+    "cleanup_recovered_tasks_observed": 10,
+    "raw_copy": "/tmp/hybrid-observation-20261018-final.jsonl",
+    "raw_sha256": "682d732d3958af7798fbef42b4e8a1acf8f2d61ce227ae219ea3724a9af55e0b",
+    "passed_scopes": [
+      "Collector started at real recorded start and ended after86404seconds, without manual extension",
+      "Both cameras acquired during day/night and returned to daytime capture",
+      "Observed frame files existed at sample; six transient metadata records reconciled to FITS",
+      "Cleanup ran while generation was active and recovered target repeatedly; final task queue drained",
+      "Capture and web left active; no operator changes during observation"
+    ],
+    "defects": [
+      "9 IMX708 exposure timeout events with automatic recovery",
+      "Nighttime intervals exceeded nominal cadence on both cameras: maxima118s and76s",
+      "Camera2 panorama INSERT failed with SQLite database locked18October19:47CEST",
+      "Image INSERT failed with SQLite database locked19October15:19CEST and caused image-worker exception; confirmed from uncapped original log"
+    ],
+    "evidence_gaps": [
+      "Three systemctl-query timeouts; sample gap maximum120.905s",
+      "One copytruncate log gap; one sample capped stored error details, main image INSERT cause recovered separately",
+      "No exhaustive proof of deletion eligibility, five-day timelapse preservation, or original-file hash integrity from this collector",
+      "Whole-product functional matrix, native handoffs and unavailable hardware/integrations remain separately scoped"
+    ],
+    "next_work": "Fix and verify remaining capture/SQLite defects; no new24h observation automatically authorized by this closure."
   }
 }
