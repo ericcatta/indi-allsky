@@ -1,5 +1,7 @@
 import io
 import os
+import math
+import re
 import shutil
 from datetime import datetime
 from collections import OrderedDict
@@ -692,10 +694,10 @@ class IndiClientLibCameraGeneric(IndiClient):
 
 
         images_only = bool(getattr(self, 'images_only', False))
+        self.current_libcamera_cmd = list(cmd)
         self.libcamera_timeout = self._libcameraExposureTimeout()
         self.exposureStartTime = time.time()
         self.exposureStartMonotonic = time.monotonic()
-        self.current_libcamera_cmd = list(cmd)
         logger.info('image command: %s', ' '.join(cmd))
         if images_only:
             _multi_camera_diag(
@@ -945,10 +947,46 @@ class IndiClientLibCameraGeneric(IndiClient):
     def _libcameraExposureTimeout(self):
         exposure = float(getattr(self, 'exposure', 0.0) or 0.0)
         if self._libcameraProfileContextEnabled():
-            return max(10.0, exposure + 12.0)
+            return max(10.0, exposure + 12.0 + self._libcameraPreviewSeconds())
 
         configured_timeout = float(self.config.get('CCD_EXPOSURE_TIMEOUT', 330))
         return max(configured_timeout, exposure + 30.0)
+
+
+    def _libcameraPreviewSeconds(self):
+        cmd = getattr(self, 'current_libcamera_cmd', None) or []
+        if self._cmdHasOption(cmd, '--immediate'):
+            return 0.0
+
+        # --nopreview only hides the window. rpicam-still still runs a five
+        # second viewfinder phase before switching modes and exposing the still.
+        # Preserve that phase for autofocus; budget it separately from shutter
+        # time and the existing twelve seconds for startup/saving/recovery.
+        timeout_value = None
+        for index, token in enumerate(cmd):
+            token = str(token)
+            if token in ('--timeout', '-t'):
+                timeout_value = cmd[index + 1] if index + 1 < len(cmd) else ''
+            elif token.startswith('--timeout='):
+                timeout_value = token.split('=', 1)[1]
+            elif token.startswith('-t'):
+                timeout_value = token[2:].lstrip('=')
+
+        if timeout_value is None:
+            return 5.0
+
+        match = re.fullmatch(r'([+]?(?:[0-9]+(?:\.[0-9]*)?|\.[0-9]+)(?:[eE][+-]?[0-9]+)?)(min|sec|ms|us|ns|s)?', str(timeout_value))
+        if not match:
+            return 5.0
+
+        scales = {None: 0.001, 'min': 60.0, 'sec': 1.0, 's': 1.0,
+                  'ms': 0.001, 'us': 0.000001, 'ns': 0.000000001}
+        seconds = float(match.group(1)) * scales[match.group(2)]
+        # A zero timer means indefinite preview in rpicam, not an infinite
+        # watchdog. Invalid/non-finite values must also leave recovery bounded.
+        if not math.isfinite(seconds):
+            return 5.0
+        return seconds
 
 
     def _libcameraFileStats(self, file_p):
