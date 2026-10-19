@@ -45,5 +45,61 @@
     "Collector does not itself certify every deletion eligibility or original hash",
     "Whole-product functional matrix remains separate from this runtime period"
   ],
-  "previous_period": "hybrid-24h-observation-20261009.json remains closed_not_passed"
+  "previous_period": "hybrid-24h-observation-20261009.json remains closed_not_passed",
+  "checkpoint_20261019_1424": {
+    "sample_count": 1335,
+    "through_utc": "2026-10-19T14:23:49.925334+00:00",
+    "sample_gap_max_seconds": 120.905,
+    "collector_systemctl_timeouts": 3,
+    "log_gap_samples": [
+      "2026-10-18T22:41:54.774877+00:00"
+    ],
+    "free_min_bytes": 5172654080,
+    "free_last_bytes": 8588750848,
+    "config_revisions": [
+      "119"
+    ],
+    "capture_pid": 488645,
+    "pending_tasks_at_last_sample": 0,
+    "imx708_timeout_events": 9,
+    "camera_summary": {
+      "1": {
+        "frames": 3522,
+        "night": 943,
+        "latest": "2026-10-19 16:23:41.000000",
+        "max_gap": 118.0,
+        "missing": 0,
+        "night_formats": [
+          "None",
+          "fits"
+        ],
+        "gaps_over_60_seconds": 58
+      },
+      "2": {
+        "frames": 3544,
+        "night": 946,
+        "latest": "2026-10-19 16:23:44.000000",
+        "max_gap": 76.0,
+        "missing": 0,
+        "night_formats": [
+          "None",
+          "fits"
+        ],
+        "gaps_over_60_seconds": 59
+      }
+    },
+    "defects": [
+      "Repeated IMX708 timeouts and irregular nighttime frame intervals on both cameras",
+      "Panorama database insert failed with SQLite database locked at18October19:47CEST",
+      "Image worker exception observed19October15:19CEST; captured traceback details capped, complete cause requires original log"
+    ],
+    "limits": [
+      "Observation still running; not acceptance",
+      "One log gap flag and three service-query timeouts",
+      "Two nighttime formats include null metadata: reconcile original records before declaring format coverage",
+      "Cleanup recovered target repeatedly; deletion eligibility not certified by recovered bytes"
+    ],
+    "raw_copy": "/tmp/hybrid-observation-20261018-samples.jsonl",
+    "raw_sha256": "94a768c1030d1bc8d2390fe029a1b6bf8eb03a7273ad4cec62921920d851b6d9"
+  }
 }
