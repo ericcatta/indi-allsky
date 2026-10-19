@@ -1,8 +1,9 @@
 # Remaining Hybrid acceptance work
 
 Updated 19 October 2026. Classic frontend removal is deployed; whole-product
-acceptance remains open. SQLite metadata/keogram retries are deployed at
-`a40ec0e0`, with config 119 unchanged and a passing short daytime recovery check.
+acceptance remains open. SQLite image/panorama INSERT retries and the libcamera
+preview-phase watchdog budget are deployed at `0284f14a`, with config 119
+unchanged. No further 24-hour observation is authorized by the latest instruction.
 
 Current remaining work:
 - Observe the corrected generation overwrite lifecycle in sustained operation.
@@ -20,9 +21,10 @@ Current remaining work:
   daytime JPEG capture around 15-second intervals; files match database sizes.
   Config 119 is unchanged; the short post-restart log has no errors.
   [Release evidence](../testing/evidence/hybrid-cleanup-concurrency-20261018.json).
-- Diagnose intermittent IMX708 timeouts. Bounded diagnostics, confirmed process
-  reaping and failed-frame accounting are deployed in `884f2337`; the underlying
-  intermittent stall remains unproven and requires actual timeout diagnostics.
+- The timeout traces exposed an omitted five-second rpicam preview phase in the
+  watchdog budget. `8af78847` includes that phase without changing autofocus,
+  camera arguments or cadence. This explains a demonstrated premature timeout;
+  it does not establish that all nine historical stalls had the same cause.
 - Complete the scoped functional/control-matrix items below, distinguishing unavailable
   hardware and native handoffs from demonstrated product defects.
 - Verify corrected runtime under night/load conditions. The 9–10 October 24-hour
@@ -30,11 +32,11 @@ Current remaining work:
   24-hour period once corrections are verified and deployed, with lightweight
   collection and notifications only for problems or completion. That new period
   started at **18 October 17:12:10 CEST**, ending **19 October 17:12:10 CEST**,
-  on `cffd7002`, configuration 119. Collector PID 488769 records persistent samples
-  on the Pi. [Observation](../testing/evidence/hybrid-24h-observation-20261018.json).
+  on `cffd7002`, configuration 119. Collector PID 488769 has ended; its persistent
+  samples remain on the Pi. [Observation](../testing/evidence/hybrid-24h-observation-20261018.json).
   It ended at19October17:12:14CEST with1383samples and is **not passed**.
   Nine IMX708 timeouts, irregular night intervals and SQLite INSERT failures
-  (panorama and image-worker exception) remain. Three service-query timeouts,
+  (panorama and image-worker exception) occurred in that historical window. Three service-query timeouts,
   one copytruncate gap and incomplete retention eligibility evidence are recorded
   separately. Capture/web remain active; no new period was started.
 
@@ -609,3 +611,31 @@ No ERROR/CRITICAL/Traceback lines appeared through 15:31:24. This brief daytime
 check does not validate nighttime FITS or eliminate intermittent failures. Timeout,
 cleanup scheduling and remaining functional acceptance are separate open items.
 [Evidence](../testing/evidence/hybrid-fits-metadata-retry-20261012.json).
+
+
+## 19 October: timeout budget and image INSERT corrections deployed
+
+Camera commit `8af78847` preserves the rpicam command and autofocus while including
+the implicit five-second preview in the watchdog budget. A hardware A/B rejected
+a faster preview shortcut because autofocus had not finished. SQLite commit
+`0284f14a` retries image and panorama INSERTs only for BUSY/LOCKED, with rollback,
+fresh ORM rows and a three-attempt limit; filesystem and upload effects are not
+replayed. Real competing-writer tests verify recovery, bounded failure and metadata
+preservation. All 213 Python/compile checks passed with unchanged source hashes;
+35 prior JavaScript checks remain applicable because JavaScript is unchanged.
+
+Production matches the tested manifest. Capture and web restarted by 21:15:51 CEST
+with config 119 unchanged. The brief check ended at 21:20:48: five IMX708 and six
+ZWO nighttime FITS files exist and match database sizes; three per camera also
+decoded and passed FITS verification. Intervals were 45–46 and 43–45 seconds.
+No new ERROR/CRITICAL/Traceback or libcamera timeout was found; queue empty,
+services active without automatic restarts, 7,264,223,232 bytes free.
+
+This closes the targeted correction and brief verification, not sustained runtime
+acceptance or the remaining functional matrix. The prior 24-hour result stays
+not passed. The user explicitly requested no new 24-hour period; automation stays
+paused. Rollback source files and previous revision are retained in
+`/home/eric/hybrid-backups/timeout-sqlite-20261019/`. To roll back these code-only
+changes, restore the two files from `previous-code.tar.gz` in the production root
+and restart capture/web; no database or configuration restore is required.
+[Release evidence](../testing/evidence/hybrid-timeout-sqlite-release-20261019.json).

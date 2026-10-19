@@ -1,0 +1,100 @@
+{
+  "status": "deployed_targeted_verification_passed",
+  "scope": "Correct profile libcamera watchdog protocol budget and SQLite image/panorama INSERT contention",
+  "camera": {
+    "cause_evidence": "All9 timeout tails included approximately5s implicit preview; one observed startup7.213s + preview5.067s + requested9s exceeds old21s deadline before saving",
+    "change": "Preserve original camera argv/AF/AWB; add actual preview duration to profile exposure+12s watchdog; default9s becomes26s",
+    "not_claimed": "Does not prove all9 historical stalls shared only this cause",
+    "hardware_ab": {
+      "remote_results": "/tmp/hybrid-rpicam-ab-20261019/results.json",
+      "original_seconds": [
+        14.334,
+        14.382
+      ],
+      "rejected_short_preview_seconds": [
+        9.576,
+        9.576
+      ],
+      "all_exposure_us": 8999887,
+      "all_analogue_gain": 2.479419,
+      "all_colour_gains": [
+        2.616198,
+        1.52849
+      ],
+      "original_focus": {
+        "LensPosition": 0.5,
+        "AfState": 2
+      },
+      "rejected_focus": {
+        "LensPosition": 1.0,
+        "AfState": 1
+      },
+      "decision": "Preview shortcut rejected because autofocus was not finished; final candidate preserves original preview and command",
+      "capture_resumed_local": "2026-10-19T21:00:59+02:00"
+    }
+  },
+  "sqlite": {
+    "change": "addImage and addPanoramaImage reuse insert_with_retry; rollback and recreate only ORM row, max3attempts for SQLite BUSY/LOCKED",
+    "targeted_pi_test": "/tmp/hybrid-image-insert-contention-20261019.log",
+    "exit_code": 0,
+    "verified": [
+      "Real competing SQLite writer and release",
+      "Exactly one row with original metadata",
+      "Original source bytes unchanged",
+      "Persistent contention bounded and surfaced",
+      "Other errors not retried",
+      "Session usable after failure"
+    ]
+  },
+  "regression": {
+    "report": "/home/eric/hybrid-regression-timeout-sqlite-20261019/results.json",
+    "planned": 213,
+    "source_manifest": "73443277cc07a09d496ad0ccf426070011fe0fa1ac4702e1309fe438d6f62134",
+    "javascript": "No JS changes; existing35-check pass retained",
+    "passed": 213,
+    "failed": 0,
+    "source_changed": false,
+    "report_sha256": "c566b45525a449d0bb444867773d2ff943b245cf792edb5ec00db869915786ce"
+  },
+  "rollback_directory": "/home/eric/hybrid-backups/timeout-sqlite-20261019",
+  "observation": "User explicitly excludes any new24h period; short postdeploy checks only",
+  "deployment": {
+    "commit": "0284f14a",
+    "camera_commit": "8af78847",
+    "restarted_local": "2026-10-19T21:15:51+02:00",
+    "config": 119,
+    "production_source_manifest_matches": true
+  },
+  "live_check": {
+    "start_local": "2026-10-19T21:15:51+02:00",
+    "end_local": "2026-10-19T21:20:48.876964+02:00",
+    "camera1": {
+      "fits_frames": 5,
+      "interval_seconds": [
+        45,
+        46
+      ]
+    },
+    "camera2": {
+      "fits_frames": 6,
+      "interval_seconds": [
+        43,
+        45
+      ]
+    },
+    "all_source_files_exist_and_sizes_match": true,
+    "fits_decoded_and_verified": {
+      "camera1": 3,
+      "camera2": 3
+    },
+    "errors_critical_traceback_timeout": [],
+    "pending_tasks": 0,
+    "services": "capture and web active; NRestarts=0",
+    "config": 119,
+    "free_bytes": 7264223232,
+    "https_anonymous_now": 302,
+    "raw_evidence": "/home/eric/hybrid-release-timeout-sqlite-20261019/hybrid-release-check-20261019.json",
+    "sha256": "a3c7b656dc51b5e2a1631e14e2597d7881d87097e793c5a57b0f996d52b380fb",
+    "limits": "Brief nighttime verification, not sustained acceptance; intermittent failures cannot be excluded. SQLite contention reproduced on isolated databases, not injected into production."
+  }
+}
