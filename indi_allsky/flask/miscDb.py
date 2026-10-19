@@ -259,7 +259,7 @@ class miscDb(object):
         night_val = bool(metadata['night'])  # integer to boolean
         adu_roi_val = bool(metadata['adu_roi'])
 
-        image = IndiAllSkyDbImageTable(
+        values = dict(
             camera_id=camera_id,
             filename=str(filename_p),
             createDate=createDate,
@@ -297,10 +297,8 @@ class miscDb(object):
             data=metadata.get('data', {}),
         )
 
-        db.session.add(image)
-        db.session.commit()
-
-        return image
+        from ..sqlite_transactions import insert_with_retry
+        return insert_with_retry(db.session, IndiAllSkyDbImageTable, values)
 
 
     def addDarkFrame(self, filename, camera_id, metadata):
@@ -969,7 +967,7 @@ class miscDb(object):
         logger.info('Adding panorama image %s to DB', filename_p)
 
 
-        panorama_image = IndiAllSkyDbPanoramaImageTable(
+        values = dict(
             camera_id=camera_id,
             filename=str(filename_p),
             createDate=createDate,
@@ -991,10 +989,8 @@ class miscDb(object):
             thumbnail_uuid=metadata.get('thumbnail_uuid'),
         )
 
-        db.session.add(panorama_image)
-        db.session.commit()
-
-        return panorama_image
+        from ..sqlite_transactions import insert_with_retry
+        return insert_with_retry(db.session, IndiAllSkyDbPanoramaImageTable, values)
 
 
     def getCurrentCameraId(self):
