@@ -235,6 +235,7 @@ class CaptureWorker(Process):
         astro_av,
         capture_profile=None,
         camera_shared_state=None,
+        shared_capture_cadence=None,
     ):
 
         super(CaptureWorker, self).__init__()
@@ -242,6 +243,8 @@ class CaptureWorker(Process):
         self.name = 'Capture-{0:d}'.format(idx)
 
         self.config = config
+        self.shared_capture_cadence = shared_capture_cadence
+        self._cadence_prepared_round = None
         # MULTI_CAMERA_PREP: use the first derived profile as a read-only
         # camera identity layer while the runtime still operates one worker.
         if capture_profile is None:
@@ -363,6 +366,49 @@ class CaptureWorker(Process):
         self._busy_started = None
         self._libcamera_watchdog_cycles = 0
         self._last_libcamera_frame_ts = 0.0
+
+
+    def _shared_cadence_enabled(self):
+        # Scientific SQM/focus retain their explicit independent schedules.
+        return (getattr(self, 'shared_capture_cadence', None) is not None
+                and self.config.get('MULTI_CAMERA_CAPTURE_ENABLE', False)
+                and not self.focus_mode and not self.sqm_camera_enable)
+
+
+    def _shared_cadence_suspend(self):
+        cadence = getattr(self, 'shared_capture_cadence', None)
+        if cadence is not None:
+            cadence.suspend(self.profile_id)
+        self._cadence_prepared_round = None
+
+
+    def _shared_cadence_start(self):
+        period = self._effective_exposure_period(self.exposure_av[constants.EXPOSURE_NEXT])['effective']
+        cadence = self.shared_capture_cadence
+        decision = cadence.poll(
+            self.profile_id, period=period, queue_depth=self.image_q.qsize(),
+            prepared_round=self._cadence_prepared_round,
+        )
+        if decision['action'] == 'prepare':
+            # All peers are ready and the common deadline has arrived. Finish
+            # hooks before acknowledging preparation; a failure consumes no grant.
+            self.capture_pre_hook()
+            self._cadence_prepared_round = decision['round']
+            decision = cadence.poll(
+                self.profile_id, period=period, queue_depth=self.image_q.qsize(),
+                prepared_round=self._cadence_prepared_round,
+            )
+        if decision['action'] != 'start':
+            return False
+
+        self._cadence_prepared_round = None
+        self.add_period_delay = decision['delay']
+        logger.info('[SHARED_CAPTURE_CADENCE] profile=%s round=%s epoch=%.6f period=%.3fs delay=%.3fs members=%s repairs=%s',
+                    self.profile_id, decision['round'], decision['epoch'], decision['period'],
+                    decision['delay'], decision['members'], decision['repairs'])
+        if decision['delay'] > 0:
+            self._notify_image_backlog()  # Existing cooldown/deduplication policy.
+        return True
 
 
     def _positive_float(self, value, default):
@@ -887,6 +933,7 @@ class CaptureWorker(Process):
                 _multi_camera_diag('[MULTI_CAMERA_DIAG][%s] CaptureWorker crash pid=%s error=%s', self.profile_id, os.getpid(), str(e))
             raise e
         finally:
+            self._shared_cadence_suspend()
             if self.multi_camera_diag:
                 _multi_camera_diag('[MULTI_CAMERA_DIAG][%s] CaptureWorker run exit pid=%s', self.profile_id, os.getpid())
 
@@ -911,6 +958,8 @@ class CaptureWorker(Process):
 
 
         next_frame_time = time.time()  # start immediately
+        if not self._shared_cadence_enabled():
+            self._shared_cadence_suspend()
         frame_start_time = time.time()
         waiting_for_frame = False
         waiting_for_sqm_frame = False
@@ -1102,6 +1151,7 @@ class CaptureWorker(Process):
 
 
                 if self.config.get('CAPTURE_PAUSE'):
+                    self._shared_cadence_suspend()
                     logger.warning('*** CAPTURE PAUSED ***')
 
                     now_time = time.time()
@@ -1122,6 +1172,7 @@ class CaptureWorker(Process):
                     continue
 
                 elif not self.night and not self.config.get('DAYTIME_CAPTURE'):
+                    self._shared_cadence_suspend()
                     logger.info('Daytime capture disabled')
                     self.generate_timelapse_flag = False
 
@@ -1205,6 +1256,8 @@ class CaptureWorker(Process):
 
 
                     if not camera_ready:
+                        if self._shared_cadence_enabled():
+                            self.shared_capture_cadence.heartbeat(self.profile_id)
                         if self._busy_started is None:
                             self._busy_started = now_time
 
@@ -1296,6 +1349,7 @@ class CaptureWorker(Process):
 
                     # shutdown here to ensure camera is not taking images
                     if self._shutdown:
+                        self._shared_cadence_suspend()
                         logger.warning('Shutting down')
 
                         self.indiclient.disableCcdCooler()  # safety
@@ -1339,6 +1393,7 @@ class CaptureWorker(Process):
 
                     if (
                         self.config.get('MULTI_CAMERA_CAPTURE_ENABLE', False)
+                        and getattr(self, 'shared_capture_cadence', None) is None
                         and not self.focus_mode
                         and self.add_period_delay > 0
                     ):
@@ -1354,6 +1409,15 @@ class CaptureWorker(Process):
                             next_frame_time = baseline_frame_time
 
 
+                    shared_cadence = self._shared_cadence_enabled()
+                    if shared_cadence:
+                        if not self._shared_cadence_start():
+                            continue
+                        # The shared round grants this start. Its monotonic
+                        # deadline replaces per-camera wall-clock scheduling.
+                        next_frame_time = now_time
+
+
                     if now_time >= next_frame_time:
                         #######################
                         # Start next exposure #
@@ -1362,7 +1426,8 @@ class CaptureWorker(Process):
                         total_elapsed = now_time - frame_start_time
 
 
-                        self.capture_pre_hook()
+                        if not shared_cadence:
+                            self.capture_pre_hook()
 
 
                         self._limit_exposure_to_cadence()
@@ -1479,19 +1544,20 @@ class CaptureWorker(Process):
                             logger.warning('Image queue depth: %d', image_queue_size)
 
 
-                        if image_queue_size <= self.image_queue_min:
-                            if self.add_period_delay > 0:
-                                logger.warning('IMAGE QUEUE UNDER MINIMUM: %d *** REMOVING DELAY BETWEEN EXPOSURES ***', image_queue_size)
-                                self.add_period_delay = 0.0
-                        elif image_queue_size >= self.image_queue_max:
-                            if self.night:
-                                self.add_period_delay = (image_queue_size / self.image_queue_max) * self.config['EXPOSURE_PERIOD'] * self.image_queue_backoff
-                            else:
-                                self.add_period_delay = (image_queue_size / self.image_queue_max) * self.config['EXPOSURE_PERIOD_DAY'] * self.image_queue_backoff
+                        if not shared_cadence:
+                            if image_queue_size <= self.image_queue_min:
+                                if self.add_period_delay > 0:
+                                    logger.warning('IMAGE QUEUE UNDER MINIMUM: %d *** REMOVING DELAY BETWEEN EXPOSURES ***', image_queue_size)
+                                    self.add_period_delay = 0.0
+                            elif image_queue_size >= self.image_queue_max:
+                                if self.night:
+                                    self.add_period_delay = (image_queue_size / self.image_queue_max) * self.config['EXPOSURE_PERIOD'] * self.image_queue_backoff
+                                else:
+                                    self.add_period_delay = (image_queue_size / self.image_queue_max) * self.config['EXPOSURE_PERIOD_DAY'] * self.image_queue_backoff
 
-                            logger.warning('IMAGE QUEUE MAXIMUM EXCEEDED: %d *** ADDING ADDITIONAL %0.3fs DELAY BETWEEN EXPOSURES ***', image_queue_size, self.add_period_delay)
+                                logger.warning('IMAGE QUEUE MAXIMUM EXCEEDED: %d *** ADDING ADDITIONAL %0.3fs DELAY BETWEEN EXPOSURES ***', image_queue_size, self.add_period_delay)
 
-                            self._notify_image_backlog()
+                                self._notify_image_backlog()
 
 
                         if self.focus_mode:

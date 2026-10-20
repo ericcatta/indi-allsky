@@ -244,6 +244,7 @@ class IndiAllSky(object):
         self.capture_error_q = Queue()
         self.capture_worker = None
         self.capture_worker_map = {}
+        self.shared_capture_cadence = None
         self.capture_worker_idx = 0
 
         self.image_q = Queue()
@@ -600,8 +601,25 @@ class IndiAllSky(object):
 
     def _startMultiCaptureWorkers(self):
         from .capture import CaptureWorker
+        from .shared_capture_cadence import SharedCaptureCadence
 
-        for profile in self._enabled_capture_profiles():
+        profiles = self._enabled_capture_profiles()
+        if not profiles:
+            return
+        cadence = getattr(self, 'shared_capture_cadence', None)
+        if cadence is not None and cadence.profiles != tuple(p.profile_id for p in profiles):
+            # Never leave a live old worker polling a different coordination
+            # group. Stop/join peers before replacing the shared membership.
+            self._stopMultiCaptureWorkers()
+        if getattr(self, 'shared_capture_cadence', None) is None:
+            self.shared_capture_cadence = SharedCaptureCadence(
+                [profile.profile_id for profile in profiles],
+                queue_min=self.config.get('IMAGE_QUEUE_MIN', 1),
+                queue_max=self.config.get('IMAGE_QUEUE_MAX', 3),
+                backoff=self.config.get('IMAGE_QUEUE_BACKOFF', 0.5),
+            )
+
+        for profile in profiles:
             handle = self._capture_worker_handle(profile)
             worker = handle['worker']
 
@@ -631,6 +649,11 @@ class IndiAllSky(object):
 
             self.capture_worker_idx += 1
 
+            if not self.shared_capture_cadence.reset(profile.profile_id):
+                # A live peer is publishing a short transition. Retry on the
+                # next supervisor tick rather than start with stale membership.
+                continue
+
             _multi_camera_diag('[MULTI_CAMERA_DIAG][%s] Starting Capture-%d worker', profile.profile_id, self.capture_worker_idx)
             handle['worker'] = CaptureWorker(
                 self.capture_worker_idx,
@@ -650,6 +673,7 @@ class IndiAllSky(object):
                 handle['shared_state'].astro_av,
                 profile,
                 handle['shared_state'],
+                shared_capture_cadence=self.shared_capture_cadence,
             )
             handle['worker'].start()
             _multi_camera_diag(
@@ -677,6 +701,11 @@ class IndiAllSky(object):
             logger.info('[%s] Stopping Capture worker', profile_id)
             handle['capture_q'].put({'stop' : True})
             worker.join()
+
+        cadence = getattr(self, 'shared_capture_cadence', None)
+        if cadence is not None:
+            cadence.close()
+            self.shared_capture_cadence = None
 
 
     def _queue_video_task(self, task):

@@ -713,3 +713,11 @@ and restart capture/web; no database or configuration restore is required.
 ### User confirmations — 20 October 2026
 
 The user confirms whole mobile previews and no upload integrations in use. Live upload checks are not applicable to the current installation, not marked passed. The isolated native restore handoff is complete; its server and tunnel were stopped. No new 24-hour observation was started. Other acceptance limits remain unchanged.
+
+## 20 October: shared cadence candidate verified
+
+Hybrid now owns normal multicamera start rounds, common queue-pressure decisions, readiness/pre-hook coordination and bounded participant recovery in `SharedCaptureCadence`. Exposure/gain settings remain independent. Single-camera, focus and scientific SQM schedules are preserved. This candidate is not yet deployed.
+
+The isolated Raspberry regression passed all 216 Python/compile entrypoints with unchanged frozen sources. A subsequent two-file compatibility correction preserves existing equal/reversed queue thresholds; six affected entrypoints passed after the exact delta was verified. JavaScript was unchanged and not rerun. See [candidate evidence](../testing/evidence/hybrid-shared-cadence-candidate-20261020.json).
+
+Production deployment and bounded two-camera confirmation remain pending. The earlier IMX708 timeout remains unexplained; this coordinator is not claimed as its fix. No new 24-hour observation is authorized or started.

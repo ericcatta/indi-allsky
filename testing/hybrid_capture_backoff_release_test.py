@@ -17,7 +17,8 @@ def run():
     container = next(n for n in ast.walk(tree) if hasattr(n, 'body')
                      and isinstance(n.body, list) and release in n.body)
     index = container.body.index(release)
-    start = container.body[index + 1]
+    start = next(n for n in container.body[index + 1:] if isinstance(n, ast.If)
+                 and ast.unparse(n.test) == 'now_time >= next_frame_time')
     assert ast.unparse(start.test) == 'now_time >= next_frame_time'
     # Run the actual scheduling predicate after the actual release branch.
     # The exposure body is represented by one record to avoid camera hardware.
