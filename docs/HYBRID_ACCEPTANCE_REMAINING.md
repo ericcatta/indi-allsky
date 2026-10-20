@@ -5,6 +5,30 @@ acceptance remains open. SQLite image/panorama INSERT retries and the libcamera
 preview-phase watchdog budget are deployed at `0284f14a`, with config 119
 unchanged. No further 24-hour observation is authorized by the latest instruction.
 
+## Mobile previews and stale backlog delay — 20 October release
+
+`6d93270a` adds the missing device-width viewport and shows complete Now camera
+images at intrinsic aspect ratio, with contain sizing and wrapping labels. Native
+production checks at 320, 390, 430 and 1280px showed both images fully decoded,
+correct proportions and no horizontal page overflow. Source images are unchanged.
+
+`e2195ff9` releases an obsolete multicamera backlog delay when the camera is ready
+and its queue is already below the existing minimum. It never starts before the
+baseline interval, never catches up in a burst, and preserves active backpressure,
+focus, SQM and explicit clock-reset schedules. The earlier backpressure diagnosis
+still applies while processing is genuinely overloaded: this does not guarantee
+45-second cadence at every load.
+
+Regression: 210/214 initially passed; three failures came from macOS archive
+sidecars in the isolated checkout, and one from the intentional CSS cache-version
+change. Sidecars removed; viewport/cache assertions updated while retaining shell
+fingerprints. All four reruns passed, application sources unchanged. Production
+matches the final source manifest. Capture restarted at 08:56:31 CEST; three
+camera-1 and two camera-2 daytime files passed existence/size checks at 15/14-second
+intervals. Queue empty, no ERROR/CRITICAL/Traceback/timeout through 08:57:33.
+No new 24-hour period or artificial production backlog was started.
+[Release evidence](../testing/evidence/hybrid-mobile-cadence-release-20261020.json).
+
 ## Latest bounded verification — 20 October
 
 No new 24-hour window was started. Existing regression remains 213 Python/compile

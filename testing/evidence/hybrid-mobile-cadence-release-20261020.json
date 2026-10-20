@@ -1,0 +1,99 @@
+{
+  "status": "deployed_verified",
+  "mobile": {
+    "commit": "6d93270a",
+    "causes": [
+      "Missing viewport meta caused desktop-width layout on phone",
+      "Now camera images used object-fit cover and were cropped"
+    ],
+    "fix": "Device-width viewport, intrinsic image height and contain, wrapping camera text; unchanged source images",
+    "native_production_checks": [
+      {
+        "width": 320,
+        "scrollWidth": 320,
+        "imageWidth": 246,
+        "imageHeight": 138
+      },
+      {
+        "width": 390,
+        "scrollWidth": 390,
+        "imageWidth": 316,
+        "imageHeight": 177.75
+      },
+      {
+        "width": 430,
+        "scrollWidth": 430,
+        "imageWidth": 356,
+        "imageHeight": 200
+      },
+      {
+        "width": 1280,
+        "scrollWidth": 1280,
+        "imageWidth": 366,
+        "imageHeight": 206
+      }
+    ],
+    "natural_sizes": [
+      [
+        4608,
+        2592
+      ],
+      [
+        3840,
+        2160
+      ]
+    ],
+    "all_object_fit": "contain",
+    "viewport_override_reset": true,
+    "now_flask_test": "passed"
+  },
+  "cadence": {
+    "change": "Release obsolete multicamera backoff once ready and queue drains, never before baseline deadline; retain pressure/focus/SQM behavior",
+    "focused_tests": "new branch test and existing cadence/recovery/timeout policy pass",
+    "review": "existing grunt agent: no blocker",
+    "limit": "Processing backlog can still extend cadence; not a guarantee of fixed45seconds under any load",
+    "commit": "e2195ff9"
+  },
+  "regression": {
+    "report": "/home/eric/hybrid-regression-mobile-cadence-20261020/results.json",
+    "expected_python_checks": 214,
+    "javascript": "Unchanged JS; prior35pass applies",
+    "initial_passed": 210,
+    "initial_failed": 4,
+    "retest_passed": 4,
+    "retest_report": "/home/eric/hybrid-regression-mobile-cadence-20261020/retest.json",
+    "failure_causes": [
+      "Three checks encountered macOS AppleDouble sidecars in test archive; removed only those six sidecars",
+      "Shell asset cache version changed intentionally; explicit viewport/cache assertions added, original fingerprints retained"
+    ],
+    "application_sources_unchanged_during_retest": true,
+    "source_manifest": "d556767b948b95511d8f23d120d74b390d76f8b431e2d6fe81a8ec57fb52fabc",
+    "production_manifest_matches": true
+  },
+  "no_new_24h": true,
+  "live_check": {
+    "restart_local": "2026-10-20T08:56:31+02:00",
+    "camera1": {
+      "frames": 3,
+      "interval_seconds": [
+        15,
+        15
+      ],
+      "last": "2026-10-20 08:57:14"
+    },
+    "camera2": {
+      "frames": 2,
+      "interval_seconds": [
+        14,
+        14
+      ],
+      "last": "2026-10-20 08:57:08"
+    },
+    "all_files_exist_and_sizes_match": true,
+    "pending_tasks": 0,
+    "errors": [],
+    "log_through": "2026-10-20T08:57:33.113342+02:00",
+    "limits": "Brief daytime recovery check; backoff release covered deterministically in tests, no artificial production backlog induced. Not night or24h acceptance."
+  },
+  "rollback": "/home/eric/hybrid-backups/cadence-release-20261020"
+}
