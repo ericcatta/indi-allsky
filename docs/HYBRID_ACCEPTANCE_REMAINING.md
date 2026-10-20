@@ -11,7 +11,7 @@ Native reset/flush restore and relogin are complete. Mobile previews are user-co
 
 A read-only scan checked 4,800 daytime JPEGs and 128 nighttime FITS since 08:57:00: every expected file existed and matched its recorded size. Capture/web are active. Available logs (183,719 lines through 19:47:25) show no SQLite error but **one new IMX708 timeout at 19:39:19**, followed by recovery. Its cause is not yet established; concurrent FFmpeg is context, not proof of causality. Whole-plan acceptance therefore remains open.
 
-A separate confirmed priority bug is fixed in `2e2880cf`: only Video/Storage child processes lower their priority, leaving the supervisor and later capture workers unchanged. The real fork test passes on Raspberry. Deployment awaits a safe idle point rather than interrupting running generation. No new 24-hour observation was started. [Evidence](../testing/evidence/hybrid-final-bounded-checks-20261020.json).
+A separate confirmed priority bug is fixed in `2e2880cf`: only Video/Storage child processes lower their priority, leaving the supervisor and later capture workers unchanged. The real fork test passes on Raspberry. Activated at 19:56:44 CEST after both generation tasks completed. Supervisor/capture/image now have NI0 and Video/Storage NI19; new FITS from both cameras exist and match recorded sizes. No new 24-hour observation was started. [Evidence](../testing/evidence/hybrid-final-bounded-checks-20261020.json).
 
 ## Mobile previews and stale backlog delay — 20 October release
 

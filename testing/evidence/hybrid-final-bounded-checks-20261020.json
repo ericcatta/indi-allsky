@@ -46,7 +46,30 @@
   "worker_priority_fix": {
     "commit": "2e2880cf",
     "test": "Real forked Video/Storage children NI19, parent and later capture child NI0: PASS on Raspberry; storage lifecycle test PASS; compile/diff PASS",
-    "deployment": "pending safe idle point",
+    "deployment": {
+      "checkout": "2164d95f",
+      "activated_local": "2026-10-20T19:56:44+02:00",
+      "main_pid": 84205,
+      "supervisor_nice": 0,
+      "capture_image_nice": 0,
+      "video_storage_nice": 19,
+      "post_restart_fits": [
+        {
+          "camera": 1,
+          "id": 30376,
+          "time_local": "19:57:43",
+          "exists_and_size_matches": true
+        },
+        {
+          "camera": 2,
+          "id": 30377,
+          "time_local": "19:57:51",
+          "exists_and_size_matches": true
+        }
+      ],
+      "rollback": "/home/eric/hybrid-backups/worker-priority-20261020",
+      "timing": "After video17548/panorama17549 completed SUCCESS; no active encoder interrupted"
+    },
     "causality": "Fixes constructor changing parent priority; not demonstrated cause of current timeout"
   },
   "remaining": [

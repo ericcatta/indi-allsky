@@ -1,0 +1,33 @@
+{
+  "scope": "Two bounded isolated encodes on Raspberry, not a new 24-hour observation; no production setting change",
+  "corpus": "120 existing camera-1 daytime JPEGs from 20 October, 4608x2592; source hashes unchanged",
+  "artifacts": "/tmp/hybrid-encode-benchmark-20261020",
+  "runs": [
+    {
+      "extra_options": "-level 3.1",
+      "seconds": 33.69,
+      "peak_rss_kib": 2935824,
+      "max_threads": 24,
+      "exit_code": 0
+    },
+    {
+      "extra_options": "-level 3.1 -threads 2 -filter_threads 1",
+      "seconds": 37.78,
+      "peak_rss_kib": 2539440,
+      "max_threads": 12,
+      "exit_code": 0
+    }
+  ],
+  "validation": {
+    "both_outputs": "h264, 4608x2592, yuvj420p, 25fps,120 frames",
+    "filter": "deflicker=size=5:mode=am unchanged",
+    "full_decode_and_ssim_exit_code": 0,
+    "ssim_all": 0.99496
+  },
+  "decision": "Not applied: modest memory reduction, slower encode, single sample and no demonstrated causal fix for IMX timeout",
+  "limits": [
+    "Not a controlled proof of timeout cause",
+    "Single run per variant under variable live load",
+    "No claim of byte-identical encodes or exhaustive quality equivalence"
+  ]
+}
