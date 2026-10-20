@@ -5,6 +5,7 @@ import math
 import re
 from pathlib import Path
 from types import SimpleNamespace
+from unittest.mock import Mock
 
 SOURCE = Path(__file__).resolve().parents[1] / 'indi_allsky/camera/libcamera.py'
 
@@ -15,10 +16,11 @@ def run():
                and n.name == 'IndiClientLibCameraGeneric')
     names = {'_cmdHasOption', '_libcameraPreviewSeconds', '_libcameraExposureTimeout',
              '_libcameraProfileContextEnabled', '_libcameraProcessTimedOut',
-             '_libCameraProcessRunning'}
+             '_libCameraProcessRunning', 'getCcdExposureStatus'}
     methods = [n for n in cls.body if isinstance(n, ast.FunctionDef) and n.name in names]
-    clock = SimpleNamespace(now=100.0)
-    scope = dict(math=math, re=re, time=SimpleNamespace(time=lambda: clock.now))
+    clock = SimpleNamespace(now=100.0, wall=100.0)
+    scope = dict(math=math, re=re, time=SimpleNamespace(time=lambda: clock.wall,
+                                                     monotonic=lambda: clock.now))
     exec(compile(ast.Module(body=methods, type_ignores=[]), str(SOURCE), 'exec'), scope)
     Driver = type('Driver', (), {name: scope[name] for name in names})
     client = Driver()
@@ -56,6 +58,7 @@ def run():
     client.exposure = 9
     client.current_libcamera_cmd = command
     client.exposureStartTime = 100
+    client.exposureStartMonotonic = 100
     client.libcamera_process = SimpleNamespace(poll=lambda: None)
     clock.now = 121.04
     assert not client._libcameraProcessTimedOut()
@@ -65,6 +68,38 @@ def run():
     client.libcamera_process.poll = lambda: None
     clock.now = 126.01
     assert client._libcameraProcessTimedOut()
+
+    # Reproduce the former expression with separate clocks: an NTP jump
+    # forward aborts early, while a jump backward suppresses a real timeout.
+    # The actual driver watchdog must follow only elapsed monotonic time.
+    client.current_libcamera_cmd = command + ['--immediate', '--timeout', '1']
+    client.exposure = .54711527
+    timeout = client._libcameraExposureTimeout()
+    assert timeout == 12.54711527
+    client.active_exposure = True
+    client._abortTimedOutLibcameraExposure = Mock(return_value=True)
+    clock.now, clock.wall = 101, 3700
+    assert clock.wall - client.exposureStartTime > timeout  # Old false timeout.
+    assert not client._libcameraProcessTimedOut()
+    assert client.getCcdExposureStatus() == (False, 'BUSY')
+    client._abortTimedOutLibcameraExposure.assert_not_called()
+    clock.now, clock.wall = 113, -3500
+    assert not clock.wall - client.exposureStartTime > timeout  # Old missed timeout.
+    assert client._libcameraProcessTimedOut()
+    assert client.getCcdExposureStatus() == (True, 'TIMEOUT')
+    client._abortTimedOutLibcameraExposure.assert_called_once_with(13, timeout, sync=False)
+    assert client.exposureStartTime == 100  # Wall timestamp retained for metadata.
+    client.exposure = .5
+    timeout = client._libcameraExposureTimeout()  # Exactly representable12.5s.
+    clock.now = 100 + timeout
+    assert not client._libcameraProcessTimedOut()  # Existing strict deadline.
+    clock.now += .001
+    assert client._libcameraProcessTimedOut()
+    client.libcamera_process.poll = lambda: 0
+    assert not client._libcameraProcessTimedOut()  # Finished process still wins.
+    client.exposureStartMonotonic = 0
+    client.libcamera_process.poll = lambda: None
+    assert not client._libcameraProcessTimedOut()  # No registered exposure.
 
     # Keep the default/current-config timeout policy unchanged.
     for profile in ('default', 'current-config', None):
@@ -82,7 +117,7 @@ def run():
                                      for t in n.targets))
     assert cmd_assignment.lineno < timeout_assignment.lineno
     assert '_normalizeLibcameraPreviewTimeout' not in SOURCE.read_text()
-    print('Libcamera timeout budget: unchanged AF/argv, preview units/aliases, finite recovery and delayed completion passed')
+    print('Libcamera timeout budget: unchanged AF/argv, preview units/aliases, clock jumps, finite recovery and delayed completion passed')
 
 
 if __name__ == '__main__':

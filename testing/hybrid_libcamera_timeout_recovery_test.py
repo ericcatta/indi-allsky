@@ -38,6 +38,7 @@ def client_for(Driver, tmp):
     client.active_exposure = True
     client.exposure = 5.25
     client.exposureStartTime = time.time()
+    client.exposureStartMonotonic = time.monotonic()
     client.libcamera_output_f = None
     client.libcamera_process = None
     client.current_libcamera_cmd = ['test-camera']

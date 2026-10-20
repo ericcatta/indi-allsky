@@ -830,7 +830,7 @@ class IndiClientLibCameraGeneric(IndiClient):
 
         if self.active_exposure and self._libcameraProcessTimedOut():
             timeout = self._libcameraExposureTimeout()
-            elapsed = time.time() - self.exposureStartTime
+            elapsed = time.monotonic() - self.exposureStartMonotonic
             if self._abortTimedOutLibcameraExposure(elapsed, timeout, sync=False):
                 return True, 'TIMEOUT'
             return False, 'BUSY'
@@ -934,6 +934,7 @@ class IndiClientLibCameraGeneric(IndiClient):
         self.current_metadata_file_p = None
         self.current_libcamera_cmd = None
         self.exposureStartTime = 0.0
+        self.exposureStartMonotonic = 0.0
 
 
     def _libcameraProfileContextEnabled(self):
@@ -1073,13 +1074,13 @@ class IndiClientLibCameraGeneric(IndiClient):
         if not self._libcameraProfileContextEnabled() and not bool(getattr(self, 'images_only', False)):
             return False
 
-        if not self.exposureStartTime:
+        if not self.exposureStartMonotonic:
             return False
 
         if not self._libCameraProcessRunning():
             return False
 
-        return (time.time() - self.exposureStartTime) > self._libcameraExposureTimeout()
+        return (time.monotonic() - self.exposureStartMonotonic) > self._libcameraExposureTimeout()
 
 
     def _processMetadata(self):
