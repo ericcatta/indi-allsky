@@ -1,0 +1,104 @@
+{
+  "scope": "Bounded remaining checks and retrospective existing evidence; no new 24-hour observation or production mutations",
+  "runtime": "0284f14a",
+  "repository": "65b8ec04",
+  "checks": {
+    "boot": {
+      "status": "superato",
+      "boot_local": "2026-10-19T23:21:33+02:00",
+      "capture_active_local": "2026-10-19T23:24:19+02:00",
+      "web_active_local": "2026-10-19T23:26:35+02:00",
+      "mechanism": "enabled indi-allsky.timer OnBootSec=2min and gunicorn socket; Linger=yes; individual services disabled is expected",
+      "first_images_local": {
+        "1": "2026-10-19 23:24:34",
+        "2": "2026-10-19 23:24:45"
+      },
+      "shutdown_gap": "User confirms intentional power-off; not capture failure"
+    },
+    "native_lightbox": {
+      "status": "superato",
+      "role": "production administrator",
+      "page": "/modern-admin/media/images",
+      "images": [
+        332164,
+        332163
+      ],
+      "checks": [
+        "Open button shows modal",
+        "camera2 pixels decoded 3840x2160",
+        "Next shows camera1 pixels decoded4608x2592",
+        "ArrowLeft returns camera2",
+        "Escape closes modal",
+        "processed JPEG receipt and JPEG format inspected"
+      ],
+      "download": "ccd2_20261019_232957.jpg",
+      "sha256": "df188ea35d2dc25243efd0ef1a76ea0caff7760df0ecd98662cfc75450f4153f",
+      "limits": "Not a proof of every role or every export variant"
+    },
+    "retention_sample": {
+      "status": "superato",
+      "asset": "camera2 keogram137, night20261017",
+      "created": "2026-10-18 07:14:40",
+      "sha256_before_and_after": "848a0347a67df8849e932fc2f718a5772741c5b9cc5c121c68e4798a0094725c",
+      "context": "Unchanged after observed39cleanup tasks; below5day protection threshold",
+      "limits": "One protected output, not exhaustive deletion eligibility or five elapsed days"
+    },
+    "cleanup_concurrency": {
+      "status": "superato",
+      "basis": "Existing JSONL timeline + production task rows",
+      "cleanup_tasks": [
+        17202,
+        17203,
+        17204,
+        17205,
+        17206,
+        17207,
+        17210
+      ],
+      "generation_tasks": [
+        17195,
+        17197,
+        17198,
+        17199
+      ],
+      "finding": "Running count rises1to2 during cleanup, returns1 at cleanup success while generation backlog persists; all identified generation rows SUCCESS",
+      "limits": "Correlated at roughly60second sample resolution; exact second task ID not serialized per sample.17282 excluded from generation claim"
+    },
+    "day_archive": {
+      "status": "superato",
+      "images": [
+        333584,
+        333585
+      ],
+      "cameras": [
+        1,
+        2
+      ],
+      "night": false,
+      "format": "JPEG",
+      "file_exists_and_db_size_match": true
+    },
+    "cadence": {
+      "status": "baseline_with_backpressure_verified",
+      "configured_seconds": 45,
+      "observed_max_gap_seconds": 83,
+      "cause": "Intentional image queue backoff",
+      "confirmed_log_transitions": "2026-10-20 00:06:34 camera1 depth3 delay22.5;00:06:42 camera2 depth4 delay30;00:07:42/57 both depth5 delay37.5;00:09:20 camera2 depth0 removes delay;00:10:27 camera1 depth0 removes delay",
+      "limits": "Constant equal45second cadence under load is not achieved; no scheduler change made"
+    },
+    "available_logs": {
+      "start_local": "2026-10-20 00:18:51",
+      "end_local": "2026-10-20 07:43:10",
+      "lines": 69669,
+      "errors": 0,
+      "limits": "Current rotated log only; not continuous whole-window certification. Earlier21:21 Starlink HTTP403 retained previous catalog."
+    }
+  },
+  "still_open": [
+    "Constant camera cadence under processing load",
+    "Full dynamic control/role/device matrix beyond scoped evidence",
+    "Native restore key-reset handoff",
+    "Physical peripherals/network recovery and enabled external-provider acceptance",
+    "Sustained overwrite lifecycle and exhaustive retention eligibility; no new24h requested"
+  ]
+}

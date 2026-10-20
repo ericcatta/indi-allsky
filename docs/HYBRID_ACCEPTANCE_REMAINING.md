@@ -5,6 +5,46 @@ acceptance remains open. SQLite image/panorama INSERT retries and the libcamera
 preview-phase watchdog budget are deployed at `0284f14a`, with config 119
 unchanged. No further 24-hour observation is authorized by the latest instruction.
 
+## Latest bounded verification — 20 October
+
+No new 24-hour window was started. Existing regression remains 213 Python/compile
+passes; these read-only checks require no application change or repeated suite.
+The production lightbox now has native admin proof for both camera previews,
+Next/ArrowLeft/Escape and a received, valid processed JPEG. Four historical route
+records now link their exact later resolutions, preserving earlier outcomes.
+
+Automatic recovery after the user-confirmed power-off passed: boot 23:21:33,
+capture active 23:24:19 through the enabled two-minute timer, web through its enabled
+socket, linger enabled, both cameras writing again. The observed long offline gap
+was intentional. Both latest daytime JPEGs exist and match database sizes.
+Keogram 137 remains byte-identical after the observed cleanup work: a protected
+night-output sample passes, without claiming exhaustive five-day retention.
+Task rows correlated with existing sample timelines support production cleanup
+concurrent with generation; per-minute second-task identity was not recorded.
+
+The remaining cadence issue is now diagnosed: queue depths 3/4/5 deliberately add
+22.5/30/37.5 seconds to the configured 45-second interval. Production logs match
+this formula and show delay removal when the queue drains. This protects processing
+from overload; **constant equal 45-second cadence under load is not certified**.
+No acquisition/scheduling change was made. Current available logs from 00:18:51
+through 07:43:10 contain no ERROR/CRITICAL/Traceback; rotation limits this claim.
+The earlier Starlink HTTP 403 remains an external-provider failure with cached
+catalog retained.
+
+What remains, without starting another 24-hour run:
+- Resolve or explicitly accept variable cadence under processing backlog.
+- Complete exact native controls/role variants not covered by the scoped matrix;
+  key-reset restore requires the credential handoff already documented.
+- Hardware/network-changing effects and external integrations require the actual
+  device/provider and recovery arrangements. Unavailable equipment is not passed.
+- Sustained overwrite behavior and exhaustive retention eligibility remain unverified;
+  isolated regression and one protected output are not substitutes.
+
+[Bounded evidence](../testing/evidence/hybrid-remaining-verification-20261020.json).
+
+The following list preserves the previous checkpoint; this section supersedes
+its already-resolved scope descriptions.
+
 Current remaining work:
 - Observe the corrected generation overwrite lifecycle in sustained operation.
   Previously the Keogram/Startrail worker deleted old outputs before rendering
