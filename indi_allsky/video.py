@@ -102,8 +102,6 @@ class VideoWorker(Process):
 
         self.name = 'Video-{0:d}'.format(idx)
 
-        os.nice(19)  # lower priority
-
         self.config = config
         # MULTI_CAMERA_PREP: default route context for the current
         # single-camera runtime. It is refreshed from each video_q payload.
@@ -200,6 +198,10 @@ class VideoWorker(Process):
 
 
     def run(self):
+        # Constructors run in the supervisor. Change priority only after the
+        # fork so future capture/image workers retain the supervisor's priority.
+        os.nice(19)
+
         # setup signal handling after detaching from the main process
         signal.signal(signal.SIGHUP, self.sighup_handler_worker)
         signal.signal(signal.SIGTERM, self.sigterm_handler_worker)
