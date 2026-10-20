@@ -1,5 +1,5 @@
 {
-  "status": "isolated_raspberry_pass",
+  "status": "targeted_pass_deployed_bounded_recovery",
   "runtime_change": "Async libcamera watchdog uses monotonic elapsed; wall timestamps, budgets, argv, camera controls unchanged",
   "cause_limit": "Does not establish cause of 19:39 IMX708 timeout",
   "checks": [
@@ -43,5 +43,37 @@
   "retention": "Exact 24h/5d boundaries, +1 microsecond eligibility, day before night, pending MANUAL/QUEUED/RUNNING; real runtime/files/SQLite in isolated fixture",
   "overwrite": "Existing real VideoWorker/SQLite/files lifecycle test passed current 216-check regression. Natural sustained overwrite is an observational limitation, not an additional mandatory functional gate.",
   "browser_download": "Native production FITS download via tool timed out; no byte receipt or pass claimed",
-  "no_new_24h": true
+  "no_new_24h": true,
+  "deployment": {
+    "runtime": "8305d574",
+    "restart": "2026-10-20T20:59:13+02:00",
+    "main_pid": 121039,
+    "nrestarts": 0,
+    "active": true,
+    "manifest": "all four candidate hashes matched before restart",
+    "rollback": "/home/eric/hybrid-backups/monotonic-watchdog-20261020/libcamera.py",
+    "observed_at": "2026-10-20T21:00:30.433795+02:00",
+    "files": [
+      {
+        "camera_id": 1,
+        "id": 30539,
+        "time": "20:59:35"
+      },
+      {
+        "camera_id": 2,
+        "id": 30540,
+        "time": "20:59:36"
+      },
+      {
+        "camera_id": 2,
+        "id": 30541,
+        "time": "21:00:19"
+      }
+    ],
+    "all_files": "Size matches database, SIMPLE header, complete gzip decode/CRC passed",
+    "log_lines": 364,
+    "last_log": "2026-10-20T21:00:26.093157+02:00",
+    "errors": [],
+    "limit": "Brief recovery only; historical intermittent timeout cause not established"
+  }
 }
