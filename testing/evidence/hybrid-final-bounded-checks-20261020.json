@@ -1,0 +1,58 @@
+{
+  "status": "incomplete_new_runtime_defect",
+  "scope": "Read-only checks and existing-evidence reconciliation; no new 24-hour observation",
+  "runtime": "e5a8a47e",
+  "archive_scan": {
+    "since_local": "2026-10-20 08:57:00",
+    "day_jpeg": {
+      "camera1": 2401,
+      "camera2": 2399
+    },
+    "night_fits": {
+      "camera1": 63,
+      "camera2": 65
+    },
+    "missing": 0,
+    "size_mismatch": 0,
+    "limits": "Night image rows with zero JPEG size intentionally refer to source-only FITS; files checked separately. Does not prove pixel integrity of every exposure or historical deletion eligibility."
+  },
+  "runtime_log": {
+    "from_local": "2026-10-20T08:56:32",
+    "through_local": "2026-10-20T19:47:25",
+    "lines": 183719,
+    "error_lines": 2,
+    "sqlite_errors_observed": 0,
+    "events": [
+      {
+        "time_local": "2026-10-20T19:39:19",
+        "camera": 1,
+        "event": "rpicam timeout",
+        "exposure_seconds": 0.54711527,
+        "watchdog_seconds": 12.5,
+        "elapsed_seconds": 12.5564,
+        "preview": "--immediate --nopreview",
+        "files_created": false,
+        "recovery": "subsequent FITS camera1 19:45:55 exists and size matches",
+        "cause": "unproven; concurrent FFmpeg, capture/image NI0, video NI19"
+      }
+    ]
+  },
+  "services": "capture and web active",
+  "cleanup": {
+    "task": 17526,
+    "result": "SUCCESS recovered 8.01 GiB, 232 images deleted",
+    "limits": "Task result is not individual deletion eligibility evidence"
+  },
+  "worker_priority_fix": {
+    "commit": "2e2880cf",
+    "test": "Real forked Video/Storage children NI19, parent and later capture child NI0: PASS on Raspberry; storage lifecycle test PASS; compile/diff PASS",
+    "deployment": "pending safe idle point",
+    "causality": "Fixes constructor changing parent priority; not demonstrated cause of current timeout"
+  },
+  "remaining": [
+    "Investigate timeout under concurrent encoding",
+    "Verify fixed cadence requirement under overload, without removing necessary backpressure unsafely",
+    "Finish exact remaining native control scopes; unavailable hardware and unused uploads not passed",
+    "Sustained overwrite and retention claims remain limited; no new24h authorized"
+  ]
+}

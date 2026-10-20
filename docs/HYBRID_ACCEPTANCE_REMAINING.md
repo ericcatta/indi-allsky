@@ -1,9 +1,17 @@
 # Remaining Hybrid acceptance work
 
-Updated 19 October 2026. Classic frontend removal is deployed; whole-product
+Updated 20 October 2026. Classic frontend removal is deployed; whole-product
 acceptance remains open. SQLite image/panorama INSERT retries and the libcamera
 preview-phase watchdog budget are deployed at `0284f14a`, with config 119
 unchanged. No further 24-hour observation is authorized by the latest instruction.
+
+## Current bounded closure checkpoint — 20 October evening
+
+Native reset/flush restore and relogin are complete. Mobile previews are user-confirmed; upload integrations are not used. The route register now links later scoped proofs instead of treating historic blocked records as current defects.
+
+A read-only scan checked 4,800 daytime JPEGs and 128 nighttime FITS since 08:57:00: every expected file existed and matched its recorded size. Capture/web are active. Available logs (183,719 lines through 19:47:25) show no SQLite error but **one new IMX708 timeout at 19:39:19**, followed by recovery. Its cause is not yet established; concurrent FFmpeg is context, not proof of causality. Whole-plan acceptance therefore remains open.
+
+A separate confirmed priority bug is fixed in `2e2880cf`: only Video/Storage child processes lower their priority, leaving the supervisor and later capture workers unchanged. The real fork test passes on Raspberry. Deployment awaits a safe idle point rather than interrupting running generation. No new 24-hour observation was started. [Evidence](../testing/evidence/hybrid-final-bounded-checks-20261020.json).
 
 ## Mobile previews and stale backlog delay — 20 October release
 
@@ -58,7 +66,7 @@ catalog retained.
 What remains, without starting another 24-hour run:
 - Resolve or explicitly accept variable cadence under processing backlog.
 - Complete exact native controls/role variants not covered by the scoped matrix;
-  key-reset restore requires the credential handoff already documented.
+  key-reset restore was completed on 20 October.
 - Hardware/network-changing effects and external integrations require the actual
   device/provider and recovery arrangements. Unavailable equipment is not passed.
 - Sustained overwrite behavior and exhaustive retention eligibility remain unverified;
@@ -243,9 +251,7 @@ proof mapping; it does not certify all existing or JavaScript-generated controls
 
 Use the [route register](hybrid-acceptance-route-register.json) and its linked
 control discovery, retaining role, camera/profile, prerequisites, expected
-request/effect and source revision. There are 17 historical blocked/defect
-records without a fully passed resolution after the scoped resolutions through 3 October, including the later Process FITS production preview and download evidence. That number is not
-17 current product defects: some combine scopes, refer to older controls, or
+request/effect and source revision. Historical blocked/defect records retain their original outcomes and now include full or partial later resolutions and current applicability. They are not a count of current product defects: some combine scopes, refer to older controls, or
 already have narrower later evidence. The 7,369 static identities likewise are
 not 7,369 independently failed functions.
 

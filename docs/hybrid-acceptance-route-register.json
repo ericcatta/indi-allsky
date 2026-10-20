@@ -79,7 +79,20 @@
           "source": "testing/evidence/hybrid-native-users-2026-09-08.json",
           "record": "cases[18]",
           "control": "Successful account save/password change",
-          "recorded_status": "bloccato"
+          "recorded_status": "bloccato",
+          "resolution": {
+            "reviewed_on": "2026-10-20",
+            "status": "superato",
+            "source": "testing/evidence/hybrid-account-native-20260914.json",
+            "records": [
+              "controls[1]",
+              "controls[3]",
+              "controls[8]",
+              "open"
+            ],
+            "scope": "Native isolated administrator account name save and password change succeeded; persistence, old-password rejection and new-password login were observed. Production account mutation, ordinary-user native password change, narrow viewport and unrelated controls remain outside scope.",
+            "historical_outcome_preserved": true
+          }
         },
         {
           "source": "testing/evidence/hybrid-account-native-20260914.json",
@@ -665,6 +678,17 @@
             "source": "testing/evidence/hybrid-remaining-controls-20261001.json",
             "record": "controls[2]",
             "scope": "All four real HTTP cleanup combinations pass on disposable state. Historical native-browser gap is retained; this is not a native credential-change test."
+          },
+          "resolution": {
+            "reviewed_on": "2026-10-20",
+            "status": "superato",
+            "source": "testing/evidence/hybrid-native-restore-final-20261020.json",
+            "records": [
+              "evidence",
+              "limits"
+            ],
+            "scope": "Revision 0bfc787e, native synthetic administrator on the disposable Raspberry localhost:18123 fixture: restore with Flush Configs and Reset Security Keys selected changed both redirected fixture keys, retained only restored revision 2, queued zero tasks, rejected the old session after isolated in-process key reload and accepted a fresh login. Fresh-process behavior is covered separately; production keys/history, unrelated controls and overall acceptance are not certified.",
+            "historical_outcome_preserved": true
           }
         },
         {
@@ -1476,6 +1500,16 @@
             "source": "testing/evidence/hybrid-archive-production-20261001.json",
             "record": "controls",
             "scope": "Real production administrator workload now checked; historical ordinary-user/performance aggregate not promoted to passed."
+          },
+          "resolution": {
+            "reviewed_on": "2026-10-20",
+            "status": "parzialmente superato",
+            "source": "testing/evidence/hybrid-archive-production-20261001.json",
+            "records": [
+              "controls"
+            ],
+            "scope": "Real production administrator archive workload passed for the evidence's bounded camera, navigation and data scope. Ordinary-user coverage and the historical aggregate performance claim remain unresolved.",
+            "historical_outcome_preserved": true
           }
         },
         {
@@ -3601,7 +3635,17 @@
           "source": "testing/evidence/hybrid-download-delivery-post-classic-20260921.json",
           "record": "controls[0]",
           "control": "Download original",
-          "recorded_status": "bloccato"
+          "recorded_status": "bloccato",
+          "resolution": {
+            "reviewed_on": "2026-10-20",
+            "status": "parzialmente superato",
+            "source": "testing/evidence/hybrid-user-confirmed-delivery-20261002.json",
+            "records": [
+              "checks[0]"
+            ],
+            "scope": "User confirms that mini-video 7 downloaded and opened. The historical output 3 identity and byte integrity were not recorded, so the original record is not promoted to passed.",
+            "historical_outcome_preserved": true
+          }
         },
         {
           "source": "testing/evidence/hybrid-product-media-navigation-20260921.json",
@@ -5030,7 +5074,12 @@
           "source": "testing/evidence/hybrid-system-focus-native-20260921.json",
           "record": "controls[15]",
           "control": "Removable-drive mount/unmount/power effects",
-          "recorded_status": "bloccato"
+          "recorded_status": "bloccato",
+          "current_applicability": {
+            "reviewed_on": "2026-10-20",
+            "status": "hardware non disponibile",
+            "scope": "No identified removable-drive hardware and recovery window are available for physical mount, unmount or power effects. Supported behavior is retained and is not marked passed."
+          }
         },
         {
           "source": "testing/evidence/hybrid-navigation-drawer-20260929.json",
@@ -5336,7 +5385,12 @@
           "source": "testing/evidence/hybrid-system-focus-native-20260921.json",
           "record": "controls[6]",
           "control": "Physical GPIO output verification",
-          "recorded_status": "bloccato"
+          "recorded_status": "bloccato",
+          "current_applicability": {
+            "reviewed_on": "2026-10-20",
+            "status": "hardware non disponibile",
+            "scope": "No connected GPIO output hardware is available for physical-effect verification. Existing isolated request/browser coverage does not substitute for the absent device, and this record is not marked passed."
+          }
         }
       ]
     },
@@ -5680,6 +5734,16 @@
             "source": "testing/evidence/hybrid-tasks-filtered-download-20261004.json",
             "status": "browser_download_event_confirmed",
             "scope": "Current production administrator CSV filtered to task 14738, one visible row. Confirms a download event for the same control with a current task; does not verify historical task 12729 bytes or saved-file integrity.",
+            "historical_outcome_preserved": true
+          },
+          "resolution": {
+            "reviewed_on": "2026-10-20",
+            "status": "parzialmente superato",
+            "source": "testing/evidence/hybrid-tasks-filtered-download-20261004.json",
+            "records": [
+              "browser_download_event_confirmed"
+            ],
+            "scope": "The current production administrator CSV control produced a browser download event when filtered to task 14738 with one row. Historical task 12729 identity and saved-file byte integrity were not verified.",
             "historical_outcome_preserved": true
           }
         },
@@ -6044,7 +6108,12 @@
           "source": "testing/evidence/hybrid-system-focus-native-20260921.json",
           "record": "controls[13]",
           "control": "Physical focuser movement",
-          "recorded_status": "bloccato"
+          "recorded_status": "bloccato",
+          "current_applicability": {
+            "reviewed_on": "2026-10-20",
+            "status": "hardware non disponibile",
+            "scope": "No physical focuser is available for motion verification. Saved-frame preview and isolated effect contracts do not certify hardware movement, and this record is not marked passed."
+          }
         },
         {
           "source": "testing/evidence/hybrid-navigation-drawer-20260929.json",
@@ -6162,7 +6231,14 @@
           "source": "testing/evidence/hybrid-generation-2026-09-06.json",
           "record": "controls[9]",
           "control": "Delete submission and external upload",
-          "recorded_status": "bloccato"
+          "recorded_status": "bloccato",
+          "current_applicability": {
+            "reviewed_on": "2026-10-20",
+            "status": "parzialmente non applicabile",
+            "source": "testing/evidence/hybrid-native-restore-final-20261020.json",
+            "record": "additional_user_confirmations.upload_integrations",
+            "scope": "The user confirms that no upload integrations are used, so live external-upload effects are not applicable to the current installation and are not marked passed. Delete submission remains an independent unresolved destructive effect."
+          }
         },
         {
           "source": "testing/evidence/hybrid-generation-2026-09-06.json",
@@ -6322,7 +6398,17 @@
           "source": "testing/evidence/hybrid-geometry-2026-09-06.json",
           "record": "controls[12]",
           "control": "Live production geometry/reload",
-          "recorded_status": "bloccato"
+          "recorded_status": "bloccato",
+          "resolution": {
+            "reviewed_on": "2026-10-20",
+            "status": "parzialmente superato",
+            "source": "testing/evidence/hybrid-user-media-feedback-20261002.json",
+            "records": [
+              "checks[6]"
+            ],
+            "scope": "User confirms the Geometry Copy values control after direct route guidance. This is a user report without automated clipboard comparison and does not certify production camera reload or resulting acquisition, so the aggregate historical record remains open.",
+            "historical_outcome_preserved": true
+          }
         },
         {
           "source": "testing/evidence/hybrid-image-tools-native-20260930.json",
@@ -6437,7 +6523,17 @@
               "record": "controls[10] and bounded_capture_load",
               "scope": "Camera 2 repeated on latest application; both cameras continue capture. Induced hardware-failure recovery is not claimed."
             }
-          ]
+          ],
+          "resolution": {
+            "reviewed_on": "2026-10-20",
+            "status": "parzialmente superato",
+            "source": "testing/evidence/hybrid-mini-generation-post-classic-20260921.json",
+            "records": [
+              "controls"
+            ],
+            "scope": "Native queue submission, real worker SUCCESS, actual camera-scoped outputs and natural-end playback passed for both production cameras; camera 2 was repeated on the later application. Induced physical hardware-failure recovery remains unavailable and is not marked passed.",
+            "historical_outcome_preserved": true
+          }
         },
         {
           "source": "testing/evidence/hybrid-real-encoding-2026-09-08.json",
@@ -7327,7 +7423,14 @@
           "source": "testing/evidence/hybrid-youtube-2026-09-06.json",
           "record": "controls[6]",
           "control": "Live OAuth connect / refresh / revoke / upload",
-          "recorded_status": "bloccato"
+          "recorded_status": "bloccato",
+          "current_applicability": {
+            "reviewed_on": "2026-10-20",
+            "status": "provider non configurato",
+            "source": "testing/evidence/hybrid-native-restore-final-20261020.json",
+            "record": "additional_user_confirmations.upload_integrations",
+            "scope": "The user confirms that no upload integration is used. Live YouTube OAuth and upload effects are therefore not applicable to the current installation; supported flows remain retained and are not marked passed."
+          }
         },
         {
           "source": "testing/evidence/hybrid-navigation-drawer-20260929.json",
