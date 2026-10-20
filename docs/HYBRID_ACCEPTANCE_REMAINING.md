@@ -5,7 +5,20 @@ acceptance remains open. SQLite image/panorama INSERT retries and the libcamera
 preview-phase watchdog budget are deployed at `0284f14a`, with config 119
 unchanged. No further 24-hour observation is authorized by the latest instruction.
 
-## Current bounded closure checkpoint — 20 October evening
+## Current functional gates — 20 October, after shared-cadence release
+
+This checkpoint supersedes older pending/deployment descriptions below; historical results remain retained.
+
+- Shared normal-multicamera cadence is deployed at `df58afaa`; three paired rounds and six valid FITS passed bounded verification.
+- Overwrite preservation is functionally verified using the real worker, SQLite and files, including render/commit failure, collision, recovery and transfer protection, in the passed 216-check regression. “Sustained natural overwrite” is an observational limitation, not an extra acceptance condition introduced after the user declined another 24-hour run.
+- Retention boundary checks now pass on Raspberry in isolated fixtures: exactly 24h/5d remain protected, one microsecond older becomes eligible, day precedes night, and MANUAL/QUEUED/RUNNING uploads prevent deletion. This proves the tested policy and effects, not the eligibility of every historical production deletion.
+- A demonstrated clock-jump watchdog defect is corrected locally and passes targeted Raspberry tests; deployment remains pending. It does not establish the cause of the earlier 19:39 timeout.
+- Native FITS download attempted this turn timed out in the browser tool; no new receipt/integrity claim is made. Remaining current control/role scopes are still tracked in the route register.
+- No new 24-hour run. Whole-plan acceptance remains open for the unresolved timeout investigation and unmatched supported control scopes; unavailable external devices/integrations stay separately classified.
+
+[Targeted evidence](../testing/evidence/hybrid-final-boundary-checks-20261020.json).
+
+## Historical bounded closure checkpoint — 20 October evening
 
 Native reset/flush restore and relogin are complete. Mobile previews are user-confirmed; upload integrations are not used. The route register now links later scoped proofs instead of treating historic blocked records as current defects.
 

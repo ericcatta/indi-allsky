@@ -1,0 +1,47 @@
+{
+  "status": "isolated_raspberry_pass",
+  "runtime_change": "Async libcamera watchdog uses monotonic elapsed; wall timestamps, budgets, argv, camera controls unchanged",
+  "cause_limit": "Does not establish cause of 19:39 IMX708 timeout",
+  "checks": [
+    {
+      "case": "hybrid_storage_priority_test.py",
+      "exit_code": 0,
+      "stdout": "Storage priority: day before night, immediate FITS source reclamation, generated fallback, five-day and upload protection PASS\n",
+      "stderr": ""
+    },
+    {
+      "case": "hybrid_libcamera_timeout_budget_test.py",
+      "exit_code": 0,
+      "stdout": "Libcamera timeout budget: unchanged AF/argv, preview units/aliases, clock jumps, finite recovery and delayed completion passed\n",
+      "stderr": ""
+    },
+    {
+      "case": "hybrid_libcamera_timeout_recovery_test.py",
+      "exit_code": 0,
+      "stdout": "Libcamera timeout tail, terminate/kill reap, retained busy state and failed-frame accounting passed\n",
+      "stderr": ""
+    },
+    {
+      "case": "hybrid_libcamera_output_test.py",
+      "exit_code": 0,
+      "stdout": "Libcamera output: full/secondary profiles, sync/poll, stderr, repeated reads and failed-start cleanup passed\n",
+      "stderr": ""
+    },
+    {
+      "case": "capture_timeout_policy_test.py",
+      "exit_code": 0,
+      "stdout": "Capture timeout policy tests passed\n",
+      "stderr": ""
+    }
+  ],
+  "source_sha256": {
+    "indi_allsky/camera/libcamera.py": "e910b7d7b105d9ad7c24444ca377335062eee2fd2686e24dc4a26c2e2cbc426e",
+    "testing/hybrid_libcamera_timeout_budget_test.py": "9872e2c00c9950bc8a63e1d01544b1d93baf883bd72cd28b94b08aea7a61351e",
+    "testing/hybrid_libcamera_timeout_recovery_test.py": "37396a9761d17d97203701b2878e97905674f092a5bee86d99b60ea47d223778",
+    "testing/hybrid_storage_priority_test.py": "1a23e550de6fe499038c3b2b9c0f76879481100de6beb692a29bdb3b3885e779"
+  },
+  "retention": "Exact 24h/5d boundaries, +1 microsecond eligibility, day before night, pending MANUAL/QUEUED/RUNNING; real runtime/files/SQLite in isolated fixture",
+  "overwrite": "Existing real VideoWorker/SQLite/files lifecycle test passed current 216-check regression. Natural sustained overwrite is an observational limitation, not an additional mandatory functional gate.",
+  "browser_download": "Native production FITS download via tool timed out; no byte receipt or pass claimed",
+  "no_new_24h": true
+}
