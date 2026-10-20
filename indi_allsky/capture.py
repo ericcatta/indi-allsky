@@ -1337,6 +1337,23 @@ class CaptureWorker(Process):
                         break  # go ahead and break the loop to update other timestamps
 
 
+                    if (
+                        self.config.get('MULTI_CAMERA_CAPTURE_ENABLE', False)
+                        and not self.focus_mode
+                        and self.add_period_delay > 0
+                    ):
+                        baseline_frame_time = frame_start_time + exposure_period_info['effective']
+                        # Release only a normal cadence deadline extended by
+                        # backlog. SQM and clock-reset schedules stay explicit.
+                        if (
+                            next_frame_time == baseline_frame_time + self.add_period_delay
+                            and self.image_q.qsize() <= self.image_queue_min
+                        ):
+                            logger.warning('IMAGE QUEUE UNDER MINIMUM: releasing delay before next exposure')
+                            self.add_period_delay = 0.0
+                            next_frame_time = baseline_frame_time
+
+
                     if now_time >= next_frame_time:
                         #######################
                         # Start next exposure #
