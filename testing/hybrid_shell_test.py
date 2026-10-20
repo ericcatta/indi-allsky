@@ -62,6 +62,11 @@ def shell_contract(shell, modern, authenticated, original_source=None):
     )
     assert html.count("<p id='probe'>Content exactly once</p>") == 1
     if modern:
+        assert html.count('<meta name="viewport" content="width=device-width, initial-scale=1">') == 1
+        # The responsive preview release changes the cache version, not the
+        # shell's assets or navigation. Keep the established DOM fingerprint.
+        assert html.count('hybrid-product-ui-shell-008') == 1
+        html = html.replace('hybrid-product-ui-shell-008', 'hybrid-product-ui-shell-007')
         # New timelapse navigation is verified separately so the existing
         # shell contract and its fingerprints remain unchanged.
         timelapse_link = '<a href="indi_allsky.modern_admin_timelapse_settings_view?{}">Timelapse Settings</a>'
