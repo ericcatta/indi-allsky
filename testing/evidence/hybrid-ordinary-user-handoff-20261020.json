@@ -3,9 +3,9 @@
   "date": "2026-10-20",
   "runtime": "8305d574 application state; isolated candidate identical for affected tests",
   "environment": "Disposable SQLite/files, localhost-only Raspberry:18124 via SSH tunnel; no production account created",
-  "server_pid": 121169,
+  "server_pid": 1613,
   "fixture_script": "/tmp/hybrid-readonly-native-20261020.py",
-  "fixture_root": "/tmp/hybrid-acceptance-lo1lnz4m",
+  "fixture_root": "Recreated temporary directory; production checkout 8305d574",
   "request_log": "/tmp/hybrid-readonly-native-20261020.jsonl",
   "guard": "All mutations except real login rejected with403",
   "account": "test-user-2 ordinary user",
@@ -20,5 +20,8 @@
     "preview": "3840x2160 JPEG visibly rendered in native browser with overlay and whole frame",
     "download": "tool timeout; no new receipt claimed; prior admin contract proof remains valid"
   },
-  "no_new_24h": true
+  "no_new_24h": true,
+  "restored_after_reboot": "2026-10-20T21:45:28+02:00",
+  "tunnel": "Mac localhost:18124 to Raspberry localhost:18124; SSH keepalive enabled",
+  "readiness": "Mac request /indi-allsky/login returned HTTP200"
 }

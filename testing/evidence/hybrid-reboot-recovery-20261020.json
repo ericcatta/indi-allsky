@@ -1,0 +1,44 @@
+{
+  "status": "bounded_boot_recovery_pass",
+  "observed_at": "2026-10-20T21:47:06.711969+02:00",
+  "boot": "2026-10-20T21:43:47+02:00",
+  "runtime": "8305d574",
+  "capture": {
+    "automatic_start": "2026-10-20T21:46:04+02:00",
+    "pid": 1755,
+    "restarts": 0,
+    "timer_enabled": true
+  },
+  "web": {
+    "socket_enabled": true,
+    "activated_by_request": "2026-10-20T21:45:22+02:00",
+    "pid": 1599,
+    "http_login": 200
+  },
+  "linger": true,
+  "failed_user_units": 0,
+  "free_space": "6.5 GiB at initial check",
+  "new_fits": [
+    {
+      "camera": 1,
+      "id": 30565,
+      "time": "21:46:25"
+    },
+    {
+      "camera": 2,
+      "id": 30566,
+      "time": "21:46:27"
+    }
+  ],
+  "validation": "Both files match DB size, contain SIMPLE FITS header and pass full gzip decompression/CRC",
+  "shared_round": {
+    "round": 1,
+    "epoch": 156.538588,
+    "period_seconds": 45,
+    "both_profiles": true,
+    "repairs": 0
+  },
+  "bounded_errors": [],
+  "fixture_pid": 1613,
+  "limit": "Post-boot recovery check only; not a new24h observation or whole-plan completion"
+}
