@@ -721,3 +721,7 @@ Hybrid now owns normal multicamera start rounds, common queue-pressure decisions
 The isolated Raspberry regression passed all 216 Python/compile entrypoints with unchanged frozen sources. A subsequent two-file compatibility correction preserves existing equal/reversed queue thresholds; six affected entrypoints passed after the exact delta was verified. JavaScript was unchanged and not rerun. See [candidate evidence](../testing/evidence/hybrid-shared-cadence-candidate-20261020.json).
 
 Production deployment and bounded two-camera confirmation remain pending. The earlier IMX708 timeout remains unexplained; this coordinator is not claimed as its fix. No new 24-hour observation is authorized or started.
+
+### Shared cadence deployed and bounded verification
+
+`df58afaa` activated on Raspberry at 20:24:40 CEST, configuration 119 unchanged; MainPID 120191, no restart loop. Three shared rounds gave both profiles the same epoch, 45.048 and 45.027 seconds apart, with no pressure delay or state repairs. All six resulting FITS exist, match database sizes, have FITS SIMPLE headers and pass complete gzip decompression/CRC. The bounded log scan reported no ERROR/CRITICAL/Traceback/SQLite-lock message. Backup: `/home/eric/hybrid-backups/shared-cadence-20261020`. This closes the bounded shared-cadence deployment check, not the earlier unexplained timeout or whole-product acceptance. No new 24-hour observation.

@@ -1,5 +1,5 @@
 {
-  "status": "regression_passed_not_deployed",
+  "status": "deployed_bounded_three_round_pass",
   "scope": "Common normal-multicamera start rounds; independent camera settings; no new24h",
   "features": [
     "shared monotonic start epoch and pressure decision",
@@ -972,5 +972,89 @@
         "stderr": ""
       }
     ]
+  },
+  "production": {
+    "observed_at": "2026-10-20T20:27:12.757243+02:00",
+    "runtime": "df58afaa",
+    "config_id": 119,
+    "restart": "2026-10-20T20:24:40+02:00",
+    "main_pid": 120191,
+    "round_logs": [
+      "2026-10-20T20:25:00.685029+02:00 allsky-pi [INFO] Capture-1-120203/MainThread capture._shared_cadence_start() [406]: [SHARED_CAPTURE_CADENCE] profile=imx708-wide round=1 epoch=75807.113486 period=45.000s delay=0.000s members=('imx708-wide', 'asi678mc') repairs=0",
+      "2026-10-20T20:25:00.715023+02:00 allsky-pi [INFO] Capture-2-120207/MainThread capture._shared_cadence_start() [406]: [SHARED_CAPTURE_CADENCE] profile=asi678mc round=1 epoch=75807.113486 period=45.000s delay=0.000s members=('imx708-wide', 'asi678mc') repairs=0",
+      "2026-10-20T20:25:45.733186+02:00 allsky-pi [INFO] Capture-2-120207/MainThread capture._shared_cadence_start() [406]: [SHARED_CAPTURE_CADENCE] profile=asi678mc round=2 epoch=75852.161899 period=45.000s delay=0.000s members=('imx708-wide', 'asi678mc') repairs=0",
+      "2026-10-20T20:25:45.745016+02:00 allsky-pi [INFO] Capture-1-120203/MainThread capture._shared_cadence_start() [406]: [SHARED_CAPTURE_CADENCE] profile=imx708-wide round=2 epoch=75852.161899 period=45.000s delay=0.000s members=('imx708-wide', 'asi678mc') repairs=0",
+      "2026-10-20T20:26:30.760214+02:00 allsky-pi [INFO] Capture-1-120203/MainThread capture._shared_cadence_start() [406]: [SHARED_CAPTURE_CADENCE] profile=imx708-wide round=3 epoch=75897.188836 period=45.000s delay=0.000s members=('imx708-wide', 'asi678mc') repairs=0",
+      "2026-10-20T20:26:30.798435+02:00 allsky-pi [INFO] Capture-2-120207/MainThread capture._shared_cadence_start() [406]: [SHARED_CAPTURE_CADENCE] profile=asi678mc round=3 epoch=75897.188836 period=45.000s delay=0.000s members=('imx708-wide', 'asi678mc') repairs=0"
+    ],
+    "errors": [],
+    "files": [
+      {
+        "camera": 2,
+        "id": 30448,
+        "time": "2026-10-20 20:25:03.000000",
+        "exists": true,
+        "size_matches": true,
+        "fits_simple_header": true,
+        "gzip_crc_passed": true,
+        "decoded_bytes": 16614720
+      },
+      {
+        "camera": 1,
+        "id": 30449,
+        "time": "2026-10-20 20:25:03.000000",
+        "exists": true,
+        "size_matches": true,
+        "fits_simple_header": true,
+        "gzip_crc_passed": true,
+        "decoded_bytes": 35856000
+      },
+      {
+        "camera": 2,
+        "id": 30450,
+        "time": "2026-10-20 20:25:47.000000",
+        "exists": true,
+        "size_matches": true,
+        "fits_simple_header": true,
+        "gzip_crc_passed": true,
+        "decoded_bytes": 16614720
+      },
+      {
+        "camera": 1,
+        "id": 30451,
+        "time": "2026-10-20 20:25:48.000000",
+        "exists": true,
+        "size_matches": true,
+        "fits_simple_header": true,
+        "gzip_crc_passed": true,
+        "decoded_bytes": 35858880
+      },
+      {
+        "camera": 2,
+        "id": 30452,
+        "time": "2026-10-20 20:26:32.000000",
+        "exists": true,
+        "size_matches": true,
+        "fits_simple_header": true,
+        "gzip_crc_passed": true,
+        "decoded_bytes": 16614720
+      },
+      {
+        "camera": 1,
+        "id": 30453,
+        "time": "2026-10-20 20:26:33.000000",
+        "exists": true,
+        "size_matches": true,
+        "fits_simple_header": true,
+        "gzip_crc_passed": true,
+        "decoded_bytes": 35856000
+      }
+    ],
+    "log_lines": 453,
+    "last_log": "2026-10-20T20:26:34.945870+02:00 allsky-pi [INFO] Image-1-120211/MainThread star"
+  },
+  "rollback": {
+    "directory": "/home/eric/hybrid-backups/shared-cadence-20261020",
+    "procedure": "Stop capture; restore backed-up allsky.py and capture.py, remove new shared_capture_cadence.py, then start capture. Preserve configuration and media."
   }
 }
