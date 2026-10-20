@@ -1,0 +1,28 @@
+{
+  "status": "scoped_passed",
+  "date": "2026-10-20",
+  "timezone": "Europe/Zurich",
+  "environment": "Disposable Flask fixture on Raspberry, localhost:18123 SSH tunnel; separate database and redirected key writes; process and DBus effects blocked",
+  "operator": "Human user, synthetic administrator test-user-1",
+  "evidence": {
+    "restore_post": "18:10:10 HTTP 200; user reports Restored Config and saved-key message",
+    "keys_changed": true,
+    "remaining_config_revisions": [
+      2
+    ],
+    "queued_tasks": 0,
+    "activation": "Fixture app reloaded SECRET_KEY and PASSWORD_KEY from its own saved file; no production service reload",
+    "old_session": "18:13:13 protected page HTTP 302 to login",
+    "fresh_login": "18:13:35 POST login HTTP 200 then protected restore page HTTP 200; user confirms success"
+  },
+  "additional_user_confirmations": {
+    "mobile_previews": "Whole images confirmed",
+    "upload_integrations": "None used; live upload verification not applicable to current installation"
+  },
+  "limits": [
+    "Native activation used in-process fixture key reload, not a fresh service process; fresh-process coverage remains in hybrid-native-file-restore-20261005.json",
+    "Does not certify unrelated controls, hardware or overall acceptance",
+    "No new 24-hour observation started"
+  ],
+  "cleanup": "Isolated server PID 80237 stopped and SSH tunnel closed; production services unchanged"
+}
