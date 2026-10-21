@@ -1,5 +1,5 @@
 {
-  "status": "ordinary_user_native_handoff_ready",
+  "status": "ordinary_user_native_archive_passed",
   "date": "2026-10-20",
   "runtime": "8305d574 application state; isolated candidate identical for affected tests",
   "environment": "Disposable SQLite/files, localhost-only Raspberry:18124 via SSH tunnel; no production account created",
@@ -9,9 +9,7 @@
   "request_log": "/tmp/hybrid-readonly-native-20261020.jsonl",
   "guard": "All mutations except real login rejected with403",
   "account": "test-user-2 ordinary user",
-  "remaining": [
-    "Receive original FITS download from paired row1"
-  ],
+  "remaining": [],
   "admin_fits_current": {
     "id": 30458,
     "detail": "camera2/exposure/dimensions match selected row",
@@ -25,12 +23,13 @@
   "native_user_feedback_20261021": {
     "filters": "passed, user confirmed",
     "detail_return": "passed, user confirmed",
-    "fits_download": "pending receipt; absent link traced to test source timestamp one second later than JPEG"
+    "fits_download": "passed: user confirmed receipt after Download original FITS became visible on generation-camera-1.jpg"
   },
   "fixture_repair_20261021": {
     "root": "/tmp/hybrid-acceptance-s01s97ck",
     "change": "Aligned source metadata with generation images for cameras 1 and 2 in disposable SQLite only; production unchanged",
     "reproducible": "seed_source_media(app, pair_generation_images=True)",
-    "validation": "PASS: isolated Flask ordinary-user archive exposes FITS/RAW links for both cameras and returns nonempty attachment downloads; native receipt still pending"
+    "validation": "PASS isolated Flask ordinary-user FITS/RAW attachments both cameras; PASS native browser FITS link and user-confirmed receipt for camera 1. Does not certify all overall-plan requirements.",
+    "live_repair": "Initial direct SQLite timestamp copy omitted fractional seconds; normalized source timestamps to ORM serialization. Native browser reload then visibly showed Download original FITS and RAW."
   }
 }
