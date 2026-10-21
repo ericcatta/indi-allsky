@@ -15,6 +15,7 @@ import logging
 
 from .indi import IndiClient
 from .fake_indi import FakeIndiCcd
+from .timeout_diagnostics import timeout_diagnostics_json
 
 from .. import constants
 from ..multicamera_diag import write_multicamera_diag
@@ -1035,6 +1036,16 @@ class IndiClientLibCameraGeneric(IndiClient):
             image_stats,
             metadata_stats,
         )
+
+        # Inspect the live child's scheduling/I/O state before signals change
+        # it. Diagnostic failures must never prevent the existing abort path.
+        try:
+            logger.error('rpicam-still timeout resources profile=%s camera_id=%s snapshot=%s',
+                         getattr(self, 'profile_id', 'default'),
+                         getattr(self, 'camera_id', 'unknown'),
+                         timeout_diagnostics_json(pid))
+        except Exception:
+            pass
 
         return self.abortCcdExposure(timeout_diagnostics=True)
 

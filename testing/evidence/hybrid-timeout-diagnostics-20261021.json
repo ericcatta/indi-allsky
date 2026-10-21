@@ -1,0 +1,219 @@
+{
+  "status": "candidate_passed",
+  "checks": [
+    {
+      "test": "hybrid_libcamera_timeout_diagnostics_test.py",
+      "exit_code": 0,
+      "stdout": "Linux live process fields verified\nTimeout diagnostics: real files/process, pre-signal integration, missing/race/FIFO, thread/read/log bounds and abort resilience PASS\n",
+      "stderr": ""
+    },
+    {
+      "test": "hybrid_libcamera_timeout_budget_test.py",
+      "exit_code": 0,
+      "stdout": "Libcamera timeout budget: unchanged AF/argv, preview units/aliases, clock jumps, finite recovery and delayed completion passed\n",
+      "stderr": ""
+    },
+    {
+      "test": "hybrid_libcamera_timeout_recovery_test.py",
+      "exit_code": 0,
+      "stdout": "Libcamera timeout tail, terminate/kill reap, retained busy state and failed-frame accounting passed\n",
+      "stderr": ""
+    },
+    {
+      "test": "hybrid_libcamera_output_test.py",
+      "exit_code": 0,
+      "stdout": "Libcamera output: full/secondary profiles, sync/poll, stderr, repeated reads and failed-start cleanup passed\n",
+      "stderr": ""
+    },
+    {
+      "test": "capture_timeout_policy_test.py",
+      "exit_code": 0,
+      "stdout": "Capture timeout policy tests passed\n",
+      "stderr": ""
+    }
+  ],
+  "bounded_render_probe": {
+    "start": 1792599393.225565,
+    "end": 1792599433.335392,
+    "results": [
+      {
+        "id": 32031,
+        "camera_id": 1,
+        "seconds": 3.6549315259908326,
+        "shape": [
+          2592,
+          4608,
+          3
+        ]
+      },
+      {
+        "id": 32029,
+        "camera_id": 1,
+        "seconds": 2.6270480120001594,
+        "shape": [
+          2592,
+          4608,
+          3
+        ]
+      },
+      {
+        "id": 32027,
+        "camera_id": 1,
+        "seconds": 2.6024857179872924,
+        "shape": [
+          2592,
+          4608,
+          3
+        ]
+      },
+      {
+        "id": 32025,
+        "camera_id": 1,
+        "seconds": 2.636982742988039,
+        "shape": [
+          2592,
+          4608,
+          3
+        ]
+      },
+      {
+        "id": 32023,
+        "camera_id": 1,
+        "seconds": 3.2727043939958094,
+        "shape": [
+          2592,
+          4608,
+          3
+        ]
+      },
+      {
+        "id": 32021,
+        "camera_id": 1,
+        "seconds": 2.7022646089899354,
+        "shape": [
+          2592,
+          4608,
+          3
+        ]
+      },
+      {
+        "id": 32019,
+        "camera_id": 1,
+        "seconds": 2.6025009869917994,
+        "shape": [
+          2592,
+          4608,
+          3
+        ]
+      },
+      {
+        "id": 32017,
+        "camera_id": 1,
+        "seconds": 2.617190799996024,
+        "shape": [
+          2592,
+          4608,
+          3
+        ]
+      },
+      {
+        "id": 32032,
+        "camera_id": 2,
+        "seconds": 2.0326660930004437,
+        "shape": [
+          2160,
+          3840,
+          3
+        ]
+      },
+      {
+        "id": 32030,
+        "camera_id": 2,
+        "seconds": 2.0366978350066347,
+        "shape": [
+          2160,
+          3840,
+          3
+        ]
+      },
+      {
+        "id": 32028,
+        "camera_id": 2,
+        "seconds": 2.5796892150101485,
+        "shape": [
+          2160,
+          3840,
+          3
+        ]
+      },
+      {
+        "id": 32026,
+        "camera_id": 2,
+        "seconds": 2.553615932003595,
+        "shape": [
+          2160,
+          3840,
+          3
+        ]
+      },
+      {
+        "id": 32024,
+        "camera_id": 2,
+        "seconds": 2.042047006005305,
+        "shape": [
+          2160,
+          3840,
+          3
+        ]
+      },
+      {
+        "id": 32022,
+        "camera_id": 2,
+        "seconds": 2.0266463159932755,
+        "shape": [
+          2160,
+          3840,
+          3
+        ]
+      },
+      {
+        "id": 32020,
+        "camera_id": 2,
+        "seconds": 2.0371418300055666,
+        "shape": [
+          2160,
+          3840,
+          3
+        ]
+      },
+      {
+        "id": 32018,
+        "camera_id": 2,
+        "seconds": 2.054845901002409,
+        "shape": [
+          2160,
+          3840,
+          3
+        ]
+      }
+    ],
+    "window_local": [
+      "2026-10-21T18:16:33",
+      "2026-10-21T18:17:13"
+    ],
+    "rpicam_exits": [
+      "2026-10-21T18:16:46.870865+02:00 allsky-pi [INFO] Capture-1-47384/MainThread libcamera.getCcdExposureStatus() [871]: rpicam-still exited profile=imx708-wide camera_id=1 pid=47647 elapsed=1.9368s returncode=0 requested_exposure=0.29974061s timeout=12.3s",
+      "2026-10-21T18:17:01.955862+02:00 allsky-pi [INFO] Capture-1-47384/MainThread libcamera.getCcdExposureStatus() [871]: rpicam-still exited profile=imx708-wide camera_id=1 pid=47659 elapsed=1.9760s returncode=0 requested_exposure=0.30474061s timeout=12.3s"
+    ],
+    "errors": [],
+    "capture_completions": [
+      "2026-10-21T18:16:46.317763+02:00 allsky-pi [INFO] Capture-2-47388/MainThread capture.saferun() [1299]: Exposure received in 1.4348s (+1.4186s)",
+      "2026-10-21T18:16:46.872747+02:00 allsky-pi [INFO] Capture-1-47384/MainThread capture.saferun() [1299]: Exposure received in 1.9374s (+1.6377s)",
+      "2026-10-21T18:17:01.444098+02:00 allsky-pi [INFO] Capture-2-47388/MainThread capture.saferun() [1299]: Exposure received in 1.4147s (+1.3985s)",
+      "2026-10-21T18:17:01.957737+02:00 allsky-pi [INFO] Capture-1-47384/MainThread capture.saferun() [1299]: Exposure received in 1.9775s (+1.6727s)"
+    ],
+    "scope": "16 saved night FITS reconstructed in memory at nice19; no output/original modifications, no tasks or capture settings changed; does not reproduce the full morning generation workload"
+  },
+  "change": "On timeout only, bounded read-only process scheduling/IO/memory snapshot before abort; no timeout or capture policy change",
+  "limits": "Probe did not reproduce startup stall. Diagnostic change is not a timeout cure. No new 24h run."
+}
