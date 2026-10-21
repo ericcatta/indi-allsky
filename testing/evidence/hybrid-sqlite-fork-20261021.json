@@ -1,0 +1,44 @@
+{
+  "date": "2026-10-21",
+  "status": "candidate_passed",
+  "change": "SQLite pool rejects inherited connections after fork before checkpoint checkout; bounded retry emits error code and elapsed metadata without SQL values",
+  "before": "Real fork test fails: child inherited parent connection marker",
+  "after": "Same test passes; parent remains valid, child WAL and busy_timeout preserved",
+  "checks": [
+    {
+      "test": "hybrid_sqlite_fork_pool_test.py",
+      "exit_code": 0,
+      "stdout": "SQLite fork pool: child opens an independent configured connection; parent pool remains valid PASS\n",
+      "stderr": ""
+    },
+    {
+      "test": "hybrid_sqlite_checkpoint_flow_test.py",
+      "exit_code": 0,
+      "stdout": "PASS Flask checkout enable/fallback and committed data; synthetic heartbeat, no hardware\n",
+      "stderr": ""
+    },
+    {
+      "test": "hybrid_sqlite_retry_diagnostics_test.py",
+      "exit_code": 0,
+      "stdout": "SQLite retry diagnostics: real BUSY and BUSY_SNAPSHOT metadata with bounded recovery PASS\n",
+      "stderr": ""
+    },
+    {
+      "test": "hybrid_image_insert_contention_test.py",
+      "exit_code": 0,
+      "stdout": "Image inserts: real SQLite competition, one row, bounded retry, no file replay, error propagation and session recovery PASS\n",
+      "stderr": "[SQLITE_TRANSACTION_RETRY] attempt=1 limit=3 elapsed=0.003s error_type=OperationalError sqlite_errorcode=5 sqlite_basecode=5 retryable=True\n[SQLITE_TRANSACTION_RETRY] attempt=1 limit=3 elapsed=0.003s error_type=OperationalError sqlite_errorcode=5 sqlite_basecode=5 retryable=True\n[SQLITE_TRANSACTION_RETRY] attempt=1 limit=3 elapsed=0.001s error_type=OperationalError sqlite_errorcode=5 sqlite_basecode=5 retryable=True\n[SQLITE_TRANSACTION_RETRY] attempt=2 limit=3 elapsed=0.003s error_type=OperationalError sqlite_errorcode=5 sqlite_basecode=5 retryable=True\n[SQLITE_TRANSACTION_RETRY] attempt=3 limit=3 elapsed=0.003s error_type=OperationalError sqlite_errorcode=5 sqlite_basecode=5 retryable=False\n[SQLITE_TRANSACTION_RETRY] attempt=1 limit=3 elapsed=0.001s error_type=OperationalError sqlite_errorcode=5 sqlite_basecode=5 retryable=True\n[SQLITE_TRANSACTION_RETRY] attempt=2 limit=3 elapsed=0.001s error_type=OperationalError sqlite_errorcode=5 sqlite_basecode=5 retryable=True\n[SQLITE_TRANSACTION_RETRY] attempt=3 limit=3 elapsed=0.001s error_type=OperationalError sqlite_errorcode=5 sqlite_basecode=5 retryable=False\n[SQLITE_TRANSACTION_RETRY] attempt=1 limit=3 elapsed=0.000s error_type=OperationalError sqlite_errorcode=None sqlite_basecode=None retryable=False\n[SQLITE_TRANSACTION_RETRY] attempt=1 limit=3 elapsed=0.001s error_type=RuntimeError sqlite_errorcode=None sqlite_basecode=None retryable=False\n"
+    },
+    {
+      "test": "hybrid_fits_registration_test.py",
+      "exit_code": 0,
+      "stdout": "FITS registration: real writer conflict, one row, preserved source bytes/metadata, bounded retry and session recovery PASS\n",
+      "stderr": "[SQLITE_TRANSACTION_RETRY] attempt=1 limit=3 elapsed=0.002s error_type=OperationalError sqlite_errorcode=5 sqlite_basecode=5 retryable=True\n[SQLITE_TRANSACTION_RETRY] attempt=1 limit=3 elapsed=0.000s error_type=OperationalError sqlite_errorcode=5 sqlite_basecode=5 retryable=True\n[SQLITE_TRANSACTION_RETRY] attempt=2 limit=3 elapsed=0.001s error_type=OperationalError sqlite_errorcode=5 sqlite_basecode=5 retryable=True\n[SQLITE_TRANSACTION_RETRY] attempt=3 limit=3 elapsed=0.001s error_type=OperationalError sqlite_errorcode=5 sqlite_basecode=5 retryable=False\n[SQLITE_TRANSACTION_RETRY] attempt=1 limit=3 elapsed=0.000s error_type=OperationalError sqlite_errorcode=None sqlite_basecode=None retryable=False\n[SQLITE_TRANSACTION_RETRY] attempt=1 limit=3 elapsed=0.000s error_type=RuntimeError sqlite_errorcode=None sqlite_basecode=None retryable=False\n[SQLITE_TRANSACTION_RETRY] attempt=1 limit=3 elapsed=0.002s error_type=OperationalError sqlite_errorcode=5 sqlite_basecode=5 retryable=True\n[SQLITE_TRANSACTION_RETRY] attempt=1 limit=3 elapsed=0.000s error_type=OperationalError sqlite_errorcode=5 sqlite_basecode=5 retryable=True\n[SQLITE_TRANSACTION_RETRY] attempt=2 limit=3 elapsed=0.001s error_type=OperationalError sqlite_errorcode=5 sqlite_basecode=5 retryable=True\n[SQLITE_TRANSACTION_RETRY] attempt=3 limit=3 elapsed=0.002s error_type=OperationalError sqlite_errorcode=5 sqlite_basecode=5 retryable=False\n"
+    }
+  ],
+  "limits": [
+    "Does not establish cause of every historical SQLite lock",
+    "Does not resolve libcamera initialization stalls"
+  ],
+  "no_new_24h": true
+}
