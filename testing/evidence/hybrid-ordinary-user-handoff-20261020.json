@@ -10,9 +10,7 @@
   "guard": "All mutations except real login rejected with403",
   "account": "test-user-2 ordinary user",
   "remaining": [
-    "Apply camera1/image/night filters and inspect correct rows",
-    "Image details and Back to results preserve filters",
-    "Receive original source download from row1"
+    "Receive original FITS download from paired row1"
   ],
   "admin_fits_current": {
     "id": 30458,
@@ -23,5 +21,16 @@
   "no_new_24h": true,
   "restored_after_reboot": "2026-10-20T21:45:28+02:00",
   "tunnel": "Mac localhost:18124 to Raspberry localhost:18124; SSH keepalive enabled",
-  "readiness": "Mac request /indi-allsky/login returned HTTP200"
+  "readiness": "Mac request /indi-allsky/login returned HTTP200",
+  "native_user_feedback_20261021": {
+    "filters": "passed, user confirmed",
+    "detail_return": "passed, user confirmed",
+    "fits_download": "pending receipt; absent link traced to test source timestamp one second later than JPEG"
+  },
+  "fixture_repair_20261021": {
+    "root": "/tmp/hybrid-acceptance-s01s97ck",
+    "change": "Aligned source metadata with generation images for cameras 1 and 2 in disposable SQLite only; production unchanged",
+    "reproducible": "seed_source_media(app, pair_generation_images=True)",
+    "validation": "PASS: isolated Flask ordinary-user archive exposes FITS/RAW links for both cameras and returns nonempty attachment downloads; native receipt still pending"
+  }
 }
