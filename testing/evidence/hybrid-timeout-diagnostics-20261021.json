@@ -1,5 +1,5 @@
 {
-  "status": "candidate_passed",
+  "status": "deployed_targeted_pass_bounded_recovery",
   "checks": [
     {
       "test": "hybrid_libcamera_timeout_diagnostics_test.py",
@@ -215,5 +215,44 @@
     "scope": "16 saved night FITS reconstructed in memory at nice19; no output/original modifications, no tasks or capture settings changed; does not reproduce the full morning generation workload"
   },
   "change": "On timeout only, bounded read-only process scheduling/IO/memory snapshot before abort; no timeout or capture policy change",
-  "limits": "Probe did not reproduce startup stall. Diagnostic change is not a timeout cure. No new 24h run."
+  "limits": "Probe did not reproduce startup stall. Diagnostic change is not a timeout cure. No new 24h run.",
+  "deployment": {
+    "revision": "5ab0b6c4",
+    "capture_pid": 47966,
+    "active_since": "2026-10-21T18:21:26+02:00",
+    "rollback": "/home/eric/hybrid-backups/timeout-diagnostics-20261021",
+    "source_comparison": "Both application files byte-identical to tested candidate",
+    "verification": {
+      "services": {
+        "capture": "active",
+        "web": "active"
+      },
+      "files": [
+        {
+          "id": 346003,
+          "camera_id": 2,
+          "created": "2026-10-21T18:22:02+02:00",
+          "size_matches": true,
+          "decoded_size": [
+            3840,
+            2160
+          ]
+        },
+        {
+          "id": 346004,
+          "camera_id": 1,
+          "created": "2026-10-21T18:22:02+02:00",
+          "size_matches": true,
+          "decoded_size": [
+            4608,
+            2592
+          ]
+        }
+      ],
+      "log_lines": 1176,
+      "log_end": "2026-10-21T18:24:53.907753+02:00",
+      "errors": [],
+      "scope": "Brief post-restart verification only; intermittent startup defect remains unresolved."
+    }
+  }
 }

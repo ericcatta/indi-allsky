@@ -31,6 +31,26 @@ functional migration and frontend removal are not reopened.
 Evidence: `testing/evidence/hybrid-sqlite-fork-20261021.json` and
 `testing/evidence/hybrid-timeout-final-20261021.json`. No user handoff is outstanding.
 
+## Timeout diagnostic follow-up — 21 October
+
+A bounded 40-second reconstruction of 16 existing night FITS at worker priority
+completed without errors while both cameras captured. Two IMX708 processes exited
+successfully in 1.94/1.98 seconds. This did not reproduce the morning startup stalls.
+Release `5ab0b6c4` adds a bounded live `/proc` snapshot immediately before timeout
+termination (8 threads, 16 KiB input, 12 KiB log); it never reads command arguments,
+environment or memory contents. Five Linux tests pass, including real-process
+sampling, missing files, FIFO/bounds, abort resilience and unchanged timeout/recovery
+policy. This is instrumentation, not a claimed cure. No further 24-hour run or
+recurring observation was started. The next real startup stall must supply the
+missing scheduling/I/O evidence before a causal repair can be selected safely.
+
+Deployed at 18:21:26 CEST with rollback in
+`/home/eric/hybrid-backups/timeout-diagnostics-20261021`. Both services are active;
+new images 346004 (camera 1) and 346003 (camera 2) match database sizes and fully
+decode. The 1,176 log lines through 18:24:53 contain no ERROR/CRITICAL/Traceback.
+This brief check does not close the intermittent defect. Evidence:
+`testing/evidence/hybrid-timeout-diagnostics-20261021.json`.
+
 ## Latest acceptance decision — 21 October
 
 The user explicitly excludes any further 24-hour observation on this version.
