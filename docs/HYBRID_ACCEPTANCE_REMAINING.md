@@ -5,6 +5,17 @@ acceptance remains open. SQLite image/panorama INSERT retries and the libcamera
 preview-phase watchdog budget are deployed at `0284f14a`, with config 119
 unchanged. No further 24-hour observation is authorized by the latest instruction.
 
+## Latest acceptance decision — 21 October
+
+The user explicitly excludes any further 24-hour observation on this version.
+It is not a pending user action and historical failed observations are not relabelled
+as passes. Ordinary-user native archive filters, detail/back navigation and original
+FITS receipt are now user-confirmed and published in `b148a628`; no repeat handoff is
+needed. Classic frontend removal is deployed. Whole-product acceptance cannot yet
+be asserted: the earlier intermittent IMX708 timeout has no established root cause,
+and the remaining supported-control coverage must be reconciled against the scoped
+route register. Unavailable integrations/devices remain untested, not passed.
+
 ## Current functional gates — 20 October, after shared-cadence release
 
 This checkpoint supersedes older pending/deployment descriptions below; historical results remain retained.
