@@ -1,6 +1,6 @@
 {
   "date": "2026-10-21",
-  "status": "candidate_passed",
+  "status": "deployed_targeted_pass_bounded_recovery",
   "change": "SQLite pool rejects inherited connections after fork before checkpoint checkout; bounded retry emits error code and elapsed metadata without SQL values",
   "before": "Real fork test fails: child inherited parent connection marker",
   "after": "Same test passes; parent remains valid, child WAL and busy_timeout preserved",
@@ -40,5 +40,41 @@
     "Does not establish cause of every historical SQLite lock",
     "Does not resolve libcamera initialization stalls"
   ],
-  "no_new_24h": true
+  "no_new_24h": true,
+  "deployment": {
+    "revision": "59b50b8a",
+    "capture_active_since": "2026-10-21T18:12:24+02:00",
+    "capture_pid": 47371,
+    "web_pid": 47355,
+    "config_id": 119,
+    "rollback": "/home/eric/hybrid-backups/sqlite-fork-20261021",
+    "login_http": 200,
+    "files": [
+      {
+        "camera_id": 1,
+        "id": 345933,
+        "created": "2026-10-21T18:12:46",
+        "dimensions": [
+          4608,
+          2592
+        ],
+        "size_matches": true,
+        "decoded": true
+      },
+      {
+        "camera_id": 2,
+        "id": 345934,
+        "created": "2026-10-21T18:12:47",
+        "dimensions": [
+          3840,
+          2160
+        ],
+        "size_matches": true,
+        "decoded": true
+      }
+    ],
+    "log_lines": 288,
+    "log_end": "2026-10-21T18:12:59+02:00",
+    "errors": []
+  }
 }

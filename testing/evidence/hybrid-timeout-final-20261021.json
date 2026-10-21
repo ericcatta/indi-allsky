@@ -1,0 +1,380 @@
+{
+  "status": "repeated_startup_failures_with_automatic_recovery_observed_cause_unproven",
+  "scope": "Read-only retrospective review of supplied21October logs; no new24-hour observation, production mutation, hardware/settings/budget change or generated workload",
+  "inputs": [
+    {
+      "path": "/tmp/hybrid-timeout-recovery-20261021.log",
+      "lines": 1002,
+      "sha256": "418d5fbfb7901ab777c89c7c687239aa1755f2dd7676823fef418be698b4fa92"
+    },
+    {
+      "path": "/tmp/hybrid-final-diagnostic-20261021.log",
+      "lines": 1749,
+      "sha256": "75c1f43635d1d029a63deb2adf67375be13ceeecd5a425c1c9201dcac7aa646c"
+    }
+  ],
+  "window_local": {
+    "start": "2026-10-21T08:00:00+02:00",
+    "end": "2026-10-21T08:50:00+02:00"
+  },
+  "observations": {
+    "imx708_attempts": 199,
+    "imx708_completion_messages": 192,
+    "timeout_count": 7,
+    "timeout_tail_bytes": [
+      0,
+      485,
+      485,
+      485,
+      485,
+      1327,
+      2068
+    ],
+    "all_failed_children_reaped_before_next_attempt": true,
+    "all_recoveries_retain_requested_exposure": true,
+    "shared_rounds_with_both_profiles": 199,
+    "paired_round_epochs_identical": true,
+    "all_recoveries_published_and_completely_decoded": true
+  },
+  "events": [
+    {
+      "at": "2026-10-21T08:04:18.736660+02:00",
+      "pid": 16152,
+      "exposure_seconds": 0.30021814,
+      "deadline_seconds_exact": 12.30021814,
+      "elapsed_seconds": 12.3443,
+      "immediate": true,
+      "image_exists_at_timeout": false,
+      "metadata_exists_at_timeout": false,
+      "last_observed_stage": "Sensor properties enumeration; tuning not loaded",
+      "tail": {
+        "at": "2026-10-21T08:04:18.736875+02:00",
+        "returncode": -15,
+        "bytes": 485
+      },
+      "next_attempt": {
+        "at": "2026-10-21T08:04:21.451997+02:00",
+        "pid": 16159,
+        "exposure_seconds": 0.30021814
+      },
+      "subprocess_exit_confirmed_before_next_attempt": true,
+      "next_completion_observed": {
+        "at": "2026-10-21T08:04:23.344536+02:00",
+        "elapsed_seconds": 1.8888,
+        "attempt": {
+          "at": "2026-10-21T08:04:21.451997+02:00",
+          "pid": 16159,
+          "exposure_seconds": 0.30021814
+        }
+      },
+      "seconds_until_next_completion": 4.607876,
+      "recovered_attempt_same_requested_exposure": true,
+      "recovery_image_id": 341106
+    },
+    {
+      "at": "2026-10-21T08:17:56.532097+02:00",
+      "pid": 16816,
+      "exposure_seconds": 0.17591937,
+      "deadline_seconds_exact": 12.17591937,
+      "elapsed_seconds": 12.1945,
+      "immediate": true,
+      "image_exists_at_timeout": false,
+      "metadata_exists_at_timeout": false,
+      "last_observed_stage": "Still mode configured; no image received",
+      "tail": {
+        "at": "2026-10-21T08:17:56.546272+02:00",
+        "returncode": -15,
+        "bytes": 2068
+      },
+      "next_attempt": {
+        "at": "2026-10-21T08:17:59.372270+02:00",
+        "pid": 16828,
+        "exposure_seconds": 0.17591937
+      },
+      "subprocess_exit_confirmed_before_next_attempt": true,
+      "next_completion_observed": {
+        "at": "2026-10-21T08:18:00.641368+02:00",
+        "elapsed_seconds": 1.2665,
+        "attempt": {
+          "at": "2026-10-21T08:17:59.372270+02:00",
+          "pid": 16828,
+          "exposure_seconds": 0.17591937
+        }
+      },
+      "seconds_until_next_completion": 4.109271,
+      "recovered_attempt_same_requested_exposure": true,
+      "recovery_image_id": 341212
+    },
+    {
+      "at": "2026-10-21T08:19:26.915243+02:00",
+      "pid": 16894,
+      "exposure_seconds": 0.18216936,
+      "deadline_seconds_exact": 12.18216936,
+      "elapsed_seconds": 12.1918,
+      "immediate": true,
+      "image_exists_at_timeout": false,
+      "metadata_exists_at_timeout": false,
+      "last_observed_stage": "Sensor properties enumeration; tuning not loaded",
+      "tail": {
+        "at": "2026-10-21T08:19:27.529276+02:00",
+        "returncode": -15,
+        "bytes": 485
+      },
+      "next_attempt": {
+        "at": "2026-10-21T08:19:29.737329+02:00",
+        "pid": 16901,
+        "exposure_seconds": 0.18216936
+      },
+      "subprocess_exit_confirmed_before_next_attempt": true,
+      "next_completion_observed": {
+        "at": "2026-10-21T08:20:03.226137+02:00",
+        "elapsed_seconds": 3.3368,
+        "attempt": {
+          "at": "2026-10-21T08:19:59.882839+02:00",
+          "pid": 16918,
+          "exposure_seconds": 0.18216936
+        }
+      },
+      "seconds_until_next_completion": 36.310894,
+      "recovered_attempt_same_requested_exposure": true,
+      "recovery_image_id": 341226
+    },
+    {
+      "at": "2026-10-21T08:19:41.922383+02:00",
+      "pid": 16901,
+      "exposure_seconds": 0.18216936,
+      "deadline_seconds_exact": 12.18216936,
+      "elapsed_seconds": 12.1852,
+      "immediate": true,
+      "image_exists_at_timeout": false,
+      "metadata_exists_at_timeout": false,
+      "last_observed_stage": "Sensor properties enumeration; tuning not loaded",
+      "tail": {
+        "at": "2026-10-21T08:19:41.923407+02:00",
+        "returncode": -15,
+        "bytes": 485
+      },
+      "next_attempt": {
+        "at": "2026-10-21T08:19:44.784824+02:00",
+        "pid": 16909,
+        "exposure_seconds": 0.18216936
+      },
+      "subprocess_exit_confirmed_before_next_attempt": true,
+      "next_completion_observed": {
+        "at": "2026-10-21T08:20:03.226137+02:00",
+        "elapsed_seconds": 3.3368,
+        "attempt": {
+          "at": "2026-10-21T08:19:59.882839+02:00",
+          "pid": 16918,
+          "exposure_seconds": 0.18216936
+        }
+      },
+      "seconds_until_next_completion": 21.303754,
+      "recovered_attempt_same_requested_exposure": true,
+      "recovery_image_id": 341226
+    },
+    {
+      "at": "2026-10-21T08:19:56.969432+02:00",
+      "pid": 16909,
+      "exposure_seconds": 0.18216936,
+      "deadline_seconds_exact": 12.18216936,
+      "elapsed_seconds": 12.1849,
+      "immediate": true,
+      "image_exists_at_timeout": false,
+      "metadata_exists_at_timeout": false,
+      "last_observed_stage": "Tuning loaded; still mode not configured",
+      "tail": {
+        "at": "2026-10-21T08:19:56.972549+02:00",
+        "returncode": -15,
+        "bytes": 1327
+      },
+      "next_attempt": {
+        "at": "2026-10-21T08:19:59.882839+02:00",
+        "pid": 16918,
+        "exposure_seconds": 0.18216936
+      },
+      "subprocess_exit_confirmed_before_next_attempt": true,
+      "next_completion_observed": {
+        "at": "2026-10-21T08:20:03.226137+02:00",
+        "elapsed_seconds": 3.3368,
+        "attempt": {
+          "at": "2026-10-21T08:19:59.882839+02:00",
+          "pid": 16918,
+          "exposure_seconds": 0.18216936
+        }
+      },
+      "seconds_until_next_completion": 6.256705,
+      "recovered_attempt_same_requested_exposure": true,
+      "recovery_image_id": 341226
+    },
+    {
+      "at": "2026-10-21T08:32:44.755868+02:00",
+      "pid": 17533,
+      "exposure_seconds": 0.20526847,
+      "deadline_seconds_exact": 12.20526847,
+      "elapsed_seconds": 12.2418,
+      "immediate": true,
+      "image_exists_at_timeout": false,
+      "metadata_exists_at_timeout": false,
+      "last_observed_stage": "No subprocess output captured",
+      "tail": {
+        "at": "2026-10-21T08:32:44.756808+02:00",
+        "returncode": -15,
+        "bytes": 0
+      },
+      "next_attempt": {
+        "at": "2026-10-21T08:32:47.516965+02:00",
+        "pid": 17538,
+        "exposure_seconds": 0.20526847
+      },
+      "subprocess_exit_confirmed_before_next_attempt": true,
+      "next_completion_observed": {
+        "at": "2026-10-21T08:32:53.454062+02:00",
+        "elapsed_seconds": 5.9367,
+        "attempt": {
+          "at": "2026-10-21T08:32:47.516965+02:00",
+          "pid": 17538,
+          "exposure_seconds": 0.20526847
+        }
+      },
+      "seconds_until_next_completion": 8.698194,
+      "recovered_attempt_same_requested_exposure": true,
+      "recovery_image_id": 341327
+    },
+    {
+      "at": "2026-10-21T08:46:47.606483+02:00",
+      "pid": 18242,
+      "exposure_seconds": 0.11364404,
+      "deadline_seconds_exact": 12.11364404,
+      "elapsed_seconds": 12.1449,
+      "immediate": true,
+      "image_exists_at_timeout": false,
+      "metadata_exists_at_timeout": false,
+      "last_observed_stage": "Sensor properties enumeration; tuning not loaded",
+      "tail": {
+        "at": "2026-10-21T08:46:47.608480+02:00",
+        "returncode": -15,
+        "bytes": 485
+      },
+      "next_attempt": {
+        "at": "2026-10-21T08:46:50.468997+02:00",
+        "pid": 18249,
+        "exposure_seconds": 0.11364404
+      },
+      "subprocess_exit_confirmed_before_next_attempt": true,
+      "next_completion_observed": {
+        "at": "2026-10-21T08:46:55.119159+02:00",
+        "elapsed_seconds": 4.6501,
+        "attempt": {
+          "at": "2026-10-21T08:46:50.468997+02:00",
+          "pid": 18249,
+          "exposure_seconds": 0.11364404
+        }
+      },
+      "seconds_until_next_completion": 7.512676,
+      "recovered_attempt_same_requested_exposure": true,
+      "recovery_image_id": 341438
+    }
+  ],
+  "causal_assessment": {
+    "demonstrated": [
+      "Seven frame attempts produced no image/metadata before the monotonic watchdog deadline; all terminated with SIGTERM and recovered automatically.",
+      "Three consecutive attempts failed near08:19 before a later attempt completed; this is recurring acquisition loss, not merely one harmless historical timeout.",
+      "All seven use immediate mode: no omitted five-second preview budget applies. Observed deadlines match requested shutter plus existing12-second overhead.",
+      "At least one failed initialization takes8.073seconds from camera-manager first log to tuning-load log; another reaches still configuration only after8.054seconds.",
+      "The selected logs show ongoing generation/debayer/stretch work and an explicit FFmpeg invocation08:37:44-08:38:44."
+    ],
+    "not_demonstrated": [
+      "CPU versus I/O versus driver/IPA cause of initialization delay.",
+      "A clock jump causing these post-fix events.",
+      "FFmpeg specifically active for every timeout; streamed encoder paths do not necessarily emit the same command log.",
+      "Permanent camera hang, missing recovery, or a new capture watchdog arithmetic defect."
+    ],
+    "decision": "Do not extend the watchdog or change exposure/AWB/AF algorithms without causal evidence. Resource correlation alone does not establish a corrective limit. Persistent camera-backend replacement is a broader hardware/API change, not a verified local repair."
+  },
+  "limits": [
+    "The supplied recovery log omits normal subprocess-exit records, so no independent returncode0 claim is made; separate bounded database/file verification confirms all five resumed JPEG publications and full Pillow decoding.",
+    "Current free RAM, swap and disk observations do not establish resource availability during08:04-08:46.",
+    "No kernel journal entries in a selected interval does not rule out all sensor/driver/IPC failures.",
+    "Historical retrospective evidence cannot supply per-process scheduling or I/O counters that were not collected during the failure."
+  ],
+  "next_evidence_if_needed": "A bounded sampling of existing naturally-running rpicam processes: PID/nice, schedstat runnable delay, wchan, I/O counters, RSS/threads and CPU/I/O/memory pressure during initialization, correlated with existing diagnostic tails. No new24-hour window is required.",
+  "recovery_file_validation": {
+    "status": "passed",
+    "source": "Separate bounded production database/file verification reported by parent agent",
+    "images": [
+      {
+        "image_id": 341106,
+        "camera_id": 1,
+        "created_local": "2026-10-21 08:04:23",
+        "exposure_seconds_db": 0.300218135,
+        "format": "JPEG",
+        "file_exists": true,
+        "file_size_matches_database": true,
+        "pillow_complete_decode": "passed"
+      },
+      {
+        "image_id": 341212,
+        "camera_id": 1,
+        "created_local": "2026-10-21 08:18:00",
+        "exposure_seconds_db": 0.175919369,
+        "format": "JPEG",
+        "file_exists": true,
+        "file_size_matches_database": true,
+        "pillow_complete_decode": "passed"
+      },
+      {
+        "image_id": 341226,
+        "camera_id": 1,
+        "created_local": "2026-10-21 08:20:03",
+        "exposure_seconds_db": 0.182169363,
+        "format": "JPEG",
+        "file_exists": true,
+        "file_size_matches_database": true,
+        "pillow_complete_decode": "passed"
+      },
+      {
+        "image_id": 341327,
+        "camera_id": 1,
+        "created_local": "2026-10-21 08:32:53",
+        "exposure_seconds_db": 0.205268472,
+        "format": "JPEG",
+        "file_exists": true,
+        "file_size_matches_database": true,
+        "pillow_complete_decode": "passed"
+      },
+      {
+        "image_id": 341438,
+        "camera_id": 1,
+        "created_local": "2026-10-21 08:46:55",
+        "exposure_seconds_db": 0.113644041,
+        "format": "JPEG",
+        "file_exists": true,
+        "file_size_matches_database": true,
+        "pillow_complete_decode": "passed"
+      }
+    ],
+    "limits": "Confirms five resumed image publications, including the common recovery after three consecutive failures; does not establish why seven earlier attempts timed out."
+  },
+  "bounded_idle_load_sample": {
+    "duration_seconds": 35,
+    "samples": 25,
+    "rpicam_pids": 3,
+    "observed_process_durations_seconds": [
+      2.06,
+      1.8,
+      1.79
+    ],
+    "last_main_thread_runnable_wait_ns": [
+      0,
+      0,
+      0
+    ],
+    "scope": "Read-only /proc sample with no generation task active; cannot diagnose historical loaded startup stalls"
+  },
+  "hardware_snapshot": {
+    "throttled": "0x0",
+    "kernel_ring_start_local": "2026-10-21T14:08:48+02:00",
+    "limit": "Kernel ring does not retain morning incidents; recurring USB resets also occur during successful captures"
+  }
+}

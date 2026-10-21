@@ -1,9 +1,35 @@
 # Remaining Hybrid acceptance work
 
-Updated 20 October 2026. Classic frontend removal is deployed; whole-product
+Updated 21 October 2026. Classic frontend removal is deployed; whole-product
 acceptance remains open. SQLite image/panorama INSERT retries and the libcamera
 preview-phase watchdog budget are deployed at `0284f14a`, with config 119
 unchanged. No further 24-hour observation is authorized by the latest instruction.
+
+## Final bounded verification — 21 October, 18:13 CEST
+
+All three outstanding ordinary-user archive controls are user-confirmed in the
+native disposable fixture; the scoped control reconciliation is complete.
+No new 24-hour observation is authorized or scheduled by this work.
+
+A real fork test reproduced inherited SQLite pool reuse on the old application
+and passes with `59b50b8a`. The guard opens child-owned connections before checkpoint
+configuration. Five targeted real-SQLite/Flask tests pass, including WAL snapshot
+recovery, image/panorama inserts and FITS registration. Bounded retry diagnostics
+now record error codes and elapsed time without query data; retry limits are unchanged.
+The change is deployed with rollback, config119 unchanged, web HTTP200 and valid
+new images from both cameras. This proves the fork defect fixed, not a causal
+explanation of every historical `database is locked` incident.
+
+The IMX708 residual is **not resolved**: today's existing logs contain seven lost
+exposures during startup; all seven subprocesses were reaped and the five subsequent
+recovery images decode and match database sizes. A 35-second read-only sample without
+generation load shows three normal short processes; it cannot reproduce or explain
+the earlier loaded stalls. No speculative watchdog increase or hardware change was
+made. Full runtime acceptance remains open on these intermittent frame losses;
+functional migration and frontend removal are not reopened.
+
+Evidence: `testing/evidence/hybrid-sqlite-fork-20261021.json` and
+`testing/evidence/hybrid-timeout-final-20261021.json`. No user handoff is outstanding.
 
 ## Latest acceptance decision — 21 October
 
@@ -11,10 +37,17 @@ The user explicitly excludes any further 24-hour observation on this version.
 It is not a pending user action and historical failed observations are not relabelled
 as passes. Ordinary-user native archive filters, detail/back navigation and original
 FITS receipt are now user-confirmed and published in `b148a628`; no repeat handoff is
-needed. Classic frontend removal is deployed. Whole-product acceptance cannot yet
-be asserted: the earlier intermittent IMX708 timeout has no established root cause,
-and the remaining supported-control coverage must be reconciled against the scoped
-route register. Unavailable integrations/devices remain untested, not passed.
+needed. Classic frontend removal is deployed. This final three-control
+reconciliation identifies no remaining supported-control gap in that scoped set.
+Whole-product acceptance cannot yet be asserted because a 21 October bounded scan
+found seven new IMX708 startup timeouts from 08:04 through 08:46, including three
+consecutive failed attempts before recovery. Five resumed images were checked
+against their database rows and decoded completely. The same scan found one FITS
+registration failure from SQLite contention at 01:35. These are current runtime
+defects pending correction and verification, rather than missing functional-control
+coverage. Unavailable integrations/devices remain untested, not passed.
+
+[Timeout and recovery evidence](../testing/evidence/hybrid-timeout-final-20261021.json).
 
 ## Current functional gates — 20 October, after shared-cadence release
 
@@ -23,9 +56,20 @@ This checkpoint supersedes older pending/deployment descriptions below; historic
 - Shared normal-multicamera cadence is deployed at `df58afaa`; three paired rounds and six valid FITS passed bounded verification.
 - Overwrite preservation is functionally verified using the real worker, SQLite and files, including render/commit failure, collision, recovery and transfer protection, in the passed 216-check regression. “Sustained natural overwrite” is an observational limitation, not an extra acceptance condition introduced after the user declined another 24-hour run.
 - Retention boundary checks now pass on Raspberry in isolated fixtures: exactly 24h/5d remain protected, one microsecond older becomes eligible, day precedes night, and MANUAL/QUEUED/RUNNING uploads prevent deletion. This proves the tested policy and effects, not the eligibility of every historical production deletion.
-- A demonstrated clock-jump watchdog defect is corrected and deployed at `8305d574` (20:59:13 CEST). Targeted Raspberry tests and brief recovery passed: new FITS from both cameras have matching sizes, FITS headers and valid gzip CRC; no errors in the 364-line bounded scan. It does not establish the cause of the earlier 19:39 timeout.
-- Native FITS download attempted this turn timed out in the browser tool; no new receipt/integrity claim is made. Remaining current control/role scopes are still tracked in the route register.
-- No new 24-hour run. Whole-plan acceptance remains open for the unresolved timeout investigation and unmatched supported control scopes; unavailable external devices/integrations stay separately classified.
+- A demonstrated clock-jump watchdog defect is corrected and deployed at `8305d574`
+  (20:59:13 CEST), but it does not resolve the acquisition-startup defect. Seven
+  later immediate-mode attempts reached their monotonic deadlines without an image;
+  all child processes were reaped and capture recovered automatically. Their cause
+  remains unproven, so extending the watchdog or changing capture algorithms is not
+  justified by the available evidence.
+- The latest production-admin FITS download attempt timed out, but the same current
+  admin source-download contract already has a received, hash-matched FITS receipt
+  from 18 October. Ordinary-user archive filtering, detail/back navigation and a
+  received FITS download now pass in the disposable native localhost fixture;
+  this closes those three control scopes without claiming a production-user run.
+- No new 24-hour run is required or authorized for this version. Whole-plan
+  acceptance remains open for the unresolved intermittent timeout investigation;
+  unavailable external devices/integrations stay separately classified.
 
 [Targeted evidence](../testing/evidence/hybrid-final-boundary-checks-20261020.json).
 
@@ -88,13 +132,27 @@ The earlier Starlink HTTP 403 remains an external-provider failure with cached
 catalog retained.
 
 What remains, without starting another 24-hour run:
-- Resolve or explicitly accept variable cadence under processing backlog.
-- Complete exact native controls/role variants not covered by the scoped matrix;
-  key-reset restore was completed on 20 October.
+- Correct and verify the recurring IMX708 startup loss demonstrated by seven new
+  timeouts on 21 October. Recovery works, but repeated lost attempts remain a defect.
+- Verify the pending global SQLite fork/pool guard and retry diagnostics against a
+  real forked Flask engine, checkpoint checkout behavior, real BUSY/BUSY_SNAPSHOT,
+  image/panorama inserts and FITS registration. The 01:35 FITS lock remains open
+  until that candidate passes and is deployed with bounded recovery evidence.
+  The focused regression is `hybrid_sqlite_fork_pool_test.py`,
+  `hybrid_sqlite_checkpoint_flow_test.py`, `hybrid_sqlite_retry_diagnostics_test.py`,
+  `hybrid_image_insert_contention_test.py` and `hybrid_fits_registration_test.py`;
+  a full-suite repeat is reserved for a broader diff, a focused failure or the
+  release policy before deployment.
 - Hardware/network-changing effects and external integrations require the actual
-  device/provider and recovery arrangements. Unavailable equipment is not passed.
-- Sustained overwrite behavior and exhaustive retention eligibility remain unverified;
-  isolated regression and one protected output are not substitutes.
+  device/provider and recovery arrangements if they become applicable. They are
+  absent or unused on this installation and are not marked passed.
+
+The three previously unmatched ordinary-user archive controls are closed by the
+[native localhost handoff](../testing/evidence/hybrid-ordinary-user-handoff-20261020.json):
+filters, detail/back navigation and original FITS receipt. The fixture is disposable
+SQLite/files on the Raspberry and is not described as a production account check.
+The historical Output 3 and Tasks 12729 identities do not create new work because
+later evidence exercises the same current download contracts.
 
 [Bounded evidence](../testing/evidence/hybrid-remaining-verification-20261020.json).
 

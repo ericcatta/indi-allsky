@@ -1395,6 +1395,13 @@
           "record": "controls[2]",
           "control": "Isolated API/redirect contract",
           "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-ordinary-user-handoff-20261020.json",
+          "record": "native_user_feedback_20261021.fits_download",
+          "control": "Download original FITS; ordinary user",
+          "recorded_status": "superato",
+          "scope": "User-confirmed receipt from the native browser after the original-FITS link became visible in the disposable Raspberry localhost fixture. This is not a production-account or production-file receipt."
         }
       ]
     },
@@ -1502,13 +1509,13 @@
             "scope": "Real production administrator workload now checked; historical ordinary-user/performance aggregate not promoted to passed."
           },
           "resolution": {
-            "reviewed_on": "2026-10-20",
+            "reviewed_on": "2026-10-21",
             "status": "parzialmente superato",
             "source": "testing/evidence/hybrid-archive-production-20261001.json",
             "records": [
               "controls"
             ],
-            "scope": "Real production administrator archive workload passed for the evidence's bounded camera, navigation and data scope. Ordinary-user coverage and the historical aggregate performance claim remain unresolved.",
+            "scope": "Real production administrator archive workload passed for the evidence's bounded camera, navigation and data scope. Ordinary-user filters, detail/back navigation and original FITS receipt later passed in the disposable native localhost fixture recorded by hybrid-ordinary-user-handoff-20261020.json. The historical aggregate performance wording is not promoted by either scoped proof.",
             "historical_outcome_preserved": true
           }
         },
@@ -1517,6 +1524,14 @@
           "record": "controls",
           "control": "Native production admin: two cameras, pagination, decoded image details, exact return, empty search and reset recovery",
           "recorded_status": "superato"
+        },
+        {
+          "source": "testing/evidence/hybrid-ordinary-user-handoff-20261020.json",
+          "record": "native_user_feedback_20261021",
+          "control": "Ordinary-user archive filters and detail/back navigation",
+          "recorded_status": "superato",
+          "observed_page": "/modern-admin/media/archive",
+          "scope": "Native browser on a disposable SQLite/files fixture served from Raspberry localhost through an SSH tunnel. The user confirmed filtering and detail/return behavior. Production data and account effects are not claimed."
         }
       ]
     },
