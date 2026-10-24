@@ -1,0 +1,45 @@
+{
+  "date": "2026-10-24",
+  "code_commit": "dda37307",
+  "config_revision": 120,
+  "previous_config_revision": 119,
+  "change": {
+    "algorithm": "Adaptive MTF v2",
+    "target_midtone": 0.3,
+    "daytime_enabled": true,
+    "camera_count": 2
+  },
+  "verification": {
+    "targeted_entrypoints_passed": [
+      "gamma_lut_cache_test.py",
+      "mode3_adaptive_mtf_v2_test.py",
+      "hybrid_source_rendering_test.py",
+      "hybrid_source_publication_test.py",
+      "hybrid_source_media_flow_test.py",
+      "hybrid_generation_flow_test.py"
+    ],
+    "live_jpeg_decode": true,
+    "stretch_enabled_both_cameras": true,
+    "observed_day_cadence_seconds": 15,
+    "stretch_duration_seconds": [
+      0.0903,
+      0.1166
+    ],
+    "bounded_log_lines_checked": 432,
+    "bounded_error_count": 0,
+    "visual_result": "Brighter midtones on both cameras; existing solar clipping and optical flare remain."
+  },
+  "preserved": [
+    "Exposure/gain/cadence settings",
+    "Scientific source files",
+    "Historical rendering recipes"
+  ],
+  "limits": [
+    "Daytime smoke check, not long-term stability.",
+    "No new live night observation; night source replay is covered by tests.",
+    "Before/after JPEGs were captured at different times, not a controlled raw comparison.",
+    "No new 24-hour period.",
+    "Existing runtime acceptance limits remain open."
+  ],
+  "privacy": "Aggregate results only; no image payload, image paths, image timestamps, sensor metadata, credentials or raw logs."
+}

@@ -862,3 +862,11 @@ Production deployment and bounded two-camera confirmation remain pending. The ea
 ### Shared cadence deployed and bounded verification
 
 `df58afaa` activated on Raspberry at 20:24:40 CEST, configuration 119 unchanged; MainPID 120191, no restart loop. Three shared rounds gave both profiles the same epoch, 45.048 and 45.027 seconds apart, with no pressure delay or state repairs. All six resulting FITS exist, match database sizes, have FITS SIMPLE headers and pass complete gzip decompression/CRC. The bounded log scan reported no ERROR/CRITICAL/Traceback/SQLite-lock message. Backup: `/home/eric/hybrid-backups/shared-cadence-20261020`. This closes the bounded shared-cadence deployment check, not the earlier unexplained timeout or whole-product acceptance. No new 24-hour observation.
+
+### 24 October: balanced midtones on both cameras
+
+Deployed `dda37307`, configuration 120 (previous 119): adaptive MTF v2, target 0.30, daytime enabled and resolved true for both profiles. Corrected median normalization/MAD and deterministic degenerate handling; legacy recipes retain v1 arithmetic and new recipes freeze their algorithm version. Gamma lookup invalidation now follows live gamma changes while preserving frozen archived lookups. Exposure/gain/cadence settings were unchanged.
+
+Six targeted entrypoints passed on the Raspberry, including actual archived-source replay, publication and media/generation flows. Both live images decode and show Stretch On. Visual inspection of frames 364912/364913 confirms brighter midtones; subsequent frames resumed the 15-second shared daytime cadence. Six measured stretches took 0.0903–0.1166 seconds. The bounded post-restart scan contained 432 log lines and no ERROR/CRITICAL/Traceback. This is a daytime smoke check, not long-term stability or a new night observation.
+
+Backup of prior code/config: `/home/eric/hybrid-backups/midtone-stretch-20261024` (private on Pi). For rollback, restore the three backed-up Python files to their respective paths and save the backed-up config through the config API as a new revision, then restart capture/web. Scientific source files and historical recipes remain unchanged. No new 24-hour period; previous runtime acceptance limits remain open. [Evidence](../testing/evidence/hybrid-midtone-stretch-20261024.json).
