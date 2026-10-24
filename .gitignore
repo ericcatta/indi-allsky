@@ -28,3 +28,9 @@ ssl.crt
 ssl.key
 de421.bsp
 *.h5
+examples/DENOISE PR TEST ENVIRONMENT/Test Output/real_02_star_mask.png
+examples/DENOISE PR TEST ENVIRONMENT/Test Output/real_06_overlay.png
+examples/DENOISE PR TEST ENVIRONMENT/Test Output/real_08a_wavelet.png
+examples/DENOISE PR TEST ENVIRONMENT/Test Output/real_08b_bilateral.png
+examples/DENOISE PR TEST ENVIRONMENT/Test Output/real_08c_gaussian_blur.png
+examples/DENOISE PR TEST ENVIRONMENT/Test Output/real_08d_median_blur.png

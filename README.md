@@ -1,610 +1,606 @@
-# indi-allsky
-
-This fork uses **Hybrid as its only web interface**, at
-`/indi-allsky/modern-admin/now`, with login required. The Classic frontend has
-been removed; useful indi-allsky backend components and public integration
-contracts remain. See [Hybrid operating and development documentation](docs/HYBRID_GUIDE.md)
-for the installed release, rollback and the still-open acceptance checks.
-
-indi-allsky is software used to manage a Linux-based All Sky Camera using the INDI framework.  Theoretically, any INDI supported CCD/CMOS camera can be functional.
-
-![](./content/20210930_224951.jpg)
-*Pictured: SpaceX Cargo Dragon (over Georgia) headed for splashdown off the coast of Florida*
-
-## New Features
-* Real-Time Keogram
-    * A keogram is generated in realtime with every image that is taken
-* Long Term Keogram
-    * Automates the generation of Keograms that could span months or years
-* Moon Overlay
-    * Realtime accurate representation of illumination of the moon
-* Satellite Tracking
-* ADS-B Aircraft Tracking
-    * Use a SDR to tag aircraft that appear in your camera
-* Mini-Timelapses
-    * Create videos of specific events captured with your camera
-* Weather API
-    * OpenWeather Map API
-    * Weather Underground API
-    * Astrospheric API
-    * Ambient Weather API
-    * Ecowitt API
-* Native Fan controller support
-    * Standard
-    * PWM Controlled
-    * Software PWM
-    * Adafruit Motor Shield [MotorKit]
-    * DockerPi 4 Channel Relay Hat
-    * MQTT controlled remote fan
-* Native Dew Heater support
-    * Standard
-    * PWM Controlled
-    * Software PWM
-    * Adafruit Motor Shield [MotorKit]
-    * DockerPi 4 Channel Relay Hat
-    * MQTT controlled remote dew heater
-* Native Temperature Sensor support
-    * DS18B20 1-wire
-    * DHT11/22
-    * BMP180
-    * BMP280 (i2c & SPI)
-    * BME280 (i2c & SPI)
-    * BME680 (i2c & SPI)
-    * BMP3xx (i2c & SPI)
-    * Si7021
-    * SHT20
-    * SHT3x
-    * SHT40/41/45
-    * HTU21D
-    * HTU31D
-    * AHT10/20
-    * HDC302x
-    * LM35 via ADS1x15 ADC
-    * TMP36 via ADS1x15 ADC
-    * MLX90614 Sky Temperature
-    * MLX90615 Sky Temperature
-    * MLX90640 Thermal Camera
-    * SCD-30
-    * SCD-40/41
-* Light (Lux) Sensors
-    * TSL2561
-    * TSL2591
-    * VEML7700
-    * BH1750
-    * SI1145
-    * LTR390
-* Magnetometers
-    * MMC5983MA 3-axis
-* IMU Sensors
-    * ICM20X (Magnetometer only)
-    * MPU6050 (Temp only)
-* VOC/Air Quality Sensors
-    * SGP40
-* Current Sensors
-    * INA219
-    * INA228
-    * INA260
-    * INA23x
-    * INA3221
-* Lightning Sensors
-    * AS3935 (beta)
-* Rain Sensors
-    * FC37
-* Waveshare Environment Sensor HAT
-* Waveshare UPS hat (e) battery monitor i2c readings
-* Generic GPIO controls
-* MQTT Broker sensors
-    * Subscribe to topics as sensor input
-* Mechanical focuser support
-    * 28BYJ-48 Stepper
-    * A4988 with NEMA17 Stepper
-    * Adafruit Motor Shield [MotorKit]
-* Use star metrics (in addition to ADU) for star trails generation
-* Generate thumbnails to reduce load time in Timelapse view
-* Panorama timelapse generation
-* Fish-eye to Panoramic perspective
-* Upload timelapse videos directly to YouTube
-* Cardinal direction labels
-* Satellite tracking and visibility info
-* Wildfire smoke reporting *(North America only)*
-* Aurora prediction and Kp-index reporting
-
-## Features
-* RAW data is the default and preferred input
-    * INDI - 16-bit FITS data
-    * libcamera - 16-bit DNG data
-    * Also supports 8-bit RGB (RGB24), PNG, and JPEG input
-* Multiple camera vendor support
-    * ZWO
-    * Svbony
-    * QHY
-    * Player One Astronomy
-    * ToupTek
-    * Altair
-    * Omegon Pro
-    * OGMA
-    * Starlight Xpress
-    * Raspberry Pi Camera Modules
-        * HQ Camera (IMX477)
-        * IMX378
-        * Camera Module v3 (IMX708)
-        * AI Camera (IMX500)
-        * IMX678 Darksee
-        * IMX283 Klarity/OneInchEye
-        * IMX519
-        * IMX335
-        * IMX462
-        * IMX327
-        * 64MP HawkEye (IMX682)
-        * 64MP OwlSight (OV64A40)
-        * other libcamera supported modules
-    * Raspberry Pi Camera modules remotely controlled via MQTT
-        * HQ Camera (IMX477)
-        * IMX378
-        * Camera Module v3 (IMX708)
-        * 64MP OwlSight (OV64A40)
-        * Additional cameras upon request
-    * DSLRs
-    * Generic web cameras
-    * More to come
-* Image stretching (16-bit)
-    * Standard Deviation Cutoff (Original)
-    * Midtone Transfer Function
-* Multi-image stacking
-* Dark calibration frames to remove hot pixels
-* Camera temperature control (for cameras with active cooling)
-* Timelapse video generation
-* GPS support
-* Images tagged with EXIF data (JPEG only)
-* TrueType font support for image labels
-* Remote web portal
-* Network file transfers - Upload images and videos to remote site
-    * S3 Object Storage support
-        * Amazon Web Services
-        * Google Cloud Storage
-        * Oracle OCI Storage
-* Publish data to an MQTT service for monitoring
-    * Home Assistant Auto-Discovery integration
-* Keograms
-* Star Trails
-* Automatic meteor/plane/satellite detection
-* Docker containerization support
-* Images display local hour angle of sun and moon
-* Moon mode - reduced gain when the moon is overhead
-* Remote INDI server operation - operate camera remotely over the network
-* Pseudo-Sky Quality Meter - Use your all sky camera to measure sky brightness/quality
-* Relational database stores image and timelapse information
-    * SQLite (default)
-    * MySQL/MariaDB
-
-
-## Frequently Asked Questions
-
-https://github.com/aaronwmorris/indi-allsky/wiki/FAQ
-
-
-## Requirements
-* A computer running a modern Linux distribution, such as a Raspberry Pi
-    * Multicore is recommended
-        * ARM
-        * x86_64
-    * 2GB RAM recommended, 1GB minimum
-        * 512MB is adequate for image acquisition, but not enough to generate timelapse videos with ffmpeg
-    * 64GB of storage minimum to store 2 months of videos and 30 days of JPEG images.
-    * (Optional) Internet connectivity for image uploading
-* Camera
-    * Most INDI supported astro/planetary cameras will work
-    * [libcamera](https://github.com/aaronwmorris/indi-allsky/wiki/libcamera-enablement) - Raspberry Pi camera module
-
-
-## Distibution support
-| Distribution                    | Note |
-| ------------------------------- | ---- |
-| **Raspberry Pi OS 13 (trixie)** | **RECOMMENDED**<br>Compile INDI with build_indi.sh<br>Use libcamera or [indi_pylibcamera](https://github.com/scriptorron/indi_pylibcamera) for Raspberry PI HQ camera |
-| Raspberry Pi OS 12 (bookworm)   | Compile INDI with build_indi.sh<br>Use libcamera or [indi_pylibcamera](https://github.com/scriptorron/indi_pylibcamera) for Raspberry PI HQ camera |
-| Raspberry Pi OS 11 (bullseye)   | Compile INDI with build_indi.sh |
-| Raspberry Pi OS 10 (buster)     | (DO NOT USE) |
-| **Debian 13 (trixie)**          | **RECOMMENDED**<br>Compile INDI with build_indi.sh |
-| Debian 12 (bookworm)            | Compile INDI with build_indi.sh |
-| Debian 11 (bullseye)            | Compile INDI with build_indi.sh |
-| Debian 10 (buster)              | (DO NOT USE) |
-| Ubuntu 24.04 (noble)            | **RECOMMENDED**<br>Requires INDI 2.0.8 or newer for pyindi-client<br>INDI installed from ppa:mutlaqja/ppa<br>Compile libcamera with build_libcamera.sh |
-| Ubuntu 22.04 (focal)            | INDI installed from ppa:mutlaqja/ppa |
-| Ubuntu 20.04 (bionic)           | (NOT RECOMMENDED) INDI installed from ppa:mutlaqja/ppa |
-| Armbian                         | Compile INDI with build_indi.sh<br>https://github.com/aaronwmorris/indi-allsky/wiki/Armbian-Tuning |
-| Linux Mint 22                   | INDI installed from ppa:mutlaqja/ppa |
-| Linux Mint 21                   | INDI installed from ppa:mutlaqja/ppa |
-| LMDE 6 (Linux Mint)             | Compile INDI with build_indi.sh |
-| Stellarmate 1.8.x               | INDI pre-installed |
-| Astroberry 3.0                  | |
-| ~~Astroberry Server 2.0~~       | (DO NOT USE) |
-
-
-## Platform support
-| Platform        | Support         | Note |
-| --------------- | --------------- | ---- |
-| x86_64 (amd64)  | Excellent       |      |
-| aarch64 (arm64) | Excellent       |      |
-| armv7l (armhf)  | Not working (Apr 2026) | Current not working due to having to compile python module `dask-image` which requires `dask[array,dataframe]` which requires `pyarrow`.  pyarrow will not compile without Apache Arrow libs (not available on 32-bit platforms)<br>Many python packages do not distribute armhf python wheels which have to be compiled from source |
-| armv6l (armhf)  | Not Recommended | Raspberry Pi [v1] and Raspberry Pi Zero [v1] - In addition, some python modules will install armv7l versions which can contain CPU instructions not compatible with armv6l resulting in segfaults<br>Restricted memory environments (<= 512MB) make compiling python modules difficult |
-| x86 (32-bit)    | Problematic     | Many python packages do not distribute x86 python wheels which have to be compiled from source |
-
-
-## INDI support
-| Version         | Note |
-| --------------- | ---- |
-| v2.2.2          | **Recommended for new builds** |
-| v2.2.1          |      |
-| v2.2.0          |      |
-| v2.1.9          | indi_libcamera_ccd is stable |
-| v2.1.8          | Minimum for rpicam-apps 1.10.1 (indi_libcamera_ccd)<br>Minimum for ASI676MM |
-| v2.1.7          |      |
-| v2.1.6          | Reports as 2.1.5 after build<br>Minimum for rpicam-apps 1.9.0 (indi_libcamera_ccd)<br>`indi_altair_ccd` renamed to `indi_altaircam_ccd` |
-| v2.1.5          |      |
-| v2.1.4          |      |
-| v2.1.3          |      |
-| v2.1.2          |      |
-| v2.1.1          |      |
-| v2.1.0          |      |
-| v2.0.9          |      |
-| v2.0.8          | Minimum for Ubuntu 24.04 (pyindi-client) |
-| v2.0.7          | Minimum for ASI676MC |
-| v2.0.6          |      |
-| v2.0.5          | Requires upgrade to indi-allsky v7.7<br>[ZWO ASI problem](https://github.com/aaronwmorris/indi-allsky/wiki/INDI-2.0.5-notes) |
-| v2.0.4          | [Typo in indibash.h prevents building pyindi-client](https://github.com/aaronwmorris/indi-allsky/wiki/INDI-2.0.4-bug)<br>Svbony support is broken |
-| v2.0.3          |      |
-| v2.0.2          |      |
-| v2.0.1          |      |
-
-
-### Camera SDK Versions
-https://github.com/aaronwmorris/indi-allsky/wiki/indilib-3rdparty-SDK-versions
-
-
-## Single Board Computer support
-| Board                         | Note |
-| ----------------------------- | ---- |
-| Raspberry Pi 5                | Recommend 64-bit trixie (13) |
-| Raspberry Pi 4                | Recommend 64-bit trixie (13) |
-| Raspberry Pi 3                | Recommend 64-bit trixie (13), recommend 1GB of swap |
-| Raspberry Pi Zero 2           | Recommend 64-bit trixie (13), memory constrained |
-| Raspberry Pi Zero             | Recommend 32-bit bullseye (11), memory constrained |
-| Raspberry Pi Zero W           | Recommend 32-bit bullseye (11), memory constrained, WiFi gets disabled so build from the console |
-| Rock Pi                       |      |
-| Libre Computer (Le Potato)    |      |
-| Orange Pi                     |      |
-| Orange Pi PC Plus             | Requires 2GB swap (and patience) to build all python modules |
-| Banana Pi                     |      |
-| BeagleBone                    |      |
-
-
-## Memory Requirements for Timelapses
-Memory requirements are primarily driven by the resolution of the timelapse generated by the FFMPEG utility.  A higher resolution camera can be used on lower memory system by scaling the output resolution of the FFMPEG process.
-
-| Output Resolution  | Recommended Memory | Minimum Memory        | FFMPEG Process Memory |
-| ------------------ | ------------------ | --------------------- | --------------------- |
-| 852 x 480 (0.4MP)  | 1GB                | <1GB with swap        | 0.2GB                 |
-| 1280 x 960 (1.2MP) | 2GB                | 1GB with 1GB swap     | 0.4GB                 |
-| 1920 x 1080 (2MP)  | 2GB                | 1GB with 1GB swap     | 0.6GB                 |
-| 3840 x 2160 (8MP)  | 4GB                | 2GB with 1GB swap     | 1.7GB                 |
-| 3008 x 3008 (9MP)  | 4GB                | 2GB with 1GB swap     | 1.8GB                 |
-| 4056 x 3040 (12MP) | 4GB                |                       | 2.5GB                 |
-| 6224 x 4168 (26MP) | 8GB                |                       | 5.0GB                 |
-| 9152 x 6944 (64MP) | 16GB               |                       | 12.0GB                |
-
-
-# Installation
-The process for installing indi-allsky is documented in the wiki.
-
-https://github.com/aaronwmorris/indi-allsky/wiki/Getting-Started
-
-
-### Docker Containerization
-indi-allsky has full support for running in a containerized environment.  Check out the `docker/` folder for the Docker assets.
-
-https://github.com/aaronwmorris/indi-allsky/wiki/Docker
-
-
-### Logs
-* When indi-allsky is run from the command line, logs are sent to STDERR by default.
-* When the indi-allsky service is started, logs are sent to syslog via facility local6.  Logs are stored in `/var/log/indi-allsky/indi-allsky.log` and rotated daily.
-    * Web interface logs are located at `/var/log/indi-allsky/webapp-indi-allsky.log`
-
-
-## Updating
-indi-allsky updates are designed to be rolling releases.  I do everything I can to prevent breaking changes.  Most changes only require pulling updates from GitHub and re-running setup.sh.
-
-https://github.com/aaronwmorris/indi-allsky/wiki/Updating-indi-allsky
-
-
-### Security
-In an effort to increase security, I am trying to do a better job of tracking security issues in indi-allsky and the associated Software Bill of Materials.  GitHub Dependabot alerts are enabled which help track things like vulnerable Python modules.
-
-https://github.com/aaronwmorris/indi-allsky/wiki/Security-considerations
-
-https://github.com/aaronwmorris/indi-allsky/wiki/Security-Notifications
-
-
-### libcamera support
-libcamera is a new camera interface designed to replace the legacy camera interfaces such as V4L2.
-
-Proper libcamera support is only working on Raspberry Pi OS 11 (bullseye) on Raspberry Pi 3 & 4.
-
-https://github.com/aaronwmorris/indi-allsky/wiki/libcamera-enablement
-
-*Note: Genererating and processing raw (dng) files on a system with less than 1GB of memory and libcamera will cause out-of-memory conditions.  There is an option to generate JPEG or PNG files with libcamera which solves this issue.*
-
-
-### Dark frames
-indi-allsky fully automates the capture and processing of master dark calibration frames. Currently, sigma clipping and average methods are supported.
-
-https://github.com/aaronwmorris/indi-allsky/wiki/Dark-Calibration-Frames
-
-
-### Moon mode
-
-This is a special night time operating mode intended to reduce gain when the moon is more illuminated and above the horizon
-
-
-## Keograms
-Keograms are a visual representation of the entire timelapse video in a single frame.  Every image is rotated so that the vertical aligns to the meridian and then the center-vertical column is extraced from each frame and compiled into the keogram.  The rotation parameter in the config is KEOGRAM_ANGLE
-
-https://github.com/aaronwmorris/indi-allsky/wiki/Keogram-Rotation
-
-Below you can see perodic clouds passed over between 8-9pm and again between 4-5am.  If you look closely enough, you can see the Pleiades star cluster and the Orion constellation as it passed through the meridian in this example keogram.
-
-![](./content/keogram_example.jpg)
-
-*Note: The horizontal lines are just hot pixels that were subtracted by the dark frame.*
-
-
-## Star Trails
-Star trail images stack the stars from each frame to show their progression across the sky.
-
-![](./content/startrails_example.jpg)
-
-
-### Star Trails Timelapse
-Video of the star trails being stacked in real-time!
-
-[YouTube](https://youtu.be/pLJbTzlyBkM)
-
-
-## Smoke reporting
-indi-allsky polls data from [NOAA Office of Satellite And Product Operations](https://www.ospo.noaa.gov/) to report the level of smoke coverage in your location.  The OSPO provides KML map data for their [Hazard Mapping System Fire and Smoke Product](https://www.ospo.noaa.gov/Products/land/hms.html) [HMS].  indi-allsky processes the smoke polygons in the KML map data and checks if your location (~35 mile radius) is contained within the smoke areas.
-
-Smoke data is updated every 3 hours from NOAA.  Smoke data is also published with the MQTT data.
-
-*Note: Data is only available for **North America**.*
-
-
-## Aurora, Kp-index, and Solar Wind
-indi-allsky utilizes data from [NOAA Space Weather Prediction Center](https://www.swpc.noaa.gov/) to predict the possibility of Aurora in your location.  The SWPC provides data using the Ovation Aurora Model for aurora predictions.  indi-allsky uses the Ovation data to create an aggregate score within a ~500 mile radius around your location.
-
-The current Kp-index value is also polled from NOAA.  This is the measurement of the disturbance of the Earth's magnetic field, ranging from 0-9.  Values higher than 5 are good indicators of stronger solor storm activity which creates aurora.
-
-The Kp-index data, combined with the Ovation data, gives an objective prediction of the visibility of Aurora for your location.
-
-Also available are Magnetic field Bt, Bz, Hemispheric power, and Solar Wind speed and density data.
-
-Aurora data is updated every 60 minutes from NOAA.  Aurora data is also published with the MQTT data.
-
-
-## Satellite Tracking
-Satellite tracking data is used to track the visibility of specific satellites like the International Space Station and Hubble Space Telesope.  Rise, transit, and set times are available in the Astropanel view.
-
-Orbital data is downloaded in TLE format from [CelesTrak](https://celestrak.org/NORAD/elements/)
-
-
-## Star Detection
-indi-allsky utilizes OpenCV pattern matching to detect and count the number of stars in the view.  Star counts are a good objective measurement of sky conditions.
-
-Star and meteor detection support using detection masks to customize your Region of Interest if there are obstructions in your view.
-https://github.com/aaronwmorris/indi-allsky/wiki/Detection-Masks
-
-
-## Meteor Detection
-Using OpenCV Canny edge detection and Hough Line Transform, indi-allsky is able to perform basic line detection to detect meteor and fireball trails in the view.  Airplane and satellite trails are also detected using this method.  Images are tagged with an asterisk in the image viewer if a trail has been detected.
-
-
-## Focus Mode
-Focus mode is a special setting that generates images more often and implements a Variance of Laplacian scoring algorithm on the image to assist with focusing the camera.  Images are not saved when focus mode is enabled.
-
-
-## Stacking
-indi-allsky supports image stacking to increase details and contrast in the image.
-
-The following stacking modes are provided:
-* Maximum - The maximum value of each pixel in the stack is used.  Increases contrast of stars and sky overall.  Extends the effect of satellite/airplane trails, meteors, and other phenomena.
-* Average - The average value of each pixel is used in the resulting image.
-* Minimum - The minimum value of each pixel is used.  This has the effect of removing airplane and satellite trails (and meteors).
-
-The `Stack split screen` option will split the image into two panes.  The left pane will show the original image data and the right pane will contain the stacked data.
-
-Regarding performance, stacking does have an impact to memory and CPU utilization.  indi-allsky stores the RAW images used for the stack in memory.  A single 1920x1080 (1K) image is approximately 8MB.  Four 1K images will require 32MB of memory.  A single 4056x3040 (4K) RAW image is ~25MB, four would require 100MB of memory (at all times).
-
-CPU utilization and memory is reasonable for stacking 1K images on Raspberry Pi 3 (1GB) hardware, but 4K stacking starts to significantly impact response times.  Strongly recommend Raspberry Pi 4 with 2+GB of memory for 4K images.
-
-Registration (alignment) requires significantly more CPU time and doubles the memory requirement since the registered images must also be stored in memory.  Registering one 1920x1080 (1K) image (reference + image) requires 2-3 seconds on Raspberry Pi 3 hardware.
-
-
-## Web Interface
-
-The indi-allsky web interface is built on the Flask MVC framework.  It is designed to be a dashboard for your sky.  Included is the ability to fully manage the camera configuration without having to manually edit from the command line.
-
-Most views do not require authentication.  Credentials for accessing the privileged areas are defined upon the first setup of the software.
-
-
-### Home Page
-![](./content/webui_home.png)
-
-
-### Charts
-Early evening, the sun was still going down, but a cloud passed by, increasing the average brightness and lowering the star count.
-![](./content/webui_chart01.png)
-
-A large cloud passed over significantly increasing the brightness of the sky and blocking out almost all of the stars.
-![](./content/webui_chart02.png)
-
-
-### Image viewer
-Historical images browsing.
-![](./content/webui_images.png)
-*Pictured: A small satellite flare.*
-
-
-### Timelapse viewer
-Historical Star trails and Keograms.  The Keogram image is linked directly to the timelapse video for the night.
-![](./content/webui_timelapse_mono.png)
-
-
-### System Info
-![](./content/webui_systeminfo.png)
-
-
-## Database
-
-All media generated are logged in a local SQLite database stored in /var/lib/indi-allsky/indi-allsky.sqlite  This database is used as the source of images for timelapse and keogram generation, as well as, for displaying images via the web interfaces.
-
-The database is managed via the python modules SQLAlchemy and alembic to provide migrations (schema upgrades) automatically in the setup.sh script.
-
-
-## Remote Web Portal - SyncAPI
-
-An on-premises indi-allsky system can synchronize images and timelapses to a cloud-based indi-allsky web server instance using the built in SyncAPI.  Remote users can browse the remote indi-allsky web instance without touching the system running the camera.  Images are synced in real-time.
-
-In effect, the indi-allsky web interface is its own remote web portal.
-
-A remote indi-allsky instance can support multiple clients using SyncAPI with a single instance.  Users can easily switch between the cameras in the web interface.  The SyncAPI can also be combined with the S3 Object Storage functionality to offload image storage to a cloud service.
-
-
-### Home Hosting
-
-The indi-allsky web interface is designed to be directly exposed to the Internet, if you have sufficient bandwidth on your home Internet connection.  A simple, yet effective, access control system is implemented to let anonymous (or authenticated) users safely browse images and videos without exposing privileged controls.  Only users with assigned administrative authority can make changes.
-
-https://github.com/aaronwmorris/indi-allsky/wiki/Security-considerations
-
-It is also possible to use cloud security offerings like [Cloudflare Tunnel](https://www.cloudflare.com/products/tunnel/) to further protect your indi-allsky site.
-
-
-## Sensor support
-
-indi-allsky supports reading sensors natively on single board computers like Raspberry Pi.
-
-https://github.com/aaronwmorris/indi-allsky/wiki/Sensors
-
-
-## Dew Heater support
-
-Native dew heater support is built in for standard and PWM controlled dew heaters.
-
-https://github.com/aaronwmorris/indi-allsky/wiki/Dew-Heater-Support
-
-
-## Fan Controller support
-
-Native fan controller support is built in for standard and PWM controlled fans.
-
-https://github.com/aaronwmorris/indi-allsky/wiki/Fan-Control
-
-
-## Focuser support
-
-If you built your system with a focuser, it is now possible to control the focuser within the Focus view.  `28BYJ-48` and `NEMA17` steppers are currently supported.
-
-https://github.com/aaronwmorris/indi-allsky/wiki/Focuser-Device
-
-
-## YouTube support
-indi-allsky supports being able to upload timlapse and star trail videos directly to YouTube
-
-https://github.com/aaronwmorris/indi-allsky/wiki/Youtube-Uploads
-
-
-## S3 Object Storage
-
-You may choose to upload images and timelapse files to an S3 bucket.  Once the images are in the bucket, images and videos in the web interface will be loaded directly from S3 instead of the local indi-allsky web server.  You could easy host the web interface from your home internet connection and just have the large media files served from S3.
-
-Currently, only Amazon Web Services is supported, but other providers could be easily be added.  Just open an issue.
-
-Estimated cost for an allsky camera holding 90 days of timelapses and 30 days of images on AWS (day and night):  ~$2.00 (USD) per month  (50GB of data + 180,000 requests)
-
-AWS S3 and GCP Storage are currently supported.
-
-*Note:  As of writing this, the AWS free tier for S3 supports 5GB and 2000 requests per month.  In a single night, I achieved 80% of the requests limit (8 hours of images every 15 seconds is 1920 upload requests).  The free tier is only sufficient for basic testing, but not long term usage.*
-
-
-## GPS
-
-GPS support is provided through [indi_gpsd](https://www.indilib.org/aux/gps.html) and GPSd integration.  Any GPS hardware supported by GPSd will work.
-
-JPEG and FITS Images exported [optional] by indi-allsky will be properly tagged with Geographic (latitude/longitude) and Astrometric (RA/dec) information in the headers.  Tags include geographic location regardless of GPS support, but the information will be much more precise with the GPS module.
-
-
-## Performance
-
-indi-allsky itself is written in python, but python is just the glue between the different libraries, most of which are C based which makes indi-allsky extremely fast.  A 1920 x 1080 image can be dark frame calibrated, debayered, histogram processed, text applied, and compressed to a JPG in less than 0.5 seconds on Raspberry Pi 3 class hardware.  PNG processing is a little more taxing, but usually only takes a few seconds.
-
-ffmpeg video processing is considerably more expensive.  A 2 minute 1920x1080 h.264 encoded video compiled from 3,000 frames requires ~20 minutes on Raspberry Pi 3 (4 core) hardware.  Encoding takes place in a separate process from image aqcuisition and image processing and is run at the lowest CPU priority so image acquision is not impacted.
-
-
-## Software Dependencies
-
-| Function          | Software      | URL |
-| ----------------- | ------------- | --- |
-| Camera interface  | INDI          | https://indilib.org/ |
-|                   | pyindi-client | https://github.com/indilib/pyindi-client |
-|                   | libcamera     | https://libcamera.org/ |
-| Image processing  | OpenCV        | https://opencv.org/ |
-|                   | opencv-python | https://github.com/opencv/opencv-python |
-|                   | Pillow        | https://pillow.readthedocs.io/ |
-|                   | piexif        | https://piexif.readthedocs.io/ |
-|                   | astropy       | https://www.astropy.org/ |
-|                   | astroalign    | https://astroalign.quatrope.org/ |
-|                   | ccdproc       | https://ccdproc.readthedocs.io/ |
-|                   | numpy         | https://numpy.org/ |
-| Video processing  | ffmpeg        | https://www.ffmpeg.org/ |
-| Astrometry        | pyephem       | https://rhodesmill.org/pyephem/ |
-| File transfer     | pycurl        | http://pycurl.io/ |
-|                   | paramiko      | http://www.paramiko.org/ |
-|                   | paho-mqtt     | https://www.eclipse.org/paho/ |
-|                   | requests      | https://requests.readthedocs.io/en/latest/ |
-| S3 Object Storage | boto3         | https://boto3.amazonaws.com/v1/documentation/api/latest/index.html |
-|                   | apache-libcloud | https://libcloud.apache.org/ |
-|                   | google-cloud-storage | https://cloud.google.com/python/docs/reference/storage/latest |
-| Database          | SQLite        | https://www.sqlite.org/ |
-|                   | SQLAlchemy    | https://www.sqlalchemy.org/ |
-|                   | alembic       | https://alembic.sqlalchemy.org/ |
-|                   | mysql-connector-python | https://dev.mysql.com/doc/connector-python/en/ |
-|                   | PyMySQL       | https://pymysql.readthedocs.io/en/latest/ |
-| GPS               | GPSd          | https://gpsd.gitlab.io/gpsd/ |
-| Web interface     | Flask         | https://flask.palletsprojects.com/ |
-|                   | WTForms       | https://wtforms.readthedocs.io/ |
-|                   | flask-login   | https://flask-login.readthedocs.io/ |
-|                   | Gunicorn      | https://gunicorn.org/ |
-|                   | Apache        | https://httpd.apache.org/ |
-|                   | NGINX         | https://www.nginx.com/ |
-| Hardware Sensors  | Circuit Python | https://circuitpython.org/ [GitHub](https://github.com/adafruit) |
-
-
-## Architecture
-
-indi-allsky utilizes python's multiprocessing library to enable parallelizing tasks so that image processing does not interfere with image aquisition, etc.
-
-![](./content/indi-allsky-arch.svg)
-
-
-## Configuration
-
-All configuration is read from the database.  Almost all of the configuration is managed via the web interface.
-You may use the config.py utility to manipulate the configuration from the command line.
-
-
-## Tested Hardware
-
-3-4 weeks of constant runtime with no intervention are common.  The only reason I restart my cameras are code updates (or power failures).
-
-The hardware below has at least been plugged in and tested for correct detection and CFA decoding.
+# indi-allsky Hybrid
+
+A Linux all-sky camera system for continuous sky imaging, scientific archives,
+timelapses and observatory monitoring, with **Hybrid as its only web interface**.
+
+This repository is [Eric Cattaneo's Hybrid fork](https://github.com/ericcatta/indi-allsky)
+of [Aaron Morris's indi-allsky](https://github.com/aaronwmorris/indi-allsky).
+It retains the upstream camera drivers, processing workers and integration
+contracts while providing a different interface and additional archive,
+multicamera and storage workflows. The Classic frontend has been removed.
+
+Open **`https://<camera-host>/indi-allsky/modern-admin/now`** after installation.
+Hybrid requires login; use the account you create during setup. There are no
+shared default production credentials.
+
+![An all-sky exposure of SpaceX Cargo Dragon over Georgia](content/20210930_224951.jpg)
+
+*SpaceX Cargo Dragon headed toward splashdown off the coast of Florida.*
+
+## Contents
+
+- [Project status](#project-status)
+- [What the system does](#what-the-system-does)
+- [Requirements and supported systems](#requirements-and-supported-systems)
+- [Install on Linux](#install-on-linux)
+- [First login and commissioning](#first-login-and-commissioning)
+- [Docker and other installation layouts](#docker-and-other-installation-layouts)
+- [Configuration and data locations](#configuration-and-data-locations)
+- [Services and logs](#services-and-logs)
+- [Storage, backup and recovery](#storage-backup-and-recovery)
+- [Update an existing installation](#update-an-existing-installation)
+- [Camera and processing reference](#camera-and-processing-reference)
+- [Optional hardware and integrations](#optional-hardware-and-integrations)
+- [Security and remote access](#security-and-remote-access)
+- [Troubleshooting](#troubleshooting)
+- [Development and verification](#development-and-verification)
+- [Documentation map](#documentation-map)
+- [Dependencies and architecture](#dependencies-and-architecture)
+- [Contributing, support and license](#contributing-support-and-license)
+
+## Project status
+
+Hybrid is deployed on the project's Raspberry Pi installation. This does **not**
+mean that every supported camera, integration, operating system or clean-install
+combination has been tested with this fork.
+
+As recorded on **24 October 2026**, whole-product runtime acceptance remains open:
+intermittent IMX708 acquisition timeouts and storage/SQLite contention have required
+repairs and bounded verification. Recent recovery checks do not establish that
+all intermittent failures are resolved. The current work does not include another
+24-hour observation. See [remaining acceptance work](docs/HYBRID_ACCEPTANCE_REMAINING.md)
+and [deployment evidence and rollback](HYBRID_DEPLOYMENT.md).
+
+The existing line detector identifies candidate trails; it does not reliably
+classify meteors, aircraft and satellites. Separate Event Detector/AI development
+is not part of the standard installation described here.
+
+This README describes repository behavior and defaults. Machine-specific paths,
+configuration revisions, retention policies and historical test counts in release
+reports are examples from that installation, not defaults for a new system.
+
+## What the system does
+
+| Area | Capabilities |
+| --- | --- |
+| Acquisition | INDI CCD/CMOS cameras, Raspberry Pi libcamera interfaces, selected network/MQTT cameras, day/night and moon modes, exposure and gain control |
+| Processing | Dark calibration, debayering, stretching, stacking, overlays, star counting, line detection, cropping, scaling and panorama conversion |
+| Archive | Processed images, optional FITS/RAW sources, metadata, thumbnails and source-aware previews/downloads; source-based generation when the saved data and context support it |
+| Outputs | Timelapses, mini timelapses, keograms, long-term/realtime keograms, star trails, star-trail videos and panoramas |
+| Hybrid operations | Camera/profile selection, settings, task queue, notifications, user management, logs, storage protection and scientific-source workflows |
+| Observatory | Sky brightness estimates, charts, sensors, sun/moon context, satellite information, weather and optional environmental controls |
+| Integrations | Remote INDI, SyncAPI, file transfer, object storage, MQTT/Home Assistant, YouTube, GPS and optional GPIO devices |
+
+The main navigation is organized around **Now**, **Highlights**, **Library** and
+**Observatory**. Use Settings for capture, processing, storage and operational
+configuration. Camera/profile context matters: verify it before saving changes.
+Availability depends on configured devices, permissions and data actually captured.
+
+## Requirements and supported systems
+
+### Hardware and operating environment
+
+- A Linux host with systemd, a normal login user with `sudo` access, and a supported
+  camera. The native installer is not a macOS or Windows installer.
+- Prefer **64-bit ARM (`aarch64`) or x86-64**, multicore CPU and **at least 2 GB RAM**.
+  More memory is needed for high-resolution RAW processing, stacking, multiple
+  cameras and video encoding. A 1 GB device is constrained; 512 MB is unsuitable
+  for a complete capture-and-video workload.
+- Start with **64 GB or more of reliable storage**, then size it for your actual
+  formats, cadence and retention. This is a capacity starting point, not a promise
+  of a fixed number of days. Every-frame FITS can use much more space than JPEG.
+- Reliable power, appropriate USB/CSI connections, cooling and a weatherproof
+  enclosure for outdoor use. Confirm the camera works in the operating system
+  before commissioning unattended capture.
+- Internet access during installation for OS packages, Python dependencies and
+  INDI sources. Uploads, weather/orbital downloads and other network integrations
+  also need connectivity; local acquisition does not require those integrations.
+- Correct system time, timezone and geographic coordinates.
+
+For planning, archive growth is roughly
+`average bytes per saved frame × frames per day × retained days × cameras`, plus
+videos, derived products, calibration files, databases and backups. Measure actual
+files and leave free space for temporary encoding and database work.
+
+### Distribution selection
+
+The following table reflects branches in [setup.sh](setup.sh), not a certification
+of every combination. Use a current 64-bit system for a new installation.
+
+| Distribution | Installer path / qualification |
+| --- | --- |
+| Raspberry Pi OS / Debian 13 (Trixie) | Preferred baseline in this repository; build INDI first if absent |
+| Raspberry Pi OS / Debian 12 (Bookworm) | Installer branch present; build INDI first if absent |
+| Raspberry Pi OS / Debian 11 (Bullseye) | Older installer branch; build INDI first if absent |
+| Ubuntu 24.04 (Noble) | Preferred Ubuntu baseline; INDI packages via `ppa:mutlaqja/ppa` on supported 64-bit architectures |
+| Ubuntu 22.04 (Jammy) | Installer branch present; INDI PPA on supported 64-bit architectures |
+| Linux Mint 22 / 21 | Mapped to Ubuntu 24.04 / 22.04 |
+| LMDE 6 | Mapped to Debian 12; build INDI first if absent |
+| Debian/Raspberry Pi OS 10, Ubuntu 20.04 | Legacy branches remain; avoid for new installations |
+| Stellarmate / Astroberry 3 | Special-case handling exists; preserve the distribution's INDI installation and inspect port choices |
+| Astroberry Server 2 | Explicitly unsupported by setup |
+| Other distributions / Armbian | Recognition depends on `/etc/os-release`; inspect the installer and relevant upstream guidance before proceeding |
+
+32-bit Python dependencies have known build/availability limitations, including
+the `dask-image`/`pyarrow` chain on ARM. Do not infer that a 32-bit board is a
+supported fresh-install target simply because an old installer branch exists.
+Original Raspberry Pi/Zero boards are especially constrained. Raspberry Pi 4/5
+with a 64-bit OS is a more suitable starting point for a full system.
+
+### Memory for video generation
+
+These inherited estimates are planning guidance, not measured guarantees for the
+current multicamera workload. They exclude some concurrent capture/processing work.
+
+| Output size | Suggested host RAM | Approximate FFmpeg process RAM |
+| --- | --- | --- |
+| 1280 × 960 | 2 GB | 0.4 GB |
+| 1920 × 1080 | 2 GB | 0.6 GB |
+| 3840 × 2160 | 4 GB | 1.7 GB |
+| 4056 × 3040 | 4 GB or more | 2.5 GB |
+| 6224 × 4168 | 8 GB | 5 GB |
+| 9152 × 6944 | 16 GB | 12 GB |
+
+Reduce output resolution and concurrent work if memory or I/O is constrained.
+Swap can help avoid allocation failures but does not replace adequate RAM or
+storage throughput.
+
+## Install on Linux
+
+These commands are for a **new native installation**. For an existing system,
+follow [the update procedure](#update-an-existing-installation). Run commands in
+an interactive terminal as the user who will own the installation. Do not run
+`setup.sh` or `build_indi.sh` with `sudo`, from a root shell, or with an activated
+Python virtual environment; the scripts request elevated privileges themselves.
+
+### 1. Prepare and clone this repository
+
+Install the OS, configure networking/SSH and time synchronization, and log in as
+the intended service user. On the Debian/Ubuntu family:
+
+```sh
+sudo apt update
+sudo apt install -y git ca-certificates whiptail
+cd "$HOME"
+git clone https://github.com/ericcatta/indi-allsky.git
+cd indi-allsky
+git status --short --branch
+```
+
+Keep this checkout at its final location: generated service definitions refer to
+it. Review OS updates and reboot requirements before running installation.
+The installer may offer OS package upgrades as well as application setup.
+
+Setup requires at least 1 GB free on both `/` and `/var` and checks temporary
+space. An INDI source build separately requires at least 5 GB free on `/home`
+and `/usr/local`; allow additional space for downloads and build artifacts.
+Check with `df -h / /var /home /usr/local /tmp`.
+
+### 2. Prepare INDI and the camera interface
+
+**Debian, Raspberry Pi OS and LMDE:** the current setup script requires an existing
+`indiserver` in `/usr/bin` or `/usr/local/bin`, including when selecting a direct
+libcamera interface. If INDI is absent, run:
+
+```sh
+./misc/build_indi.sh
+```
+
+The build script prompts for choices, installs build dependencies and compiles
+INDI and selected third-party drivers. Its automatic versions are defined in
+[the script](misc/build_indi.sh); it installs under `/usr/local` and keeps sources
+under `$HOME/Projects`. Do not run it blindly over a package-managed INDI install:
+it detects conflicting packages and may refuse to proceed. Review which driver
+your camera needs and follow its reported remediation.
+
+**Ubuntu / Mint on supported 64-bit architectures:** `setup.sh` can install INDI
+from the configured PPA. An existing custom installation in `/usr/local/bin` is
+detected. `INDIALLSKY_INSTALL_INDI=false ./setup.sh` suppresses package installation
+where the installer supports that choice; it does not provide a missing INDI runtime.
+
+**CSI/libcamera cameras:** confirm that the OS camera stack detects the sensor.
+With current Raspberry Pi camera applications, a useful check is:
+
+```sh
+rpicam-still --list-cameras
+```
+
+Older systems may use `libcamera-still --list-cameras`. Run camera probes while
+capture is stopped. Select the sensor-specific interface during setup, such as
+`libcamera_imx477` or `libcamera_imx708`. Availability depends on OS, camera,
+kernel and camera-stack versions; the old Bullseye-only restriction does not
+describe this fork. See the [upstream libcamera guide](https://github.com/aaronwmorris/indi-allsky/wiki/libcamera-enablement)
+and [optional build script](misc/build_libcamera.sh) when a source build is needed.
+
+**USB astronomy cameras:** select `indi` and the correct installed CCD driver
+(e.g. `indi_asi_ccd` for supported ZWO cameras). Remote INDI and multiple cameras
+need explicit host/port/device configuration; do not assume that connecting a
+second camera completes its configuration.
+
+### 3. Run setup
+
+From the repository root:
+
+```sh
+./setup.sh
+```
+
+Read each prompt. Setup installs OS/Python dependencies, creates
+`virtualenv/indi-allsky`, initializes or migrates the database, configures logging,
+the web server and user services, and creates the first administrator account.
+It also configures permissions and user lingering for unattended startup.
+
+Decisions include the camera interface and driver, local INDI server, web ports,
+timezone, authentication, administrator credentials, automatic startup and optional
+hardware/system features. Optional watchdog, LED, desktop and system optimization
+changes affect the host; choose them deliberately. No email is sent just by
+entering an account email address.
+
+The inherited “authenticate all views” prompt is broader than Hybrid navigation:
+**Hybrid itself always requires login**, regardless of that setting. Do not use
+the old prompt wording as evidence of anonymous Hybrid access.
+
+The defaults are Apache, HTTP **80**, HTTPS **443** and INDI **7624**. Special
+appliance setups may select other ports; use the URL printed at completion.
+Environment overrides are documented in the installer header, including
+`INDIALLSKY_HTTP_PORT`, `INDIALLSKY_HTTPS_PORT`, `INDIALLSKY_TIMEZONE` and
+`INDIALLSKY_CAMERA_INTERFACE`. They do not by themselves make every prompt
+noninteractive. Avoid putting passwords into shell history or checked-in files.
+
+If setup reports that capture is running, stop it first as shown below. If it
+reports a missing user D-Bus session, follow its reboot/relogin instructions and
+rerun as the deployment user. Do not work around this by running setup as root.
+
+### 4. Open the interface and start capture
+
+Visit the hostname or IP printed by setup, adding the Hybrid route:
+
+```text
+https://<camera-host>/indi-allsky/modern-admin/now
+```
+
+If HTTPS is on a custom port, include `:<port>`. The default certificate may be
+self-signed: verify that you reached your own camera host and configure a trusted
+certificate for ongoing remote access. If `.local` discovery fails, use its LAN IP.
+
+Log in with the administrator account created during setup. If you declined
+“start now”, start capture when configuration is ready:
+
+```sh
+systemctl --user start indi-allsky.service
+systemctl --user status indi-allsky.service --no-pager
+```
+
+## First login and commissioning
+
+Before leaving the system unattended:
+
+1. Confirm the selected camera and profile, geographic location, timezone, image
+   orientation and day/night thresholds. Verify camera/INDI connection settings.
+2. Set exposure limits, gain and cadence appropriate to the camera. Check a real
+   frame and its timestamp; a running service alone does not prove acquisition.
+3. Focus the camera, then **leave Focus mode** when done. Focus mode is a special
+   acquisition mode and does not save ordinary archive images.
+4. Choose processed-image and scientific-source formats deliberately. FITS/RAW
+   downloads only exist for exposures whose sources were saved. A processed JPEG
+   is not an original scientific source.
+5. Set archive location, retention and Storage Protection thresholds before
+   enabling large-volume capture. Check available disk space and permissions.
+6. Verify Library browsing and a small generated output, including actual playback
+   or download. For multiple cameras, verify fresh, decoded frames for **each**.
+7. Capture appropriate dark calibration frames with the lens covered, then uncover
+   it and confirm normal capture resumes. Do not run dark acquisition alongside
+   a second process competing for the same camera.
+8. Check startup behavior after a planned reboot and review logs. Verify timer/socket
+   activation and fresh frames without relying on an interactive SSH login.
+
+See [capture cadence and exposure policy](HYBRID_CAPTURE_CADENCE.md),
+[dark calibration guidance](https://github.com/aaronwmorris/indi-allsky/wiki/Dark-Calibration-Frames)
+and [multicamera runtime notes](docs/multi-camera-runtime-plan.md). The latter
+includes implementation history; inspect current configuration before applying
+machine-specific examples.
+
+## Docker and other installation layouts
+
+Native Linux/systemd is the primary path documented above. Container assets and
+split-host installers are also present; their existence is not clean-install
+acceptance of every Hybrid operation. In particular, host service/GPIO/device
+controls need a suitable deployment environment.
+
+### Docker Compose
+
+Use a Linux Docker host with the Compose plugin and camera-device access. The
+manifest uses `additional_contexts`, so the installed Compose/BuildKit must support
+that feature. Read [the compose manifest](docker/docker-compose.yaml),
+[environment template](docker/env_template) and
+[upstream Docker guide](https://github.com/aaronwmorris/indi-allsky/wiki/Docker).
+
+From the cloned repository:
+
+```sh
+cd docker
+./setup_env.sh
+# Edit .env: timezone, camera driver/vendor and other deployment settings.
+# Review docker-compose.yaml: exposed ports, devices and persistent volumes.
+docker compose config --quiet
+docker compose build
+docker compose up -d
+docker compose ps
+docker compose logs --tail=100 capture.indi.allsky gunicorn.indi.allsky
+```
+
+`setup_env.sh` uses `apt`/`sudo` for its prerequisites and creates `.env` and TLS
+material. Keep those files private. The template initially selects the **CCD
+simulator** and `America/New_York`; change these for your installation.
+
+The manifest includes INDI, capture, Gunicorn, web, MariaDB and MQTT containers.
+Default host ports are HTTP **8080**, HTTPS **8443**, INDI **17624**, MariaDB
+**13306**, MQTT TLS **18883** and MQTT WebSocket **18081**. Review bindings before
+starting; database, broker and INDI do not need to be publicly reachable.
+Open `https://<docker-host>:8443/indi-allsky/modern-admin/now`.
+
+Images, database, migrations and broker state use named volumes. Back them up
+before rebuilding/upgrading. `docker compose down` stops the stack;
+**`docker compose down -v` also removes named volumes and is not an update step**.
+For CSI cameras, review the libcamera device/privilege comments in the manifest.
+No container deployment is performed by following the native service commands.
+
+### Remote camera or web-only server
+
+- [misc/indiserver_only_setup.sh](misc/indiserver_only_setup.sh) provisions an
+  INDI-only host.
+- [misc/web_only_setup.sh](misc/web_only_setup.sh) provisions a web-only receiver.
+- SyncAPI can send images and outputs to another instance; configure authentication,
+  receiving storage and matching API settings. A web-only receiver does not
+  control the remote physical camera merely because it displays its images.
+
+Read each script's options and the
+[upstream getting-started guide](https://github.com/aaronwmorris/indi-allsky/wiki/Getting-Started)
+before choosing a split deployment. Upstream screenshots/navigation may refer to
+Classic; use Hybrid's current pages in this fork.
+
+## Configuration and data locations
+
+| Item | Native-install default |
+| --- | --- |
+| Source checkout | Wherever you cloned the repository, commonly `$HOME/indi-allsky` |
+| Python environment | `<checkout>/virtualenv/indi-allsky` |
+| Flask settings and keys | `/etc/indi-allsky/flask.json` |
+| Service environment | `/etc/indi-allsky/indi-allsky.env` |
+| Runtime database | `/var/lib/indi-allsky/indi-allsky.sqlite` |
+| Database migrations | `/var/lib/indi-allsky/migrations` |
+| Database backups | `/var/lib/indi-allsky/backup` |
+| Archive | `/var/www/html/allsky/images`, unless `IMAGE_FOLDER` is changed |
+| User systemd units | `~/.config/systemd/user/` |
+| Capture / web logs | `/var/log/indi-allsky/indi-allsky.log` / `webapp-indi-allsky.log` |
+
+Application configuration is versioned in the database. Most changes should be
+made through Hybrid Settings in the correct camera/profile context. `flask.json`
+contains application/bootstrap settings and secrets; it is not a replacement for
+the database configuration. A similarly named SQLite file inside a checkout is
+not necessarily the runtime database.
+
+For CLI inspection and a private configuration export, from the checkout:
+
+```sh
+./virtualenv/indi-allsky/bin/python config.py list
+umask 077
+./virtualenv/indi-allsky/bin/python config.py dumpfile --outfile "$HOME/indi-allsky-config.json"
+```
+
+An export may contain credentials. Store it outside the checkout and do not attach
+it unredacted to an issue. `config.py load -c <file>` and `revert --id <id>` change
+configuration; review their effects and required capture reload/restart first.
+Neither restores archived media or the whole database.
+
+For account recovery, the installed service user can use an interactive password
+prompt without passing the password on the command line:
+
+```sh
+./virtualenv/indi-allsky/bin/python misc/usertool.py list
+./virtualenv/indi-allsky/bin/python misc/usertool.py resetpass --username '<your-login>'
+```
+
+## Services and logs
+
+Run application service commands **as the installation user, without `sudo`**.
+Apache/NGINX are system services. Do not start a second foreground capture process
+while `indi-allsky.service` owns the camera.
+
+```sh
+# Inspect acquisition, web activation and boot behavior.
+systemctl --user status indi-allsky.service gunicorn-indi-allsky.socket --no-pager
+systemctl --user list-timers --all
+loginctl show-user "$USER" -p Linger
+
+# Stop or restart acquisition during planned maintenance.
+systemctl --user stop indi-allsky.service
+systemctl --user start indi-allsky.service
+
+# Reload web workers after a compatible web-only code change.
+systemctl --user reload gunicorn-indi-allsky.service
+
+# Inspect recent capture and web service messages.
+journalctl --user -u indi-allsky.service -u gunicorn-indi-allsky.service -n 100 --no-pager
+tail -n 100 /var/log/indi-allsky/indi-allsky.log
+```
+
+Capture autostart is normally controlled by `indi-allsky.timer` (two minutes after
+boot); INDI has its own timer/service; Gunicorn is socket-activated. Therefore a
+service reporting `disabled` does not by itself mean startup is broken. Setup
+uses user lingering so the user manager can run without an SSH login.
+
+```sh
+systemctl --user is-enabled indi-allsky.timer gunicorn-indi-allsky.socket
+systemctl --user status indiserver.service --no-pager
+systemctl status apache2 --no-pager
+```
+
+Use `nginx` in place of `apache2` when configured. Some distributions manage INDI
+as a system service, and custom multicamera installations can have additional
+unit names. Inspect the actual units before restarting INDI. Reloading web workers
+does not activate changes in the capture coordinator or its forked workers; those
+require a controlled capture restart.
+
+CLI logs go to standard error; capture uses syslog local6 and the web application
+uses local7, with the rotated files listed above. Avoid sharing logs without reviewing hostnames,
+locations, account names and integration credentials.
+
+## Storage, backup and recovery
+
+### Archive and external disks
+
+Use Storage Protection to review archive capacity and retention. Preserve original
+scientific sources, thumbnails and shared rendering assets together; source-backed
+previews may require more than the FITS file alone. Retention and generation/upload
+protections are application policies, not reasons to delete archive files manually.
+
+For an external archive disk: create a persistent OS mount, stop archive writers,
+and migrate the archive preserving its structure. Keeping the same application
+path avoids breaking historical absolute filenames in the database. If changing
+paths, inspect and migrate those records as well; changing `IMAGE_FOLDER` alone
+does not rewrite them. Update `IMAGE_FOLDER` and any existing `ARCHIVE_VOLUME.ROOT`
+and UUID protection together, rerun setup to update web paths, then restart and
+verify files/previews for every camera before removing the old copy.
+The filesystem-UUID guard can require the configured block device before archive
+access and cleanup. It does not mount or format a disk and cannot pin a network
+share without a block filesystem UUID. Do not disable the guard merely to hide a
+missing disk: that can redirect writes to the underlying root filesystem.
+See [storage release runbook](HYBRID_STORAGE_RELEASE_RUNBOOK.md) and
+[deployment notes](HYBRID_DEPLOYMENT.md).
+
+### What a usable backup includes
+
+Back up **all** of the following, preferably to another physical device:
+
+- A consistent database snapshot, including image metadata, configuration and users.
+- `/etc/indi-allsky/`, especially encryption keys and Flask settings. Without the
+  original password-encryption key, stored integration secrets may be unusable.
+- The archive and calibration files, plus any separately configured source/export
+  directories. A database backup does not contain the image/video bytes.
+- The source commit, local changes, custom service definitions and relevant web,
+  storage-mount and device configuration.
+
+The application has a database-backup task, and setup creates database backups
+before migrations. These are not a complete off-device disaster-recovery plan.
+Check task completion, free space and the resulting backup; do not treat a queued
+request as a completed copy. Large backups on a busy SD card can stall acquisition.
+
+### Example: consistent SQLite and configuration backup
+
+This example uses the native defaults and a **planned maintenance window**. Replace
+the backup directory with an existing mounted backup filesystem having enough
+space. First wait for active generation/upload jobs to finish, record active
+services and timers, and ensure no other processes write to the database.
+
+```sh
+cd "$HOME/indi-allsky"
+backup_dir="/mnt/backup/indi-allsky-$(date +%Y%m%d-%H%M%S)"
+umask 077
+mkdir -p "$backup_dir"
+git rev-parse HEAD > "$backup_dir/source-commit.txt"
+git diff HEAD > "$backup_dir/local-changes.patch"
+
+# Temporarily prevent timer/socket reactivation while making the checkpoint.
+systemctl --user stop indi-allsky.timer indi-allsky.service
+systemctl --user stop gunicorn-indi-allsky.socket gunicorn-indi-allsky.service
+
+sqlite3 /var/lib/indi-allsky/indi-allsky.sqlite ".backup '$backup_dir/indi-allsky.sqlite'"
+sqlite3 "$backup_dir/indi-allsky.sqlite" 'PRAGMA integrity_check;'
+sudo tar -C / -czf "$backup_dir/etc-indi-allsky.tar.gz" etc/indi-allsky
+sudo chmod 600 "$backup_dir/etc-indi-allsky.tar.gz"
+```
+
+The integrity result must be `ok`. Also copy required custom units, untracked
+configuration and the archive during this same window if you need one coherent
+recovery point; `git diff` does not include untracked files. Record what was and
+was not copied. Protect the backup permissions and test reading it.
+
+Restart only the units you recorded as active/enabled for normal operation, then
+verify fresh images and login. For a normal capture installation this includes:
+
+```sh
+systemctl --user start gunicorn-indi-allsky.socket
+systemctl --user start indi-allsky.timer indi-allsky.service
+```
+
+If a step fails, do not continue an update assuming the backup exists. Resolve the
+failure and restore the intended service state. For MariaDB/container deployments,
+use a database-native consistent dump or a coordinated volume snapshot instead
+of copying these SQLite paths.
+
+### Recovery and rollback
+
+For a full recovery, stop all database writers **and web socket activation**,
+preserve the current damaged state for diagnosis, restore a verified database
+with its matching keys/media and compatible source revision, restore ownership
+and permissions, and verify database integrity before starting services. SQLite
+WAL/SHM sidecars belong to their original database: never combine stale sidecars
+with a different restored snapshot. Keep them with the old database while all
+writers are stopped. Validate migrations against a copy before upgrading a
+restored installation.
+
+A **code-only rollback usually must not restore an old database**: that would lose
+new configuration/media records. Follow the release-specific rollback in
+[HYBRID_DEPLOYMENT.md](HYBRID_DEPLOYMENT.md), preserving readers for any source-backed
+archive formats already in use. Restoring an older reader that cannot handle new
+FITS-backed records is not a safe rollback.
+
+## Update an existing installation
+
+Use this fork's `origin`; do not replace it with upstream as part of an ordinary
+update. Keep local changes and private files intact. Review the incoming diff and
+release notes, prepare a suitable backup, and schedule capture interruption before
+running an installer or changing runtime workers.
+
+From the existing checkout, inspect first:
+
+```sh
+git remote -v
+git status --short --branch
+git rev-parse HEAD
+git fetch origin
+git log --oneline HEAD..origin/main
+git diff --stat HEAD..origin/main
+```
+
+If local tracked changes or divergent commits exist, reconcile them before
+proceeding. Do not use `git reset --hard` or `git clean` as an upgrade shortcut.
+For a clean checkout on `main`, after completing backups:
+
+```sh
+systemctl --user stop indi-allsky.timer indi-allsky.service
+systemctl --user stop gunicorn-indi-allsky.socket gunicorn-indi-allsky.service
+git pull --ff-only origin main
+./setup.sh
+```
+
+Run setup outside a virtual environment. It can change dependencies, services and
+schema; read its prompts and restore the intended autostart/start state afterward.
+If setup fails, inspect the failure and schema/dependency state before restoring
+services; do not blindly restart a partially updated application.
+A documentation-only update does not need setup or a service restart. A tested
+web-only update may need only a web reload; capture/worker changes require their
+own restart. Use the actual diff to decide, not the age of the last installation.
+
+After activation, verify the installed commit and file state, login, new decoded
+frames for every camera, logs, task completion and affected outputs. A successful
+`git pull` does not prove that Python workers loaded the new code.
+
+[misc/unattended_upgrade.sh](misc/unattended_upgrade.sh) and
+`upgrade-indi-allsky.service` exist for an explicitly prepared automated workflow.
+Read the script before enabling it; automatic updates are not a substitute for
+backups and release validation.
+
+## Camera and processing reference
+
+INDI support depends on the camera's driver, SDK and operating system. The source
+builder records its selected versions; camera-specific minimum versions can differ.
+See [upstream camera SDK notes](https://github.com/aaronwmorris/indi-allsky/wiki/indilib-3rdparty-SDK-versions)
+and the driver documentation rather than assuming every INDI camera works unchanged.
+
+The table below retains **upstream-reported hardware experience**, not a claim that
+each model has been retested on Hybrid. Ratings are historical upstream labels.
 
 | Vendor   | Model               | Rating | Notes |
 | -------- | ------------------- | ------ | ----- |
@@ -644,116 +640,239 @@ The hardware below has at least been plugged in and tested for correct detection
 | Webcams  | indi_webcam_ccd     | D      | No gain controls.  Little control over image quality. |
 | indi     | indi_simulator_ccd  |        | CCD Simulator.  Install GSC to generate sample images. |
 
-If you have an INDI supported camera from a vendor not listed, open an enhancement request and I can work with you to support the camera.
+Raspberry Pi interfaces also include additional sensor-specific implementations;
+inspect [camera modules](indi_allsky/camera) and the setup selector for the current
+list. A model appearing in a selector is not evidence of an end-to-end acceptance run.
 
+### Calibration, stacking and sky products
 
-## Gotchas
-Common problems you might run into.
+- **Dark frames:** remove sensor thermal/hot-pixel signal using calibration frames
+  appropriate to the camera and exposure conditions.
+- **Stretching:** standard-deviation and midtone-transfer processing provide display
+  contrast for high-bit-depth sources. Preserve original sources when needed.
+- **Stacking:** maximum emphasizes stars/trails, average combines signal, minimum
+  can suppress transient trails. It consumes additional RAM and can also suppress
+  real short-lived events; choose it according to your scientific/display goal.
+- **Keograms:** compile a narrow column from successive frames to show the night
+  over time. Set orientation with `KEOGRAM_ANGLE`; see
+  [rotation guidance](https://github.com/aaronwmorris/indi-allsky/wiki/Keogram-Rotation).
+- **Star trails:** combine star motion over time into an image or video.
+- **Star/line detection:** counts and candidate trails can be useful indicators,
+  but clouds, obstructions, aircraft and satellites affect results. Configure
+  [detection masks](https://github.com/aaronwmorris/indi-allsky/wiki/Detection-Masks).
+- **Moon mode:** can reduce gain when the moon's illumination/altitude meets the
+  configured thresholds. It is distinct from ordinary day/night selection.
+- **Pseudo-SQM:** camera-derived brightness is an estimate, not a substitute for
+  a calibrated dedicated sky-quality instrument without suitable calibration.
 
-* The indi-allsky python processes consume ~500MB of RAM.
-    * 1K (1920x1080) h.264 encoding with ffmpeg requires an additional ~500MB of RAM.  1GB of RAM should be the bare minimum system memory.  You should also have 100-500MB of additional swap space to prevent running out of memory during encoding.  2GB of RAM recommended.
-    * 4K (3840x2160) h.264 encoding requires an additional 2+GB of RAM.  4GB of RAM recommended.
-    * 8K resolution (ArduCam 64MP HawkEye) requires 8GB of RAM for full resolution video processing.
-* In Raspberry Pi OS 10, the h.264 codec in ffmpeg has a maximum frame size of 4096×2304 (AVC level 5.1).  If your camera generates higher resolution images, you will need to scale the video  or use the Region of Interest (RoI) options to reduce the frame size.
-    * NEW: indi-allsky now has the ability to scale the native resolution images during the ffmpeg encoding phase, so you do not need to pre-scale your images.
-    * The RaspberryPi HQ camera has a bin1 image size of 4056x3040.  Setting IMAGE_SCALE to 75 in the config results in a image size of 3042x2280.  Alternatively, you can center crop the image using IMAGE_CROP_ROI set to [0, 368, 4056, 2672] for an image size of 4056×2304.
-* ffmpeg in Raspberry Pi OS 11 enables AVC level 6.0+ which permits h.264 resolutions up to 8192×4320 (you must have sufficient system memory)
-    * https://en.wikipedia.org/wiki/Advanced_Video_Coding
+![Example keogram showing changes throughout the night](content/keogram_example.jpg)
 
+![Example stacked star trails](content/startrails_example.jpg)
 
-## File Transfer
+## Optional hardware and integrations
 
-indi-allsky supports several file transfer methods.
+Enable only the integrations you use and install their optional dependencies where
+required. Device support in code does not prove that an unconnected device works.
 
-https://github.com/aaronwmorris/indi-allsky/wiki/File-transfers
+| Capability | Examples / setup reference |
+| --- | --- |
+| Environmental sensors | Temperature, humidity, pressure, light, sky temperature, air quality, current, rain and lightning; [sensor guide](https://github.com/aaronwmorris/indi-allsky/wiki/Sensors), [device implementations](indi_allsky/devices) |
+| Dew heaters / fans | Standard/PWM/relay/MQTT controllers; [dew heaters](https://github.com/aaronwmorris/indi-allsky/wiki/Dew-Heater-Support), [fans](https://github.com/aaronwmorris/indi-allsky/wiki/Fan-Control) |
+| Focusers | 28BYJ-48, A4988/NEMA17 and MotorKit implementations; [focuser guide](https://github.com/aaronwmorris/indi-allsky/wiki/Focuser-Device) |
+| GPS | GPSd/INDI integration for supported receivers; [setup helper](misc/setup_gpsd.sh) |
+| Weather | Provider-specific OpenWeather, Weather Underground, Astrospheric, Ambient Weather and Ecowitt integrations; account/API configuration may be required |
+| MQTT / Home Assistant | Publish measurements and discovery data; also selected remote sensors/controllers; [publishing guide](https://github.com/aaronwmorris/indi-allsky/wiki/MQTT-Broker-Publishing) |
+| Uploads | FTP/FTPS/FTPES, SFTP and HTTPS WebDAV implementations; [file-transfer guide](https://github.com/aaronwmorris/indi-allsky/wiki/File-transfers) |
+| Object storage | AWS S3, compatible backends, Google Cloud and OCI implementations; inspect [transfer modules](indi_allsky/filetransfer) and provider credentials/permissions |
+| YouTube | OAuth-based upload of supported videos; [Hybrid operations](HYBRID_YOUTUBE_OPERATIONS.md) |
+| Satellite / sky context | CelesTrak orbital elements, sun/moon calculations and selected astronomical overlays |
+| Aurora / smoke | NOAA-derived aurora/solar information and North-America-only smoke coverage; availability depends on external data |
+| Aircraft | Optional ADS-B input; receiver/feed configuration is separate from camera capture |
 
-| Protocol       | Port |
-| -------------- | ---- |
-| ftp            | 21   |
-| ftpes          | 21   |
-| ftps           | 990  |
-| sftp           | 22   |
-| webdav (https) | 443  |
+Provider quotas, fees, authentication and service availability are external to this
+project. Configure and verify a small upload before bulk transfers. Preserve the
+originals until the remote copy is verified; remote storage alone is not a backup
+if the same retention/deletion policy can remove both copies.
 
+## Security and remote access
 
-## MQTT Publishing
+Hybrid pages require login and privileged changes require the appropriate role.
+Selected public media/integration handlers remain for compatibility. Login protection
+for Hybrid does not imply that every static image or API endpoint is private.
+Review the web server, API authentication and archive exposure before publishing.
 
-indi-allsky supports publishing all sky data to an MQTT service for monitoring.
+Use HTTPS with a trusted certificate and a deliberate network policy. Keep INDI,
+databases, brokers and administrative device controls off the public Internet unless
+you have explicitly designed and secured their access. A private network/VPN or a
+properly configured authenticated proxy can provide remote access.
 
-For more info, see the wiki page: https://github.com/aaronwmorris/indi-allsky/wiki/MQTT-Broker-Publishing
+Protect `/etc/indi-allsky`, configuration exports, backups, `.env`, TLS keys and
+OAuth/API credentials. Do not commit secrets or use the disposable test fixture's
+accounts in production. Apply OS/application updates deliberately and consult
+[upstream security considerations](https://github.com/aaronwmorris/indi-allsky/wiki/Security-considerations)
+for backend guidance, bearing in mind this fork's different frontend.
 
+## Troubleshooting
 
-## Blogs, Articles, and Links
+| Symptom | Checks and next action |
+| --- | --- |
+| Setup refuses to run | Use the installation user, leave the virtualenv, stop capture; check free space and the reported distro/architecture |
+| Missing INDI on Debian/Pi OS | Run the INDI build step if no supported installation exists; inspect conflicting packages rather than mixing installs |
+| Python dependency build fails | Preserve the first error, confirm 64-bit OS, memory, disk and selected requirements; do not randomly upgrade the global Python environment |
+| `systemctl --user` cannot connect to the bus | Log in directly as the service user; follow setup's reboot/relogin instructions and check lingering |
+| Site unreachable / HTTP 502 | Check selected port, hostname/IP, Apache/NGINX, Gunicorn socket/service and web log; review port conflicts |
+| Cannot log in | Use the account created at setup; recover with `misc/usertool.py resetpass` as the installation user |
+| Service active but no fresh image | Check frame timestamps, capture log, selected camera/driver, device access, storage guard and free space; a healthy parent process does not prove healthy children |
+| CSI camera busy / capture timeout | Stop competing camera consumers; inspect the actual timeout and resource logs; intermittent IMX708 timeouts remain a documented runtime issue |
+| `database is locked` / SQLite BUSY | Check concurrent generation/cleanup/backup work and I/O pressure; retain the timestamp/log context, avoid deleting the DB or arbitrarily raising timeouts |
+| Capture lags during encoding | Review RAM, swap, disk latency, output resolution, number of cameras and queues; lower-priority encoding still shares physical resources |
+| FITS/RAW download missing | Confirm that this exposure actually saved that source and retention has not removed it; JPEG-only captures cannot supply an original FITS |
+| Archive unavailable after disk removal | Inspect the configured mount and filesystem UUID; reconnect the correct disk before bypassing protection |
+| No capture after reboot | Check the capture/INDI timers, web socket, user lingering and actual configured unit names; allow the boot delay |
+| `pip check` reports GPIO metadata conflict on Pi 5 | Read [the dependency review](docs/HYBRID_DEPENDENCIES.md); `rpi-lgpio` can provide the `RPi.GPIO` module without satisfying the old distribution metadata |
 
-Please let me know if you want to make an addition or correction.
+When reporting a problem, include the source commit, OS/architecture, camera/interface,
+reproduction steps, expected/actual behavior and a short redacted log excerpt.
+Do not post full databases, secrets or private astronomical/location data by default.
 
-* [indilib.org](https://www.indilib.org/research/projects/197-indi-allsky-record-the-sky.html)
-* [indilib.org forum thread](https://indilib.org/forum/general/10619-new-all-sky-camera-management-software-indi-allsky.html)
-* [CloudyNights.com forum thread](https://www.cloudynights.com/topic/785514-new-all-sky-camera-management-software-indi-allsky/)
-* [Gord Tulloch](https://www.openastronomy.ca/2023/01/06/indi-allsky-software-review/)
-* [Giles Coochey](https://coochey.net/?cat=29)
-* [PampaSkies](http://www.pampaskies.com/gallery3/Equipment/All-Sky-Camera-with-Sky-Condition-Detection)
-* [The Suffolk Sky](http://www.suffolksky.com/all-sky-camera/)
-* [Boletim da Sociedade Astronômica Brasileira](https://sab-astro.org.br/wp-content/uploads/2023/04/GabrielSantos2.pdf)
-* [Aircraft data / ADS-B tracking via adsb.fi](https://allsky-rodgau.com/aircraft-data-ads-b-tracking-for-my-allsky-camera-via-adsb-fi-1336/)
-* [indi Allsky live images in WordPress](https://allsky-rodgau.com/indi-allsky-live-images-in-wordpress-structure-and-functionality-of-my-plugin-1648/)
-* [Raspberry Pi as a digital picture frame in kiosk mode](https://allsky-rodgau.com/raspberry-pi-as-a-digital-picture-frame-in-kiosk-mode-hardware-setup-troubleshooting-1610/)
-* [Automatic indi-allsky backup on external drive](https://allsky-rodgau.com/automatic-indi-allsky-backup-on-external-drive-fritzbox-nas-1653/)
-* [Optimal configuration for indi-allsky](https://allsky-rodgau.com/optimal-configuration-for-indi-allsky-stable-day-night-transition-and-reliable-moon-mode-1541/)
+## Development and verification
 
+Use an isolated **Linux** test environment with the project's dependencies. macOS
+alone does not provide the complete D-Bus/camera runtime. The regression suite and
+browser fixture do not require changing production capture settings.
 
-## Alternatives
+List the current regression plan without running the suite:
 
-* Thomas Jacquin's Allsky
-    * Free, Open source
-    * Linux, Single board computer
-    * https://github.com/thomasjacquin/allsky
-* AllSkEye
-    * Free version, Commercial option
-    * Windows
-    * https://allskeye.com/
-* frankAllSkyCam
-    * Free, Open source
-    * Linux, Single board computer
-    * https://github.com/sferlix/frankAllSkyCam
-* RPi Meteor Station
-    * Free, Open source
-    * Linux, Single board computer
-    * https://github.com/CroatianMeteorNetwork/RMS
-* Meteotux Pi
-    * Free version, Commercial option
-    * Linux, Single board computer
-    * https://www.meteotuxpi.com/
-* UFOCapture
-    * Shareware, Commercial option
-    * Windows
-    * https://sonotaco.com/soft/e_index.html
+```sh
+python3 testing/run_hybrid_regression.py --list
+```
 
+A standard-library self-check for the runner is also available:
 
-## Commercial hardware
+```sh
+python3 testing/hybrid_regression_runner_test.py
+```
 
-* Deep Sky Dad
-    * https://shop.deepskydad.com/
-* Titan Astro
-    * https://titanastro.com/store/
-* Allsky Optics
-    * https://www.allskyoptics.com/store
-* Oculus All-Sky Cameras
-    * https://www.sxccd.com/cameras/oculus-all-sky-cameras/
-* Alcor System
-    * https://www.alcor-system.com/new/AllSky/Alphea_camera.html
+On a prepared isolated Linux checkout, use its dependency-equipped interpreter,
+Node and a **new output directory outside the source tree**:
 
-## Star History
+```sh
+python3 testing/run_hybrid_regression.py \
+  --python /path/to/prepared/virtualenv/bin/python \
+  --node node \
+  --output /tmp/indi-allsky-regression-unique-run
+```
 
-<a href="https://www.star-history.com/?repos=aaronwmorris%2Findi-allsky&type=date&legend=top-left">
- <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=aaronwmorris/indi-allsky&type=date&theme=dark&legend=bottom-right" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=aaronwmorris/indi-allsky&type=date&legend=bottom-right" />
-   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=aaronwmorris/indi-allsky&type=date&legend=bottom-right" />
- </picture>
-</a>
+Replace the interpreter and output paths before execution. Integration fixtures
+read `/etc/indi-allsky/flask.json` to construct isolated state. Optional YouTube
+coverage may require `--oauth-python` with its dependencies. See
+[the regression guide](testing/HYBRID_REGRESSION.md) for exact prerequisites and
+interpretation. Do not run the suite from the production checkout.
 
-## Acknowledgements
+For disposable browser development:
+
+```sh
+python testing/hybrid_browser_sandbox.py \
+  --runtime-config /etc/indi-allsky/flask.json --port 18110
+```
+
+The sandbox binds to loopback, creates temporary data and blocks external effects.
+Follow [UI development](docs/local-ui-dev.md) for test accounts and SSH forwarding;
+do not expose the fixture publicly. Automated tests, synthetic browser checks,
+actual hardware operation and deployment verification are different forms of
+evidence. Record which ones were performed instead of claiming a universal pass.
+
+## Documentation map
+
+| Purpose | Document |
+| --- | --- |
+| Maintained Hybrid documentation index | [Hybrid guide](docs/HYBRID_GUIDE.md) |
+| Latest remaining runtime issues and verification | [Remaining acceptance work](docs/HYBRID_ACCEPTANCE_REMAINING.md) |
+| Installed releases and release-specific rollback | [Deployment](HYBRID_DEPLOYMENT.md) |
+| Earlier acceptance register and evidence | [Acceptance status](HYBRID_ACCEPTANCE_STATUS.md) |
+| Acceptance procedure and control coverage | [Workflow](docs/HYBRID_ACCEPTANCE_WORKFLOW.md), [route register](docs/hybrid-acceptance-route-register.md) |
+| Capture cadence and exposure policy | [Capture](HYBRID_CAPTURE_CADENCE.md) |
+| Storage and masks | [Storage runbook](HYBRID_STORAGE_RELEASE_RUNBOOK.md), [mask runbook](HYBRID_MASK_RELEASE_RUNBOOK.md) |
+| Dependencies and installer-check limits | [Dependency review](docs/HYBRID_DEPENDENCIES.md) |
+| Automated and browser tests | [Regression](testing/HYBRID_REGRESSION.md), [UI development](docs/local-ui-dev.md) |
+| Utility scripts | [misc README](misc/README.md) |
+| Removed historical reports and recovery | [Historical documents](docs/HISTORICAL_DOCUMENTS.md) |
+| Upstream technical reference | [Wiki](https://github.com/aaronwmorris/indi-allsky/wiki), [FAQ](https://github.com/aaronwmorris/indi-allsky/wiki/FAQ) |
+
+Dated audit/design reports describe their own checkpoints. They do not override
+later deployment evidence or current source code. The upstream wiki remains useful
+for drivers and processing, but its Classic screenshots and navigation are not
+instructions for restoring the removed interface.
+
+## Dependencies and architecture
+
+The installer selects requirements for the OS and architecture from
+[requirements/](requirements). Do not replace that selection with an arbitrary
+`pip install` of the newest packages. SQLite is the standard native-install
+database. MariaDB/MySQL paths exist in the backend/container deployment, but native
+setup marks its MySQL path as not ready; it is not an equivalent default.
+
+| Function          | Software      | URL |
+| ----------------- | ------------- | --- |
+| Camera interface  | INDI          | https://indilib.org/ |
+|                   | pyindi-client | https://github.com/indilib/pyindi-client |
+|                   | libcamera     | https://libcamera.org/ |
+| Image processing  | OpenCV        | https://opencv.org/ |
+|                   | opencv-python | https://github.com/opencv/opencv-python |
+|                   | Pillow        | https://pillow.readthedocs.io/ |
+|                   | piexif        | https://piexif.readthedocs.io/ |
+|                   | astropy       | https://www.astropy.org/ |
+|                   | astroalign    | https://astroalign.quatrope.org/ |
+|                   | ccdproc       | https://ccdproc.readthedocs.io/ |
+|                   | numpy         | https://numpy.org/ |
+| Video processing  | ffmpeg        | https://www.ffmpeg.org/ |
+| Astrometry        | pyephem       | https://rhodesmill.org/pyephem/ |
+| File transfer     | pycurl        | http://pycurl.io/ |
+|                   | paramiko      | http://www.paramiko.org/ |
+|                   | paho-mqtt     | https://www.eclipse.org/paho/ |
+|                   | requests      | https://requests.readthedocs.io/en/latest/ |
+| S3 Object Storage | boto3         | https://boto3.amazonaws.com/v1/documentation/api/latest/index.html |
+|                   | apache-libcloud | https://libcloud.apache.org/ |
+|                   | google-cloud-storage | https://cloud.google.com/python/docs/reference/storage/latest |
+| Database          | SQLite        | https://www.sqlite.org/ |
+|                   | SQLAlchemy    | https://www.sqlalchemy.org/ |
+|                   | alembic       | https://alembic.sqlalchemy.org/ |
+|                   | mysql-connector-python | https://dev.mysql.com/doc/connector-python/en/ |
+|                   | PyMySQL       | https://pymysql.readthedocs.io/en/latest/ |
+| GPS               | GPSd          | https://gpsd.gitlab.io/gpsd/ |
+| Web interface     | Flask         | https://flask.palletsprojects.com/ |
+|                   | WTForms       | https://wtforms.readthedocs.io/ |
+|                   | flask-login   | https://flask-login.readthedocs.io/ |
+|                   | Gunicorn      | https://gunicorn.org/ |
+|                   | Apache        | https://httpd.apache.org/ |
+|                   | NGINX         | https://www.nginx.com/ |
+| Hardware Sensors  | Circuit Python | https://circuitpython.org/ [GitHub](https://github.com/adafruit) |
+
+Capture, image processing, video/storage and upload work use separate processes.
+This helps scheduling but cannot eliminate memory, CPU or storage contention.
+The following inherited diagram provides backend context; it is not a map of
+Hybrid's current navigation or a guarantee of every deployed topology.
+
+![indi-allsky backend architecture](content/indi-allsky-arch.svg)
+
+## Contributing, support and license
+
+Report fork-specific issues at [ericcatta/indi-allsky issues](https://github.com/ericcatta/indi-allsky/issues).
+Identify whether you run this fork or upstream, and include a reproducible example
+with the revision and environment. Keep changes focused and validate them at the
+appropriate level. Do not include production secrets, private backups or generated
+media in a pull request.
+
+The project retains the original authorship and is distributed under the
+[GNU General Public License v3](LICENSE). See [licenses/](licenses) for bundled
+third-party notices. A different frontend or repository location does not remove
+upstream attribution or license obligations.
+
+### Acknowledgements
+
+Thanks to Aaron Morris and the indi-allsky contributors for the acquisition,
+processing and integration foundation, and to the Hybrid contributors for this
+fork's interface and operational work.
 
 * [Thomas Jacquin](https://github.com/thomasjacquin) - indi-allsky is heavily inspired by his [allsky](https://github.com/thomasjacquin/allsky) software.
 * [Marco Gulino](https://github.com/GuLinux) - His examples from [indi-lite-tools](https://github.com/GuLinux/indi-lite-tools) were key to understanding how to work with pyindi-client
@@ -763,9 +882,6 @@ Please let me know if you want to make an addition or correction.
 * [Russell Valentine](https://github.com/bluthen) - [fish2pano](https://github.com/bluthen/fish2pano) Fish-eye to panoramic perspective conversion
 * [Adafruit Industries](https://www.adafruit.com/) - [Adafruit Github](https://github.com/adafruit) Circuit Python modules enabled indi-allsky to quickly facilitate using many electronics sensors
 
-## Donate
-[![](https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif)](https://paypal.me/aaronwmorris)
-
-If you would like to fund equipment purchases for testing (or more Dr Pepper), you can use this link.
-
-**However, I would rather you to donate something to charity.  As a suggestion, the [Ronald McDonald House](https://rmhc.org/) has helped my family in the past.  I would love to hear if you give, please let me know!**
+Upstream development can be supported through
+[Aaron Morris's donation link](https://paypal.me/aaronwmorris). This is the upstream
+author's funding link, not a separate donation account for this fork.

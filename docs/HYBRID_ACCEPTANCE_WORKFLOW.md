@@ -14,8 +14,13 @@ commands do not certify the current application.
   proves an interaction or effect. Native DOM discovery is still necessary.
 - `docs/hybrid-acceptance-route-register.json` links historical evidence to route
   entries. Read its recorded baseline and individual evidence before reuse.
-- `HYBRID_ACCEPTANCE_STATUS.md` records bounded acceptance results and open work.
-  `HYBRID_DEPLOYMENT.md` identifies the installed revision and rollback procedure.
+- [Remaining acceptance work](HYBRID_ACCEPTANCE_REMAINING.md) records the current
+  runtime limitations and open verification gates. The earlier
+  [acceptance history](../HYBRID_ACCEPTANCE_STATUS.md) preserves bounded results
+  and historical checkpoints; its older open-work lists do not override the
+  current work queue. [Deployment](../HYBRID_DEPLOYMENT.md) records installed
+  revisions and rollback procedures; confirm the actual installed revision
+  before reusing a checkpoint.
 - `tools/hybrid_settings_ownership_map.json` remains a runtime input. Retain it
   and its Settings contracts; it is separate from the retired static UI map.
 

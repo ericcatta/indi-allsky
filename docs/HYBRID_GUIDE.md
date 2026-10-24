@@ -8,7 +8,8 @@ observation are not part of the current completed work.
 | Purpose | Current source |
 | --- | --- |
 | Installed release, backup and rollback | [Deployment](../HYBRID_DEPLOYMENT.md) |
-| Passed checks and outstanding gates | [Acceptance status](../HYBRID_ACCEPTANCE_STATUS.md) |
+| Current acceptance work and runtime limitations | [Remaining acceptance work](HYBRID_ACCEPTANCE_REMAINING.md) |
+| Earlier bounded checks and evidence checkpoints | [Acceptance history](../HYBRID_ACCEPTANCE_STATUS.md) |
 | Test procedure and evidence rules | [Acceptance workflow](HYBRID_ACCEPTANCE_WORKFLOW.md) |
 | Per-route evidence and its limits | [Control register](hybrid-acceptance-route-register.md) |
 | Retained core dependencies and installer checks | [Dependency review](HYBRID_DEPENDENCIES.md) |
@@ -19,6 +20,9 @@ observation are not part of the current completed work.
 | YouTube operations | [YouTube](../HYBRID_YOUTUBE_OPERATIONS.md) |
 
 ## Historical design documents
+
+The [removed report index](HISTORICAL_DOCUMENTS.md) records 19 superseded
+design, migration and review documents and how to recover each one from Git.
 
 Early Modern Admin V1, information architecture, integration proposal and June
 QA audit were removed from current documentation: they instructed developers to
