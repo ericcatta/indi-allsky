@@ -1,5 +1,5 @@
 {
-  "status": "candidate_verified",
+  "status": "deployed_targeted_checks_passed",
   "date": "2026-10-24",
   "baseline": "5f746cb3",
   "diagnostic_log_sha256": "600a9af41df45dc35260d15a35531c3ad6cda8b2e06a16f21e7a85a457bdc86b",
@@ -1550,5 +1550,62 @@
     "Post-commit yield reduces aggressive writer reacquisition; it cannot guarantee every SQLite BUSY is eliminated.",
     "No new 24-hour run; sustained absence of timeouts not asserted."
   ],
-  "deployment": null
+  "deployment": {
+    "revision": "58dca579",
+    "capture_pid": 3850,
+    "web_pid": 3833,
+    "capture_active_since": "2026-10-24T10:51:18+02:00",
+    "web_active_since": "2026-10-24T10:51:09+02:00",
+    "rollback": "/home/eric/hybrid-backups/storage-contention-20261024",
+    "tested_sources_byte_identical": true,
+    "login_http": 200,
+    "verification": {
+      "images": [
+        {
+          "id": 364735,
+          "camera_id": 1,
+          "created": "2026-10-24T10:51:53+02:00",
+          "size_matches": true,
+          "decoded_dimensions": [
+            4608,
+            2592
+          ]
+        },
+        {
+          "id": 364733,
+          "camera_id": 1,
+          "created": "2026-10-24T10:51:38+02:00",
+          "size_matches": true,
+          "decoded_dimensions": [
+            4608,
+            2592
+          ]
+        },
+        {
+          "id": 364736,
+          "camera_id": 2,
+          "created": "2026-10-24T10:51:54+02:00",
+          "size_matches": true,
+          "decoded_dimensions": [
+            3840,
+            2160
+          ]
+        },
+        {
+          "id": 364734,
+          "camera_id": 2,
+          "created": "2026-10-24T10:51:40+02:00",
+          "size_matches": true,
+          "decoded_dimensions": [
+            3840,
+            2160
+          ]
+        }
+      ],
+      "queue": [],
+      "log_lines": 349,
+      "log_end": "2026-10-24T10:51:58.347509+02:00",
+      "errors": []
+    }
+  }
 }

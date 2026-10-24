@@ -1,9 +1,9 @@
 # Remaining Hybrid acceptance work
 
-Updated 21 October 2026. Classic frontend removal is deployed; whole-product
-acceptance remains open. SQLite image/panorama INSERT retries and the libcamera
-preview-phase watchdog budget are deployed at `0284f14a`, with config 119
-unchanged. No further 24-hour observation is authorized by the latest instruction.
+Updated 24 October 2026. Classic frontend removal is deployed; whole-product
+acceptance remains open for runtime verification. Storage contention corrections
+are deployed at `58dca579`; the timeout watchdog and capture policy are unchanged.
+No further 24-hour observation is authorized by the latest instruction.
 
 ## Storage contention follow-up — 24 October
 
@@ -29,6 +29,16 @@ cache corruption/concurrency, source integrity and full/mini generation. A bound
 not completion of background disk writes or proof that all timeouts are cured.
 No new 24-hour observation is started. Evidence:
 `testing/evidence/hybrid-storage-contention-20261024.json`.
+
+Release `58dca579` is active: capture restarted at 10:51:18 CEST and web at
+10:51:09. The deployed application files match the tested candidate byte-for-byte.
+Four post-restart JPEGs across both cameras exist, match database sizes and fully
+decode; the task queue is empty and the 349 log lines through 10:51:58 contain
+no error/traceback/retry. Login returns HTTP 200. This is bounded recovery evidence,
+not sustained absence of intermittent timeouts. Rollback: restore `preview_cache.py`
+and `storage_pressure_runtime.py` from
+`/home/eric/hybrid-backups/storage-contention-20261024` into `indi_allsky/`, then
+restart capture/web; no configuration or database restore is required.
 
 ## Final bounded verification — 21 October, 18:13 CEST
 
