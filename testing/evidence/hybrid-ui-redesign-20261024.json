@@ -1,0 +1,101 @@
+{
+  "date": "2026-10-24",
+  "status": "production activation and bounded runtime acceptance passed",
+  "git": {
+    "before": "cbe9de5a",
+    "application_release": "f8f6e6f3",
+    "followup_tests": "ed3bea1ad173ca4977893e3ceba2c4c8890c7da6",
+    "github_main_at_activation": "ed3bea1ad173ca4977893e3ceba2c4c8890c7da6",
+    "raspberry_installed_at_activation": "ed3bea1ad173ca4977893e3ceba2c4c8890c7da6"
+  },
+  "backup": {
+    "directory": "/home/eric/hybrid-backups/ui-release-20261024-puUZJZ",
+    "previous_files": "/home/eric/hybrid-backups/ui-release-20261024-puUZJZ/previous-files.tar.gz",
+    "before_commit": "/home/eric/hybrid-backups/ui-release-20261024-puUZJZ/before-commit",
+    "new_files": "/home/eric/hybrid-backups/ui-release-20261024-puUZJZ/new-files",
+    "tested_sources_manifest": "/home/eric/hybrid-backups/ui-release-20261024-puUZJZ/tested-sources.sha256",
+    "visibility": "private"
+  },
+  "activation": {
+    "method": "fast-forward followed by gunicorn reload only",
+    "capture_restarted": false,
+    "capture_pid_before_and_after": 6521,
+    "capture_nrestarts": 0,
+    "web_pid_after_reload": 5972,
+    "web_active": true,
+    "configuration_revision_before_and_after": 121,
+    "active_tasks": 0,
+    "installed_application_files_verified": 15,
+    "installed_files_match_isolated_candidate": true
+  },
+  "isolated_candidate": {
+    "path": "/home/eric/hybrid-backups/ui-release-20261024-puUZJZ/candidate",
+    "runtime_shell": "passed",
+    "runtime_flows": {
+      "count": 8,
+      "status": "passed",
+      "tests": [
+        "runtime_shell",
+        "observatory",
+        "settings_navigation",
+        "camera_settings_entries",
+        "settings",
+        "private_ui_policy",
+        "navigation_redirect",
+        "now_page"
+      ]
+    }
+  },
+  "production_http": {
+    "main_pages_checked": 7,
+    "anonymous_status": 302,
+    "login_status": 200,
+    "static_assets_checked": 3,
+    "static_asset_types": [
+      "CSS",
+      "JavaScript"
+    ],
+    "served_asset_hashes_match_disk": true
+  },
+  "access_policy": {
+    "routes": 107,
+    "requests": 452,
+    "aliases": 56,
+    "roles": 3,
+    "status": "passed",
+    "environment": "isolated candidate"
+  },
+  "capture_continuity": {
+    "before": {
+      "camera_1_frame_id": 365350,
+      "camera_2_frame_id": 365351
+    },
+    "after": {
+      "camera_1_frame_id": 365378,
+      "camera_2_frame_id": 365379,
+      "maximum_observed_age_seconds": 14,
+      "decoded_frames": [
+        {
+          "camera_id": 1,
+          "width": 4608,
+          "height": 2592
+        },
+        {
+          "camera_id": 2,
+          "width": 3840,
+          "height": 2160
+        }
+      ]
+    }
+  },
+  "local_validation": {
+    "pytest_passed": 75,
+    "synthetic_layout_and_browser_checks_passed": 36,
+    "popup_checks_passed": 6
+  },
+  "limitations": [
+    "No authenticated production browser was exercised or claimed.",
+    "The user journal was unavailable, so this evidence does not claim a clean journal.",
+    "HTTP checks establish routing, login availability and static delivery; they do not substitute for an authenticated production browser review."
+  ]
+}

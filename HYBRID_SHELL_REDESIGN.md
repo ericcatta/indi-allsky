@@ -38,4 +38,4 @@ The shell and navigation contracts are covered by:
 - `testing/hybrid_ui_structure_test.py`
 - `testing/hybrid_settings_navigation_flow_test.py`
 
-Runtime flow behavior that depends on the deployed Linux host, system services, hardware, or real capture data was not verified locally. This document does not claim deployment validation or testing against production data.
+The deployed Linux candidate passed eight isolated runtime flows before activation. The Raspberry Pi was then fast-forwarded and gunicorn alone was reloaded; capture PID 6521, its zero restart count, and configuration revision 121 remained unchanged. Seven main HTTP routes, three served assets, and fresh decoded frames from both cameras passed bounded production checks. Access-policy coverage was verified in the isolated candidate. See [the 24 October release evidence](testing/evidence/hybrid-ui-redesign-20261024.json). No authenticated production browser was exercised, and the unavailable user journal prevents a clean-journal claim.

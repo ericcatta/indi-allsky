@@ -1,5 +1,16 @@
 # Hybrid: deployment and rollback
 
+## UI shell release — 24 October
+
+The Hybrid shell redesign was fast-forwarded from `cbe9de5a` to application release
+`f8f6e6f3`, followed by test revision `ed3bea1ad173ca4977893e3ceba2c4c8890c7da6`,
+which is installed on the Raspberry Pi and published on GitHub `main`. Activation
+reloaded gunicorn only: capture PID 6521 and configuration revision 121 were
+unchanged, all eight isolated runtime flows passed, and fresh decoded frames from
+both cameras were verified. The private rollback bundle and bounded acceptance
+results are recorded in [the release evidence](testing/evidence/hybrid-ui-redesign-20261024.json).
+No authenticated production browser or clean user-journal claim is made.
+
 ## Active configuration — 4 October
 
 Configuration 119 enables SD-only night FITS/day JPEG, lossless compression,
