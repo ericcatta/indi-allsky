@@ -81,7 +81,8 @@ class PreviewCache:
                 pending = Path(out.name)
                 out.write(hashlib.sha256(data).hexdigest().encode() + b'\n' + data)
                 out.flush()
-                os.fsync(out.fileno())
+                # Disposable derivatives need atomic visibility, not durable
+                # storage barriers per frame. _read regenerates corrupt entries.
             with self._lock('index.lock'):
                 os.replace(pending, path)
                 self._prune()

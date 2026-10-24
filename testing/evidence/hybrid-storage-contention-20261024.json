@@ -1,0 +1,1554 @@
+{
+  "status": "candidate_verified",
+  "date": "2026-10-24",
+  "baseline": "5f746cb3",
+  "diagnostic_log_sha256": "600a9af41df45dc35260d15a35531c3ad6cda8b2e06a16f21e7a85a457bdc86b",
+  "timeout_snapshots": [
+    {
+      "time": "2026-10-24T08:00:10.575270+02:00",
+      "pid": 166326,
+      "threads": [
+        {
+          "tid": 166326,
+          "status": {
+            "State": "D (disk sleep)"
+          },
+          "wchan": "0",
+          "schedstat": {
+            "cpu_ns": 88495483,
+            "runqueue_ns": 2184463,
+            "timeslices": 50
+          }
+        },
+        {
+          "tid": 166327,
+          "status": {
+            "State": "S (sleeping)"
+          },
+          "wchan": "futex_do_wait",
+          "schedstat": {
+            "cpu_ns": 123741,
+            "runqueue_ns": 0,
+            "timeslices": 1
+          }
+        },
+        {
+          "tid": 166328,
+          "status": {
+            "State": "S (sleeping)"
+          },
+          "wchan": "futex_do_wait",
+          "schedstat": {
+            "cpu_ns": 188797,
+            "runqueue_ns": 8463,
+            "timeslices": 5
+          }
+        }
+      ],
+      "status": {
+        "State": "D (disk sleep)",
+        "VmRSS": "32960 kB",
+        "VmSwap": "0 kB",
+        "Threads": "3",
+        "voluntary_ctxt_switches": "49",
+        "nonvoluntary_ctxt_switches": "0"
+      },
+      "io": {
+        "rchar": "435276",
+        "wchar": "1186113",
+        "syscr": "3777",
+        "syscw": "112",
+        "read_bytes": "851968",
+        "write_bytes": "0",
+        "cancelled_write_bytes": "0"
+      },
+      "memory": {
+        "MemAvailable": "4321648 kB",
+        "SwapTotal": "2097136 kB",
+        "SwapFree": "1601776 kB",
+        "Dirty": "464 kB",
+        "Writeback": "720 kB"
+      }
+    },
+    {
+      "time": "2026-10-24T09:28:53.734538+02:00",
+      "pid": 170727,
+      "threads": [
+        {
+          "tid": 170727,
+          "status": {
+            "State": "D (disk sleep)"
+          },
+          "wchan": "folio_wait_bit_common",
+          "schedstat": {
+            "cpu_ns": 1364016,
+            "runqueue_ns": 0,
+            "timeslices": 11
+          }
+        }
+      ],
+      "status": {
+        "State": "D (disk sleep)",
+        "VmRSS": "1696 kB",
+        "VmSwap": "0 kB",
+        "Threads": "1",
+        "voluntary_ctxt_switches": "11",
+        "nonvoluntary_ctxt_switches": "0"
+      },
+      "io": {
+        "rchar": "9875",
+        "wchar": "0",
+        "syscr": "16",
+        "syscw": "0",
+        "read_bytes": "344064",
+        "write_bytes": "0",
+        "cancelled_write_bytes": "0"
+      },
+      "memory": {
+        "MemAvailable": "3775952 kB",
+        "SwapTotal": "2097136 kB",
+        "SwapFree": "1262032 kB",
+        "Dirty": "1552 kB",
+        "Writeback": "656 kB"
+      }
+    },
+    {
+      "time": "2026-10-24T09:30:35.976443+02:00",
+      "pid": 170804,
+      "threads": [
+        {
+          "tid": 170804,
+          "status": {
+            "State": "D (disk sleep)"
+          },
+          "wchan": "folio_wait_bit_common",
+          "schedstat": {
+            "cpu_ns": 4099536,
+            "runqueue_ns": 18871,
+            "timeslices": 3
+          }
+        }
+      ],
+      "status": {
+        "State": "D (disk sleep)",
+        "VmRSS": "6256 kB",
+        "VmSwap": "0 kB",
+        "Threads": "1",
+        "voluntary_ctxt_switches": "3",
+        "nonvoluntary_ctxt_switches": "0"
+      },
+      "io": {
+        "rchar": "38163",
+        "wchar": "0",
+        "syscr": "50",
+        "syscw": "0",
+        "read_bytes": "49152",
+        "write_bytes": "0",
+        "cancelled_write_bytes": "0"
+      },
+      "memory": {
+        "MemAvailable": "3745888 kB",
+        "SwapTotal": "2097136 kB",
+        "SwapFree": "1207488 kB",
+        "Dirty": "912 kB",
+        "Writeback": "320 kB"
+      }
+    },
+    {
+      "time": "2026-10-22T08:26:39.881814+02:00",
+      "pid": 68303,
+      "threads": [
+        {
+          "tid": 68303,
+          "status": {
+            "State": "D (disk sleep)"
+          },
+          "wchan": "folio_wait_bit_common",
+          "schedstat": {
+            "cpu_ns": 14992113,
+            "runqueue_ns": 34093,
+            "timeslices": 23
+          }
+        },
+        {
+          "tid": 68307,
+          "status": {
+            "State": "S (sleeping)"
+          },
+          "wchan": "futex_do_wait",
+          "schedstat": {
+            "cpu_ns": 67018,
+            "runqueue_ns": 0,
+            "timeslices": 1
+          }
+        },
+        {
+          "tid": 68308,
+          "status": {
+            "State": "S (sleeping)"
+          },
+          "wchan": "futex_do_wait",
+          "schedstat": {
+            "cpu_ns": 45482,
+            "runqueue_ns": 0,
+            "timeslices": 2
+          }
+        },
+        {
+          "tid": 68309,
+          "status": {
+            "State": "S (sleeping)"
+          },
+          "wchan": "poll_schedule_timeout.constprop.0",
+          "schedstat": {
+            "cpu_ns": 27210777,
+            "runqueue_ns": 12038,
+            "timeslices": 12
+          }
+        },
+        {
+          "tid": 68310,
+          "status": {
+            "State": "S (sleeping)"
+          },
+          "wchan": "futex_do_wait",
+          "schedstat": {
+            "cpu_ns": 24741,
+            "runqueue_ns": 0,
+            "timeslices": 1
+          }
+        },
+        {
+          "tid": 68311,
+          "status": {
+            "State": "S (sleeping)"
+          },
+          "wchan": "futex_do_wait",
+          "schedstat": {
+            "cpu_ns": 12278,
+            "runqueue_ns": 0,
+            "timeslices": 1
+          }
+        }
+      ],
+      "status": {
+        "State": "D (disk sleep)",
+        "VmRSS": "24880 kB",
+        "VmSwap": "0 kB",
+        "Threads": "6",
+        "voluntary_ctxt_switches": "21",
+        "nonvoluntary_ctxt_switches": "2"
+      },
+      "io": {
+        "rchar": "422519",
+        "wchar": "1327",
+        "syscr": "3729",
+        "syscw": "15",
+        "read_bytes": "536576",
+        "write_bytes": "0",
+        "cancelled_write_bytes": "0"
+      },
+      "memory": {
+        "MemAvailable": "3271408 kB",
+        "SwapTotal": "2097136 kB",
+        "SwapFree": "1719872 kB",
+        "Dirty": "2480 kB",
+        "Writeback": "2016 kB"
+      }
+    },
+    {
+      "time": "2026-10-22T10:04:05.103124+02:00",
+      "pid": 72885,
+      "threads": [
+        {
+          "tid": 72885,
+          "status": {
+            "State": "S (sleeping)"
+          },
+          "wchan": "futex_do_wait",
+          "schedstat": {
+            "cpu_ns": 34341462,
+            "runqueue_ns": 1432573,
+            "timeslices": 44
+          }
+        },
+        {
+          "tid": 72889,
+          "status": {
+            "State": "S (sleeping)"
+          },
+          "wchan": "futex_do_wait",
+          "schedstat": {
+            "cpu_ns": 78518,
+            "runqueue_ns": 0,
+            "timeslices": 1
+          }
+        },
+        {
+          "tid": 72890,
+          "status": {
+            "State": "S (sleeping)"
+          },
+          "wchan": "futex_do_wait",
+          "schedstat": {
+            "cpu_ns": 45927,
+            "runqueue_ns": 0,
+            "timeslices": 2
+          }
+        },
+        {
+          "tid": 72891,
+          "status": {
+            "State": "S (sleeping)"
+          },
+          "wchan": "poll_schedule_timeout.constprop.0",
+          "schedstat": {
+            "cpu_ns": 68027858,
+            "runqueue_ns": 13760517,
+            "timeslices": 207
+          }
+        },
+        {
+          "tid": 72892,
+          "status": {
+            "State": "S (sleeping)"
+          },
+          "wchan": "futex_do_wait",
+          "schedstat": {
+            "cpu_ns": 20167,
+            "runqueue_ns": 0,
+            "timeslices": 1
+          }
+        },
+        {
+          "tid": 72893,
+          "status": {
+            "State": "S (sleeping)"
+          },
+          "wchan": "futex_do_wait",
+          "schedstat": {
+            "cpu_ns": 11445,
+            "runqueue_ns": 0,
+            "timeslices": 1
+          }
+        },
+        {
+          "tid": 72894,
+          "status": {
+            "State": "S (sleeping)"
+          },
+          "wchan": "futex_do_wait",
+          "schedstat": {
+            "cpu_ns": 26204,
+            "runqueue_ns": 0,
+            "timeslices": 1
+          }
+        },
+        {
+          "tid": 72895,
+          "status": {
+            "State": "S (sleeping)"
+          },
+          "wchan": "poll_schedule_timeout.constprop.0",
+          "schedstat": {
+            "cpu_ns": 185481,
+            "runqueue_ns": 0,
+            "timeslices": 1
+          }
+        }
+      ],
+      "status": {
+        "State": "S (sleeping)",
+        "VmRSS": "103040 kB",
+        "VmSwap": "0 kB",
+        "Threads": "9",
+        "voluntary_ctxt_switches": "44",
+        "nonvoluntary_ctxt_switches": "0"
+      },
+      "io": {
+        "rchar": "430895",
+        "wchar": "2132",
+        "syscr": "3746",
+        "syscw": "47",
+        "read_bytes": "962560",
+        "write_bytes": "0",
+        "cancelled_write_bytes": "0"
+      },
+      "memory": {
+        "MemAvailable": "4445104 kB",
+        "SwapTotal": "2097136 kB",
+        "SwapFree": "1302416 kB",
+        "Dirty": "944 kB",
+        "Writeback": "0 kB"
+      }
+    },
+    {
+      "time": "2026-10-22T10:39:38.037560+02:00",
+      "pid": 74632,
+      "threads": [
+        {
+          "tid": 74632,
+          "status": {
+            "State": "D (disk sleep)"
+          },
+          "wchan": "folio_wait_bit_common",
+          "schedstat": {
+            "cpu_ns": 18434648,
+            "runqueue_ns": 0,
+            "timeslices": 4
+          }
+        },
+        {
+          "tid": 74636,
+          "status": {
+            "State": "S (sleeping)"
+          },
+          "wchan": "futex_do_wait",
+          "schedstat": {
+            "cpu_ns": 73000,
+            "runqueue_ns": 0,
+            "timeslices": 1
+          }
+        },
+        {
+          "tid": 74637,
+          "status": {
+            "State": "S (sleeping)"
+          },
+          "wchan": "futex_do_wait",
+          "schedstat": {
+            "cpu_ns": 45518,
+            "runqueue_ns": 0,
+            "timeslices": 2
+          }
+        },
+        {
+          "tid": 74638,
+          "status": {
+            "State": "S (sleeping)"
+          },
+          "wchan": "poll_schedule_timeout.constprop.0",
+          "schedstat": {
+            "cpu_ns": 32795315,
+            "runqueue_ns": 0,
+            "timeslices": 2
+          }
+        },
+        {
+          "tid": 74639,
+          "status": {
+            "State": "S (sleeping)"
+          },
+          "wchan": "futex_do_wait",
+          "schedstat": {
+            "cpu_ns": 24926,
+            "runqueue_ns": 0,
+            "timeslices": 1
+          }
+        },
+        {
+          "tid": 74640,
+          "status": {
+            "State": "S (sleeping)"
+          },
+          "wchan": "futex_do_wait",
+          "schedstat": {
+            "cpu_ns": 15722,
+            "runqueue_ns": 0,
+            "timeslices": 1
+          }
+        }
+      ],
+      "status": {
+        "State": "D (disk sleep)",
+        "VmRSS": "26560 kB",
+        "VmSwap": "0 kB",
+        "Threads": "6",
+        "voluntary_ctxt_switches": "4",
+        "nonvoluntary_ctxt_switches": "0"
+      },
+      "io": {
+        "rchar": "429173",
+        "wchar": "1327",
+        "syscr": "3737",
+        "syscw": "15",
+        "read_bytes": "65536",
+        "write_bytes": "0",
+        "cancelled_write_bytes": "0"
+      },
+      "memory": {
+        "MemAvailable": "4448944 kB",
+        "SwapTotal": "2097136 kB",
+        "SwapFree": "1207488 kB",
+        "Dirty": "1552 kB",
+        "Writeback": "160 kB"
+      }
+    },
+    {
+      "time": "2026-10-22T19:05:52.460392+02:00",
+      "pid": 99327,
+      "threads": [
+        {
+          "tid": 99327,
+          "status": {
+            "State": "D (disk sleep)"
+          },
+          "wchan": "folio_wait_bit_common",
+          "schedstat": {
+            "cpu_ns": 616427,
+            "runqueue_ns": 0,
+            "timeslices": 2
+          }
+        }
+      ],
+      "status": {
+        "State": "D (disk sleep)",
+        "VmRSS": "816 kB",
+        "VmSwap": "0 kB",
+        "Threads": "1",
+        "voluntary_ctxt_switches": "2",
+        "nonvoluntary_ctxt_switches": "0"
+      },
+      "io": {
+        "rchar": "4051",
+        "wchar": "0",
+        "syscr": "9",
+        "syscw": "0",
+        "read_bytes": "147456",
+        "write_bytes": "0",
+        "cancelled_write_bytes": "0"
+      },
+      "memory": {
+        "MemAvailable": "4138080 kB",
+        "SwapTotal": "2097136 kB",
+        "SwapFree": "1633968 kB",
+        "Dirty": "560 kB",
+        "Writeback": "5760 kB"
+      }
+    },
+    {
+      "time": "2026-10-22T19:33:24.472371+02:00",
+      "pid": 99807,
+      "threads": [
+        {
+          "tid": 99807,
+          "status": {
+            "State": "S (sleeping)"
+          },
+          "wchan": "futex_do_wait",
+          "schedstat": {
+            "cpu_ns": 17115146,
+            "runqueue_ns": 20815,
+            "timeslices": 7
+          }
+        },
+        {
+          "tid": 99811,
+          "status": {
+            "State": "S (sleeping)"
+          },
+          "wchan": "futex_do_wait",
+          "schedstat": {
+            "cpu_ns": 106315,
+            "runqueue_ns": 0,
+            "timeslices": 1
+          }
+        },
+        {
+          "tid": 99812,
+          "status": {
+            "State": "S (sleeping)"
+          },
+          "wchan": "futex_do_wait",
+          "schedstat": {
+            "cpu_ns": 68444,
+            "runqueue_ns": 0,
+            "timeslices": 2
+          }
+        },
+        {
+          "tid": 99813,
+          "status": {
+            "State": "D (disk sleep)"
+          },
+          "wchan": "folio_wait_bit_common",
+          "schedstat": {
+            "cpu_ns": 17611353,
+            "runqueue_ns": 30092,
+            "timeslices": 9
+          }
+        }
+      ],
+      "status": {
+        "State": "S (sleeping)",
+        "VmRSS": "16656 kB",
+        "VmSwap": "0 kB",
+        "Threads": "4",
+        "voluntary_ctxt_switches": "6",
+        "nonvoluntary_ctxt_switches": "1"
+      },
+      "io": {
+        "rchar": "291301",
+        "wchar": "485",
+        "syscr": "3674",
+        "syscw": "4",
+        "read_bytes": "73728",
+        "write_bytes": "0",
+        "cancelled_write_bytes": "0"
+      },
+      "memory": {
+        "MemAvailable": "6141504 kB",
+        "SwapTotal": "2097136 kB",
+        "SwapFree": "1637472 kB",
+        "Dirty": "10672 kB",
+        "Writeback": "2160 kB"
+      }
+    },
+    {
+      "time": "2026-10-22T19:37:54.738924+02:00",
+      "pid": 99903,
+      "threads": [
+        {
+          "tid": 99903,
+          "status": {
+            "State": "S (sleeping)"
+          },
+          "wchan": "futex_do_wait",
+          "schedstat": {
+            "cpu_ns": 43462501,
+            "runqueue_ns": 5259,
+            "timeslices": 9
+          }
+        },
+        {
+          "tid": 99907,
+          "status": {
+            "State": "S (sleeping)"
+          },
+          "wchan": "futex_do_wait",
+          "schedstat": {
+            "cpu_ns": 133777,
+            "runqueue_ns": 0,
+            "timeslices": 1
+          }
+        },
+        {
+          "tid": 99908,
+          "status": {
+            "State": "S (sleeping)"
+          },
+          "wchan": "futex_do_wait",
+          "schedstat": {
+            "cpu_ns": 83556,
+            "runqueue_ns": 0,
+            "timeslices": 1
+          }
+        },
+        {
+          "tid": 99909,
+          "status": {
+            "State": "S (sleeping)"
+          },
+          "wchan": "poll_schedule_timeout.constprop.0",
+          "schedstat": {
+            "cpu_ns": 78350792,
+            "runqueue_ns": 5501575,
+            "timeslices": 183
+          }
+        },
+        {
+          "tid": 99910,
+          "status": {
+            "State": "S (sleeping)"
+          },
+          "wchan": "futex_do_wait",
+          "schedstat": {
+            "cpu_ns": 30518,
+            "runqueue_ns": 0,
+            "timeslices": 1
+          }
+        },
+        {
+          "tid": 99911,
+          "status": {
+            "State": "S (sleeping)"
+          },
+          "wchan": "futex_do_wait",
+          "schedstat": {
+            "cpu_ns": 21797,
+            "runqueue_ns": 0,
+            "timeslices": 1
+          }
+        },
+        {
+          "tid": 99912,
+          "status": {
+            "State": "S (sleeping)"
+          },
+          "wchan": "futex_do_wait",
+          "schedstat": {
+            "cpu_ns": 30556,
+            "runqueue_ns": 0,
+            "timeslices": 1
+          }
+        },
+        {
+          "tid": 99913,
+          "status": {
+            "State": "S (sleeping)"
+          },
+          "wchan": "poll_schedule_timeout.constprop.0",
+          "schedstat": {
+            "cpu_ns": 189796,
+            "runqueue_ns": 0,
+            "timeslices": 1
+          }
+        }
+      ],
+      "status": {
+        "State": "S (sleeping)",
+        "VmRSS": "103040 kB",
+        "VmSwap": "0 kB",
+        "Threads": "9",
+        "voluntary_ctxt_switches": "9",
+        "nonvoluntary_ctxt_switches": "0"
+      },
+      "io": {
+        "rchar": "430893",
+        "wchar": "2132",
+        "syscr": "3746",
+        "syscw": "47",
+        "read_bytes": "32768",
+        "write_bytes": "0",
+        "cancelled_write_bytes": "0"
+      },
+      "memory": {
+        "MemAvailable": "3127872 kB",
+        "SwapTotal": "2097136 kB",
+        "SwapFree": "1632656 kB",
+        "Dirty": "2480 kB",
+        "Writeback": "208 kB"
+      }
+    },
+    {
+      "time": "2026-10-22T19:38:39.883648+02:00",
+      "pid": 99916,
+      "threads": [
+        {
+          "tid": 99916,
+          "status": {
+            "State": "D (disk sleep)"
+          },
+          "wchan": "folio_wait_bit_common",
+          "schedstat": {
+            "cpu_ns": 15123556,
+            "runqueue_ns": 6019,
+            "timeslices": 5
+          }
+        },
+        {
+          "tid": 99917,
+          "status": {
+            "State": "S (sleeping)"
+          },
+          "wchan": "futex_do_wait",
+          "schedstat": {
+            "cpu_ns": 89334,
+            "runqueue_ns": 0,
+            "timeslices": 1
+          }
+        },
+        {
+          "tid": 99918,
+          "status": {
+            "State": "S (sleeping)"
+          },
+          "wchan": "futex_do_wait",
+          "schedstat": {
+            "cpu_ns": 52648,
+            "runqueue_ns": 0,
+            "timeslices": 2
+          }
+        },
+        {
+          "tid": 99919,
+          "status": {
+            "State": "S (sleeping)"
+          },
+          "wchan": "poll_schedule_timeout.constprop.0",
+          "schedstat": {
+            "cpu_ns": 28363129,
+            "runqueue_ns": 191704,
+            "timeslices": 8
+          }
+        },
+        {
+          "tid": 99923,
+          "status": {
+            "State": "S (sleeping)"
+          },
+          "wchan": "futex_do_wait",
+          "schedstat": {
+            "cpu_ns": 32796,
+            "runqueue_ns": 0,
+            "timeslices": 1
+          }
+        },
+        {
+          "tid": 99924,
+          "status": {
+            "State": "S (sleeping)"
+          },
+          "wchan": "futex_do_wait",
+          "schedstat": {
+            "cpu_ns": 17796,
+            "runqueue_ns": 0,
+            "timeslices": 1
+          }
+        }
+      ],
+      "status": {
+        "State": "D (disk sleep)",
+        "VmRSS": "24464 kB",
+        "VmSwap": "0 kB",
+        "Threads": "6",
+        "voluntary_ctxt_switches": "4",
+        "nonvoluntary_ctxt_switches": "1"
+      },
+      "io": {
+        "rchar": "420853",
+        "wchar": "1327",
+        "syscr": "3727",
+        "syscw": "15",
+        "read_bytes": "53248",
+        "write_bytes": "0",
+        "cancelled_write_bytes": "0"
+      },
+      "memory": {
+        "MemAvailable": "3259824 kB",
+        "SwapTotal": "2097136 kB",
+        "SwapFree": "1632688 kB",
+        "Dirty": "5312 kB",
+        "Writeback": "1200 kB"
+      }
+    },
+    {
+      "time": "2026-10-23T08:56:34.873691+02:00",
+      "pid": 119274,
+      "threads": [
+        {
+          "tid": 119274,
+          "status": {
+            "State": "S (sleeping)"
+          },
+          "wchan": "futex_do_wait",
+          "schedstat": {
+            "cpu_ns": 23167372,
+            "runqueue_ns": 7659908,
+            "timeslices": 22
+          }
+        },
+        {
+          "tid": 119278,
+          "status": {
+            "State": "S (sleeping)"
+          },
+          "wchan": "futex_do_wait",
+          "schedstat": {
+            "cpu_ns": 72037,
+            "runqueue_ns": 862908,
+            "timeslices": 1
+          }
+        },
+        {
+          "tid": 119279,
+          "status": {
+            "State": "S (sleeping)"
+          },
+          "wchan": "futex_do_wait",
+          "schedstat": {
+            "cpu_ns": 109686,
+            "runqueue_ns": 0,
+            "timeslices": 1
+          }
+        },
+        {
+          "tid": 119280,
+          "status": {
+            "State": "D (disk sleep)"
+          },
+          "wchan": "folio_wait_bit_common",
+          "schedstat": {
+            "cpu_ns": 32531554,
+            "runqueue_ns": 2487519,
+            "timeslices": 3
+          }
+        }
+      ],
+      "status": {
+        "State": "S (sleeping)",
+        "VmRSS": "16080 kB",
+        "VmSwap": "0 kB",
+        "Threads": "4",
+        "voluntary_ctxt_switches": "17",
+        "nonvoluntary_ctxt_switches": "5"
+      },
+      "io": {
+        "rchar": "282991",
+        "wchar": "489",
+        "syscr": "3664",
+        "syscw": "4",
+        "read_bytes": "319488",
+        "write_bytes": "0",
+        "cancelled_write_bytes": "0"
+      },
+      "memory": {
+        "MemAvailable": "6185568 kB",
+        "SwapTotal": "2097136 kB",
+        "SwapFree": "1456336 kB",
+        "Dirty": "1744 kB",
+        "Writeback": "480 kB"
+      }
+    },
+    {
+      "time": "2026-10-23T09:18:15.458154+02:00",
+      "pid": 120339,
+      "threads": [
+        {
+          "tid": 120339,
+          "status": {
+            "State": "S (sleeping)"
+          },
+          "wchan": "futex_do_wait",
+          "schedstat": {
+            "cpu_ns": 16680240,
+            "runqueue_ns": 0,
+            "timeslices": 2
+          }
+        },
+        {
+          "tid": 120340,
+          "status": {
+            "State": "S (sleeping)"
+          },
+          "wchan": "futex_do_wait",
+          "schedstat": {
+            "cpu_ns": 83741,
+            "runqueue_ns": 0,
+            "timeslices": 1
+          }
+        },
+        {
+          "tid": 120341,
+          "status": {
+            "State": "S (sleeping)"
+          },
+          "wchan": "futex_do_wait",
+          "schedstat": {
+            "cpu_ns": 59759,
+            "runqueue_ns": 0,
+            "timeslices": 2
+          }
+        },
+        {
+          "tid": 120342,
+          "status": {
+            "State": "D (disk sleep)"
+          },
+          "wchan": "folio_wait_bit_common",
+          "schedstat": {
+            "cpu_ns": 15526130,
+            "runqueue_ns": 0,
+            "timeslices": 3
+          }
+        }
+      ],
+      "status": {
+        "State": "S (sleeping)",
+        "VmRSS": "15936 kB",
+        "VmSwap": "0 kB",
+        "Threads": "4",
+        "voluntary_ctxt_switches": "2",
+        "nonvoluntary_ctxt_switches": "0"
+      },
+      "io": {
+        "rchar": "281325",
+        "wchar": "489",
+        "syscr": "3662",
+        "syscw": "4",
+        "read_bytes": "53248",
+        "write_bytes": "0",
+        "cancelled_write_bytes": "0"
+      },
+      "memory": {
+        "MemAvailable": "6340800 kB",
+        "SwapTotal": "2097136 kB",
+        "SwapFree": "1274048 kB",
+        "Dirty": "320 kB",
+        "Writeback": "1248 kB"
+      }
+    },
+    {
+      "time": "2026-10-23T09:23:46.164456+02:00",
+      "pid": 120604,
+      "threads": [
+        {
+          "tid": 120604,
+          "status": {
+            "State": "D (disk sleep)"
+          },
+          "wchan": "folio_wait_bit_common",
+          "schedstat": {
+            "cpu_ns": 9631759,
+            "runqueue_ns": 4814,
+            "timeslices": 2
+          }
+        }
+      ],
+      "status": {
+        "State": "D (disk sleep)",
+        "VmRSS": "7008 kB",
+        "VmSwap": "0 kB",
+        "Threads": "1",
+        "voluntary_ctxt_switches": "2",
+        "nonvoluntary_ctxt_switches": "0"
+      },
+      "io": {
+        "rchar": "38163",
+        "wchar": "0",
+        "syscr": "50",
+        "syscw": "0",
+        "read_bytes": "65536",
+        "write_bytes": "0",
+        "cancelled_write_bytes": "0"
+      },
+      "memory": {
+        "MemAvailable": "6392000 kB",
+        "SwapTotal": "2097136 kB",
+        "SwapFree": "1282144 kB",
+        "Dirty": "1024 kB",
+        "Writeback": "416 kB"
+      }
+    },
+    {
+      "time": "2026-10-23T09:30:02.929844+02:00",
+      "pid": 120935,
+      "threads": [
+        {
+          "tid": 120935,
+          "status": {
+            "State": "S (sleeping)"
+          },
+          "wchan": "futex_do_wait",
+          "schedstat": {
+            "cpu_ns": 15180220,
+            "runqueue_ns": 343501,
+            "timeslices": 23
+          }
+        },
+        {
+          "tid": 120939,
+          "status": {
+            "State": "S (sleeping)"
+          },
+          "wchan": "futex_do_wait",
+          "schedstat": {
+            "cpu_ns": 72741,
+            "runqueue_ns": 0,
+            "timeslices": 1
+          }
+        },
+        {
+          "tid": 120940,
+          "status": {
+            "State": "S (sleeping)"
+          },
+          "wchan": "futex_do_wait",
+          "schedstat": {
+            "cpu_ns": 46925,
+            "runqueue_ns": 0,
+            "timeslices": 2
+          }
+        },
+        {
+          "tid": 120941,
+          "status": {
+            "State": "D (disk sleep)"
+          },
+          "wchan": "folio_wait_bit_common",
+          "schedstat": {
+            "cpu_ns": 10275944,
+            "runqueue_ns": 0,
+            "timeslices": 1
+          }
+        }
+      ],
+      "status": {
+        "State": "S (sleeping)",
+        "VmRSS": "15456 kB",
+        "VmSwap": "0 kB",
+        "Threads": "4",
+        "voluntary_ctxt_switches": "13",
+        "nonvoluntary_ctxt_switches": "10"
+      },
+      "io": {
+        "rchar": "275503",
+        "wchar": "489",
+        "syscr": "3655",
+        "syscw": "4",
+        "read_bytes": "376832",
+        "write_bytes": "0",
+        "cancelled_write_bytes": "0"
+      },
+      "memory": {
+        "MemAvailable": "5594928 kB",
+        "SwapTotal": "2097136 kB",
+        "SwapFree": "1268512 kB",
+        "Dirty": "1120 kB",
+        "Writeback": "768 kB"
+      }
+    },
+    {
+      "time": "2026-10-23T09:36:04.202431+02:00",
+      "pid": 121227,
+      "threads": [
+        {
+          "tid": 121227,
+          "status": {
+            "State": "D (disk sleep)"
+          },
+          "wchan": "folio_wait_bit_common",
+          "schedstat": {
+            "cpu_ns": 1773703,
+            "runqueue_ns": 0,
+            "timeslices": 9
+          }
+        }
+      ],
+      "status": {
+        "State": "D (disk sleep)",
+        "VmRSS": "2736 kB",
+        "VmSwap": "0 kB",
+        "Threads": "1",
+        "voluntary_ctxt_switches": "9",
+        "nonvoluntary_ctxt_switches": "0"
+      },
+      "io": {
+        "rchar": "17363",
+        "wchar": "0",
+        "syscr": "25",
+        "syscw": "0",
+        "read_bytes": "147456",
+        "write_bytes": "0",
+        "cancelled_write_bytes": "0"
+      },
+      "memory": {
+        "MemAvailable": "3605424 kB",
+        "SwapTotal": "2097136 kB",
+        "SwapFree": "1170544 kB",
+        "Dirty": "3792 kB",
+        "Writeback": "5488 kB"
+      }
+    },
+    {
+      "time": "2026-10-23T09:46:21.289491+02:00",
+      "pid": 121732,
+      "threads": [
+        {
+          "tid": 121732,
+          "status": {
+            "State": "D (disk sleep)"
+          },
+          "wchan": "folio_wait_bit_common",
+          "schedstat": {
+            "cpu_ns": 14424814,
+            "runqueue_ns": 0,
+            "timeslices": 6
+          }
+        },
+        {
+          "tid": 121736,
+          "status": {
+            "State": "S (sleeping)"
+          },
+          "wchan": "futex_do_wait",
+          "schedstat": {
+            "cpu_ns": 71333,
+            "runqueue_ns": 0,
+            "timeslices": 1
+          }
+        },
+        {
+          "tid": 121737,
+          "status": {
+            "State": "S (sleeping)"
+          },
+          "wchan": "futex_do_wait",
+          "schedstat": {
+            "cpu_ns": 44314,
+            "runqueue_ns": 0,
+            "timeslices": 2
+          }
+        },
+        {
+          "tid": 121738,
+          "status": {
+            "State": "S (sleeping)"
+          },
+          "wchan": "poll_schedule_timeout.constprop.0",
+          "schedstat": {
+            "cpu_ns": 33399315,
+            "runqueue_ns": 0,
+            "timeslices": 4
+          }
+        },
+        {
+          "tid": 121740,
+          "status": {
+            "State": "S (sleeping)"
+          },
+          "wchan": "futex_do_wait",
+          "schedstat": {
+            "cpu_ns": 29685,
+            "runqueue_ns": 0,
+            "timeslices": 1
+          }
+        },
+        {
+          "tid": 121741,
+          "status": {
+            "State": "S (sleeping)"
+          },
+          "wchan": "futex_do_wait",
+          "schedstat": {
+            "cpu_ns": 16944,
+            "runqueue_ns": 0,
+            "timeslices": 1
+          }
+        }
+      ],
+      "status": {
+        "State": "D (disk sleep)",
+        "VmRSS": "23840 kB",
+        "VmSwap": "0 kB",
+        "Threads": "6",
+        "voluntary_ctxt_switches": "6",
+        "nonvoluntary_ctxt_switches": "0"
+      },
+      "io": {
+        "rchar": "416701",
+        "wchar": "1335",
+        "syscr": "3722",
+        "syscw": "15",
+        "read_bytes": "69632",
+        "write_bytes": "0",
+        "cancelled_write_bytes": "0"
+      },
+      "memory": {
+        "MemAvailable": "3640224 kB",
+        "SwapTotal": "2097136 kB",
+        "SwapFree": "1117040 kB",
+        "Dirty": "1264 kB",
+        "Writeback": "1168 kB"
+      }
+    },
+    {
+      "time": "2026-10-23T09:46:36.296441+02:00",
+      "pid": 121742,
+      "threads": [
+        {
+          "tid": 121742,
+          "status": {
+            "State": "S (sleeping)"
+          },
+          "wchan": "futex_do_wait",
+          "schedstat": {
+            "cpu_ns": 44911073,
+            "runqueue_ns": 0,
+            "timeslices": 12
+          }
+        },
+        {
+          "tid": 121743,
+          "status": {
+            "State": "S (sleeping)"
+          },
+          "wchan": "futex_do_wait",
+          "schedstat": {
+            "cpu_ns": 90185,
+            "runqueue_ns": 0,
+            "timeslices": 1
+          }
+        },
+        {
+          "tid": 121744,
+          "status": {
+            "State": "S (sleeping)"
+          },
+          "wchan": "futex_do_wait",
+          "schedstat": {
+            "cpu_ns": 62093,
+            "runqueue_ns": 0,
+            "timeslices": 2
+          }
+        },
+        {
+          "tid": 121745,
+          "status": {
+            "State": "S (sleeping)"
+          },
+          "wchan": "poll_schedule_timeout.constprop.0",
+          "schedstat": {
+            "cpu_ns": 75321670,
+            "runqueue_ns": 0,
+            "timeslices": 185
+          }
+        },
+        {
+          "tid": 121746,
+          "status": {
+            "State": "S (sleeping)"
+          },
+          "wchan": "futex_do_wait",
+          "schedstat": {
+            "cpu_ns": 18537,
+            "runqueue_ns": 0,
+            "timeslices": 1
+          }
+        },
+        {
+          "tid": 121747,
+          "status": {
+            "State": "S (sleeping)"
+          },
+          "wchan": "futex_do_wait",
+          "schedstat": {
+            "cpu_ns": 17685,
+            "runqueue_ns": 0,
+            "timeslices": 1
+          }
+        },
+        {
+          "tid": 121751,
+          "status": {
+            "State": "S (sleeping)"
+          },
+          "wchan": "futex_do_wait",
+          "schedstat": {
+            "cpu_ns": 28389,
+            "runqueue_ns": 0,
+            "timeslices": 1
+          }
+        },
+        {
+          "tid": 121752,
+          "status": {
+            "State": "S (sleeping)"
+          },
+          "wchan": "poll_schedule_timeout.constprop.0",
+          "schedstat": {
+            "cpu_ns": 564778,
+            "runqueue_ns": 0,
+            "timeslices": 2
+          }
+        }
+      ],
+      "status": {
+        "State": "S (sleeping)",
+        "VmRSS": "103120 kB",
+        "VmSwap": "0 kB",
+        "Threads": "9",
+        "voluntary_ctxt_switches": "12",
+        "nonvoluntary_ctxt_switches": "0"
+      },
+      "io": {
+        "rchar": "434067",
+        "wchar": "2192",
+        "syscr": "3753",
+        "syscw": "53",
+        "read_bytes": "98304",
+        "write_bytes": "0",
+        "cancelled_write_bytes": "0"
+      },
+      "memory": {
+        "MemAvailable": "3498592 kB",
+        "SwapTotal": "2097136 kB",
+        "SwapFree": "1117168 kB",
+        "Dirty": "208 kB",
+        "Writeback": "704 kB"
+      }
+    }
+  ],
+  "sqlite_retries": [
+    "2026-10-24T05:30:33.011057+02:00 allsky-pi [WARNING] Image-2-74841/MainThread sqlite_transactions.retry_sqlite_transaction() [48]: [SQLITE_TRANSACTION_RETRY] attempt=1 limit=3 elapsed=20.015s error_type=OperationalError sqlite_errorcode=5 sqlite_basecode=5 retryable=True",
+    "2026-10-24T05:30:53.126865+02:00 allsky-pi [WARNING] Image-2-74841/MainThread sqlite_transactions.retry_sqlite_transaction() [48]: [SQLITE_TRANSACTION_RETRY] attempt=2 limit=3 elapsed=40.131s error_type=OperationalError sqlite_errorcode=5 sqlite_basecode=5 retryable=True",
+    "2026-10-24T05:31:13.343892+02:00 allsky-pi [WARNING] Image-2-74841/MainThread sqlite_transactions.retry_sqlite_transaction() [48]: [SQLITE_TRANSACTION_RETRY] attempt=3 limit=3 elapsed=60.348s error_type=OperationalError sqlite_errorcode=5 sqlite_basecode=5 retryable=False",
+    "2026-10-24T07:03:42.113697+02:00 allsky-pi [WARNING] Image-2-74841/MainThread sqlite_transactions.retry_sqlite_transaction() [48]: [SQLITE_TRANSACTION_RETRY] attempt=1 limit=3 elapsed=20.015s error_type=OperationalError sqlite_errorcode=5 sqlite_basecode=5 retryable=True",
+    "2026-10-24T07:04:02.228647+02:00 allsky-pi [WARNING] Image-2-74841/MainThread sqlite_transactions.retry_sqlite_transaction() [48]: [SQLITE_TRANSACTION_RETRY] attempt=2 limit=3 elapsed=40.130s error_type=OperationalError sqlite_errorcode=5 sqlite_basecode=5 retryable=True",
+    "2026-10-22T00:54:25.037838+02:00 allsky-pi [WARNING] Image-1-47986/MainThread sqlite_transactions.retry_sqlite_transaction() [48]: [SQLITE_TRANSACTION_RETRY] attempt=1 limit=3 elapsed=20.019s error_type=OperationalError sqlite_errorcode=5 sqlite_basecode=5 retryable=True",
+    "2026-10-22T02:16:48.732873+02:00 allsky-pi [WARNING] Image-1-47986/MainThread sqlite_transactions.retry_sqlite_transaction() [48]: [SQLITE_TRANSACTION_RETRY] attempt=1 limit=3 elapsed=20.016s error_type=OperationalError sqlite_errorcode=5 sqlite_basecode=5 retryable=True",
+    "2026-10-22T02:17:28.712954+02:00 allsky-pi [WARNING] Image-1-47986/MainThread sqlite_transactions.retry_sqlite_transaction() [48]: [SQLITE_TRANSACTION_RETRY] attempt=1 limit=3 elapsed=20.015s error_type=OperationalError sqlite_errorcode=5 sqlite_basecode=5 retryable=True",
+    "2026-10-22T10:44:23.258976+02:00 allsky-pi [WARNING] Image-2-74841/MainThread sqlite_transactions.retry_sqlite_transaction() [48]: [SQLITE_TRANSACTION_RETRY] attempt=1 limit=3 elapsed=20.025s error_type=OperationalError sqlite_errorcode=5 sqlite_basecode=5 retryable=True",
+    "2026-10-22T19:33:26.127770+02:00 allsky-pi [WARNING] Image-2-74841/MainThread sqlite_transactions.retry_sqlite_transaction() [48]: [SQLITE_TRANSACTION_RETRY] attempt=1 limit=3 elapsed=20.021s error_type=OperationalError sqlite_errorcode=5 sqlite_basecode=5 retryable=True",
+    "2026-10-23T02:26:15.044502+02:00 allsky-pi [WARNING] Image-2-74841/MainThread sqlite_transactions.retry_sqlite_transaction() [48]: [SQLITE_TRANSACTION_RETRY] attempt=1 limit=3 elapsed=20.015s error_type=OperationalError sqlite_errorcode=5 sqlite_basecode=5 retryable=True",
+    "2026-10-23T02:26:35.160168+02:00 allsky-pi [WARNING] Image-2-74841/MainThread sqlite_transactions.retry_sqlite_transaction() [48]: [SQLITE_TRANSACTION_RETRY] attempt=2 limit=3 elapsed=40.131s error_type=OperationalError sqlite_errorcode=5 sqlite_basecode=5 retryable=True",
+    "2026-10-23T15:13:19.126732+02:00 allsky-pi [WARNING] Image-2-74841/MainThread sqlite_transactions.retry_sqlite_transaction() [48]: [SQLITE_TRANSACTION_RETRY] attempt=1 limit=3 elapsed=20.016s error_type=OperationalError sqlite_errorcode=5 sqlite_basecode=5 retryable=True",
+    "2026-10-23T19:43:34.955912+02:00 allsky-pi [WARNING] Image-2-74841/MainThread sqlite_transactions.retry_sqlite_transaction() [48]: [SQLITE_TRANSACTION_RETRY] attempt=1 limit=3 elapsed=20.023s error_type=OperationalError sqlite_errorcode=5 sqlite_basecode=5 retryable=True",
+    "2026-10-23T19:43:55.075406+02:00 allsky-pi [WARNING] Image-2-74841/MainThread sqlite_transactions.retry_sqlite_transaction() [48]: [SQLITE_TRANSACTION_RETRY] attempt=2 limit=3 elapsed=40.143s error_type=OperationalError sqlite_errorcode=5 sqlite_basecode=5 retryable=True",
+    "2026-10-23T19:44:15.290908+02:00 allsky-pi [WARNING] Image-2-74841/MainThread sqlite_transactions.retry_sqlite_transaction() [48]: [SQLITE_TRANSACTION_RETRY] attempt=3 limit=3 elapsed=60.358s error_type=OperationalError sqlite_errorcode=5 sqlite_basecode=5 retryable=False"
+  ],
+  "cleanup_correlation": {
+    "task": 18133,
+    "created_utc": "2026-10-24T03:29:41Z",
+    "result": "Storage cleanup: more work; deleted 500 images; 7.24 GiB free.",
+    "busy_local_window": [
+      "2026-10-24T05:30:33+02:00",
+      "2026-10-24T05:31:13+02:00"
+    ]
+  },
+  "tests": [
+    {
+      "test": "hybrid_storage_sqlite_fairness_test.py",
+      "code": 0,
+      "stdout": "Storage SQLite fairness: baseline contention fails; post-commit yield permits capture PASS\n",
+      "stderr": ""
+    },
+    {
+      "test": "hybrid_storage_contention_test.py",
+      "code": 0,
+      "stdout": "Storage contention: real thumbnail commit collision, refreshed upload guard, bounded retry and error propagation PASS\n",
+      "stderr": ""
+    },
+    {
+      "test": "hybrid_storage_pressure_flow_test.py",
+      "code": 0,
+      "stdout": "Storage cleanup: real files, two cameras, missing-prefix paging, commit paging, upload/generation protection, lock and path boundary PASS\n",
+      "stderr": ""
+    },
+    {
+      "test": "hybrid_storage_priority_test.py",
+      "code": 0,
+      "stdout": "Storage priority: day before night, immediate FITS source reclamation, generated fallback, five-day and upload protection PASS\n",
+      "stderr": ""
+    },
+    {
+      "test": "hybrid_storage_worker_test.py",
+      "code": 0,
+      "stdout": "Storage worker: latest disable, observed task results, notifications and lock contention PASS\n",
+      "stderr": ""
+    },
+    {
+      "test": "hybrid_storage_process_test.py",
+      "code": 0,
+      "stdout": "Storage process: real child cleanup consumption and scoped protection PASS\n",
+      "stderr": "Goodbye\n"
+    },
+    {
+      "test": "hybrid_storage_dispatch_test.py",
+      "code": 0,
+      "stdout": "Dedicated storage dispatch and worker lifecycle PASS\n",
+      "stderr": "Storage worker recovery failed; retrying on the next supervisor loop\nTraceback (most recent call last):\n  File \"/tmp/hybrid-fixes-20261024/indi_allsky/allsky.py\", line 942, in _startStorageWorker\n    recover_interrupted_cleanup()\n    ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^\n  File \"/tmp/hybrid-fixes-20261024/testing/hybrid_storage_dispatch_test.py\", line 55, in recover\n    raise recovery_failures.pop()\nRuntimeError: database is locked\n"
+    },
+    {
+      "test": "hybrid_preview_cache_publication_test.py",
+      "code": 0,
+      "stdout": "",
+      "stderr": "test_identity_without_durability_barrier (__main__.PublicationTest.test_identity_without_durability_barrier) ... ok\ntest_lost_or_corrupt_cache_regenerates (__main__.PublicationTest.test_lost_or_corrupt_cache_regenerates) ... ok\n\n----------------------------------------------------------------------\nRan 2 tests in 0.009s\n\nOK\n"
+    },
+    {
+      "test": "hybrid_preview_cache_test.py",
+      "code": 0,
+      "stdout": "Preview cache: bounded LRU, corruption/eviction regeneration, source isolation, failure handling and cross-process single rendering: PASS\n",
+      "stderr": "Preview cache write failed; serving reconstructed image\n"
+    },
+    {
+      "test": "hybrid_source_rendering_test.py",
+      "code": 0,
+      "stdout": "Source upload: real rendered bytes in all formats, FTP/S3/Sync/MQTT worker paths, metadata isolation, failure cleanup, duplicate claims PASS\nFull source replay: exact display pixels, original FITS unchanged, calibrated/raw/stack/focus, two cameras, day/night, all stretch modes, AWB/CCM, masks and saved labels: PASS\n",
+      "stderr": "-24 10:48:43,858] [ERROR] MainProcess-2822 uploader.processUpload() [200]: Upload task 11 failed\nTraceback (most recent call last):\n  File \"/tmp/hybrid-fixes-20261024/indi_allsky/uploader.py\", line 197, in processUpload\n    self._executeUpload(task)\n    ~~~~~~~~~~~~~~~~~~~^^^^^^\n  File \"/tmp/hybrid-fixes-20261024/indi_allsky/uploader.py\", line 547, in _executeUpload\n    with source_upload_file(entry, self.image_dir, metadata) as (display_file, metadata):\n         ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.13/contextlib.py\", line 141, in __enter__\n    return next(self.gen)\n  File \"/tmp/hybrid-fixes-20261024/indi_allsky/source_upload.py\", line 23, in source_upload_file\n    raise ValueError('Invalid scientific source reference')\nValueError: Invalid scientific source reference\n[2026-10-24 10:48:43,864] [ERROR] MainProcess-2822 uploader.processUpload() [200]: Upload task 12 failed\nTraceback (most recent call last):\n  File \"/tmp/hybrid-fixes-20261024/indi_allsky/uploader.py\", line 197, in processUpload\n    self._executeUpload(task)\n    ~~~~~~~~~~~~~~~~~~~^^^^^^\n  File \"/tmp/hybrid-fixes-20261024/indi_allsky/uploader.py\", line 547, in _executeUpload\n    with source_upload_file(entry, self.image_dir, metadata) as (display_file, metadata):\n         ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.13/contextlib.py\", line 141, in __enter__\n    return next(self.gen)\n  File \"/tmp/hybrid-fixes-20261024/indi_allsky/source_upload.py\", line 27, in source_upload_file\n    raise ValueError('Upload source does not match the camera/exposure')\nValueError: Upload source does not match the camera/exposure\nOverriding CFA pattern: RGGB\nFocus mode enabled, labels disabled\nOverriding CFA pattern: RGGB\nFocus mode enabled, labels disabled\n"
+    },
+    {
+      "test": "hybrid_source_publication_test.py",
+      "code": 0,
+      "stdout": "Publication probe: typed science pixels/extra HDU/gzip preserved; context complete; failed replace preserves source: PASS\n",
+      "stderr": ""
+    },
+    {
+      "test": "hybrid_generation_flow_test.py",
+      "code": 0,
+      "stdout": "Hybrid generation form, roles/CSRF/network, scoped jobs, FISH2PANO gate, task visibility and dedicated fixture deletion: PASS\n",
+      "stderr": ""
+    },
+    {
+      "test": "hybrid_mini_generation_flow_test.py",
+      "code": 0,
+      "stdout": "Hybrid mini generation: identities, scope, CSRF, validation, queue payload/rollback, empty state and exact preview boundaries: PASS\n",
+      "stderr": ""
+    }
+  ],
+  "initial_test_adjustment": "Storage contention test assumed sleep only meant retry; updated to assert both completed post-commit yield and existing retry, with no active transaction and media lock acquirable. Rerun passed; application unchanged.",
+  "benchmark": {
+    "benchmark_root": "/home/eric/hybrid-benchmark-20261024",
+    "results": [
+      {
+        "variant": "former_fsync",
+        "publications": 16,
+        "payload_bytes": 1048576,
+        "fsync_count": 16,
+        "fsync_seconds": 12.970602717999782,
+        "publish_seconds": [
+          0.03999780300000566,
+          0.029766737000045396,
+          0.023804263000101855,
+          0.024819317999913437,
+          0.02231218200006424,
+          0.027721739000071466,
+          0.4627418889999717,
+          12.051654217000078,
+          0.039145658999927946,
+          0.03409342000009019,
+          0.032685250999975324,
+          0.05617946000006668,
+          0.02360994799994387,
+          0.025682013999926312,
+          0.07371469899999283,
+          0.05773845400005939
+        ],
+        "total_seconds": 13.025667053000234
+      },
+      {
+        "variant": "disposable_atomic",
+        "publications": 16,
+        "payload_bytes": 1048576,
+        "fsync_count": 0,
+        "fsync_seconds": 0,
+        "publish_seconds": [
+          0.0018794899999647896,
+          0.0018582120000019131,
+          0.0018718970000008994,
+          0.0019034900000178823,
+          0.0019985100000212697,
+          0.0019746579999946334,
+          0.0020011029999977836,
+          0.0021574749999899723,
+          0.0019140090000746568,
+          0.0019458979999171788,
+          0.001991935999967609,
+          0.002225827999950525,
+          0.002132900999981757,
+          0.0021251049998909366,
+          0.0023331260000531984,
+          0.002227753999932247
+        ],
+        "total_seconds": 0.03254139199975725
+      }
+    ]
+  },
+  "limits": [
+    "Publication benchmark measures enqueue/atomic visibility, not final background disk write completion.",
+    "14 of 17 snapshots show a thread in disk sleep; remaining samples do not establish the same cause.",
+    "Post-commit yield reduces aggressive writer reacquisition; it cannot guarantee every SQLite BUSY is eliminated.",
+    "No new 24-hour run; sustained absence of timeouts not asserted."
+  ],
+  "deployment": null
+}

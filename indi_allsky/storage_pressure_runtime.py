@@ -22,6 +22,7 @@ from .generation_retention import generation_scope
 IMAGE_FAMILIES = ('Image', 'FitsImage', 'RawImage', 'PanoramaImage')
 GENERATED_FAMILIES = ('Video', 'MiniVideo', 'Keogram', 'StarTrails', 'StarTrailsVideo', 'PanoramaVideo')
 ACTION = 'storagePressureCleanup'
+SQLITE_WRITER_FAIRNESS_SECONDS = 0.01
 
 
 def pending_storage_cleanup(tasks):
@@ -42,6 +43,7 @@ class StoragePressureRuntime:
         self.options = StoragePressureOptions.from_config(config)
         self.volume_spec = config.get('ARCHIVE_VOLUME')
         self.session = session
+        self.sqlite_writer_fairness = session.get_bind().dialect.name == 'sqlite'
         self.models = models
         self.root = Path(image_root).resolve()
         self.disk_usage = disk_usage
@@ -179,7 +181,15 @@ class StoragePressureRuntime:
         # fresh scan could omit it once its file has gone but its row remains.
         for attempt in range(3):
             try:
-                return self._delete_once(candidate)
+                result = self._delete_once(candidate)
+                # SQLite does not queue a waiting writer ahead of a process
+                # that immediately starts its next transaction. Cleanup may
+                # otherwise reacquire the WAL writer slot for an entire
+                # 500-file batch. Yield only after the commit and after the
+                # media lock has been released; no transaction spans this.
+                if self.sqlite_writer_fairness:
+                    time.sleep(SQLITE_WRITER_FAIRNESS_SECONDS)
+                return result
             except OperationalError as exc:
                 self.session.rollback()
                 code = getattr(exc.orig, 'sqlite_errorcode', None)

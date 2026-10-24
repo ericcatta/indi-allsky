@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """Real SQLite writer conflict after thumbnail unlink; bounded safe recovery."""
 from datetime import datetime, timedelta
+import fcntl
+import os
 from pathlib import Path
 import sqlite3
 from unittest.mock import patch
@@ -50,13 +52,27 @@ with isolated_app(file_database=True) as app, app.app_context():
     db.session.execute(db.text('PRAGMA busy_timeout=0'))
     released = []
     def release(delay):
-        assert photo.exists() and not thumb.exists()
-        writer.commit()
+        if delay == 0.1:
+            assert photo.exists() and not thumb.exists()
+            writer.commit()
+        elif delay == 0.01:
+            # The fairness yield belongs only to a completed delete. Both
+            # commits and the exclusive media lock must already be finished.
+            assert not photo.exists() and not thumb.exists()
+            assert not db.session().in_transaction()
+            fd = os.open(root / '.hybrid-media-task.lock',
+                         os.O_CREAT | os.O_RDWR | os.O_NOFOLLOW, 0o600)
+            try:
+                fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            finally:
+                os.close(fd)
+        else:
+            raise AssertionError('Unexpected storage retry/yield delay: {0}'.format(delay))
         released.append(delay)
     with patch.object(Thumbnail, 'deleteAsset', collide), \
             patch('indi_allsky.storage_pressure_runtime.time.sleep', release):
         runtime.delete(candidate)
-    assert collisions == [1] and released == [0.1]
+    assert collisions == [1] and released == [0.1, 0.01]
     assert not photo.exists() and not thumb.exists()
     assert db.session.get(Image, 1) is None and db.session.get(Thumbnail, 1) is None
 
@@ -65,6 +81,7 @@ with isolated_app(file_database=True) as app, app.app_context():
     photo, thumb, candidate = fixture(2)
     collisions.clear()
     def queue_upload(delay):
+        assert delay == 0.1
         writer.commit()
         db.session.add(models.IndiAllSkyDbTaskQueueTable(
             queue=models.TaskQueueQueue.UPLOAD, state=models.TaskQueueState.QUEUED,

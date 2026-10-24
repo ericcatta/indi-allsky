@@ -5,6 +5,31 @@ acceptance remains open. SQLite image/panorama INSERT retries and the libcamera
 preview-phase watchdog budget are deployed at `0284f14a`, with config 119
 unchanged. No further 24-hour observation is authorized by the latest instruction.
 
+## Storage contention follow-up — 24 October
+
+The diagnostics now contain 17 timeout snapshots from 22–24 October: 14 show
+at least one rpicam thread in disk sleep (mostly `folio_wait_bit_common`). These
+establish I/O/page waits for those attempts, not CPU starvation or a camera
+exposure setting fault. Other sampled states remain inconclusive. SQLite BUSY
+also recurred during a 500-file storage-pressure cleanup, exhausting three
+20-second waits for one FITS registration.
+
+Two targeted corrections are verified in an isolated Raspberry candidate:
+- SQLite cleanup yields 10 ms after each completed delete, outside the transaction
+  and media lock, allowing competing capture writers to acquire the writer slot.
+  Retention, retry limits and upload/generation protections remain unchanged.
+- Disposable preview cache publication no longer forces `fsync` per derivative.
+  Flush/close, atomic replacement and checksum regeneration remain; science FITS
+  and archival assets retain their durability operations.
+
+Thirteen targeted tests pass, including real SQLite contention, protected cleanup,
+cache corruption/concurrency, source integrity and full/mini generation. A bounded
+16 × 1 MiB SD benchmark measured 13.026 s with the former barriers (one publication
+12.052 s), versus 0.033 s without; bytes match. This measures publication latency,
+not completion of background disk writes or proof that all timeouts are cured.
+No new 24-hour observation is started. Evidence:
+`testing/evidence/hybrid-storage-contention-20261024.json`.
+
 ## Final bounded verification — 21 October, 18:13 CEST
 
 All three outstanding ordinary-user archive controls are user-confirmed in the
