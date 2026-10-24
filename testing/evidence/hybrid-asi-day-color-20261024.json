@@ -1,0 +1,45 @@
+{
+  "date": "2026-10-24",
+  "runtime_code": "dda37307",
+  "previous_config_revision": 120,
+  "config_revision": 121,
+  "scope": "Configuration-only ASI678 daylight color and tone refinement",
+  "settings": {
+    "USE_NIGHT_COLOR": false,
+    "ASI_day": {
+      "auto_wb": false,
+      "scnr": "",
+      "red_factor": 1.0,
+      "green_factor": 1.04,
+      "blue_factor": 0.93,
+      "gamma": 1.15
+    }
+  },
+  "checks": {
+    "effective_IMX_day_parameters_unchanged": true,
+    "effective_night_parameters_unchanged_both_cameras": true,
+    "parameters_compared": [
+      "auto_wb",
+      "scnr",
+      "RGB multipliers",
+      "RGB MTF midtones",
+      "saturation",
+      "gamma",
+      "denoise",
+      "sharpen"
+    ],
+    "legacy_auto_wb_before_change_was_active": false,
+    "live_frames_decode_both": true,
+    "live_visual_review": "ASI sky brighter and violet cast reduced; strong solar flare remains.",
+    "observed_shared_day_interval_seconds": 15,
+    "bounded_log_lines": 425,
+    "bounded_error_count": 0
+  },
+  "reason": "Day controls were ignored by USE_NIGHT_COLOR. Offline color comparisons support a small green increase/blue reduction instead of whole-scene gray-world balance. Modest gamma lift increases sky midtone visibility.",
+  "limits": [
+    "Visual tuning, not calibrated colorimetry: no known neutral reference or spectral calibration.",
+    "Daylight samples only; no new 24-hour observation.",
+    "No exposure/gain, cadence or scientific data change."
+  ],
+  "privacy": "No raw logs, image files, image metadata or credentials included."
+}
