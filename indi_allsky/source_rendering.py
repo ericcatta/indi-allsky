@@ -35,7 +35,7 @@ EXPOSURE_PERIOD EXPOSURE_PERIOD_DAY
 '''.split())
 STRETCH_KEYS = RENDER_GROUPS['IMAGE_STRETCH'] + (
     'DAYTIME', 'MOONMODE', 'MODE3_BLACK_CLIP', 'MODE3_SHADOWS',
-    'MODE3_MIDTONES', 'MODE3_HIGHLIGHTS',
+    'MODE3_MIDTONES', 'MODE3_HIGHLIGHTS', 'MODE3_ALGORITHM_VERSION',
 )
 
 
@@ -113,7 +113,8 @@ def snapshot_source_recipe(processor, basis, presentation, assets, *, ccm=None):
     stretch_mask = getattr(p._stretch_o, '_numpy_mask_dict', {}).get(mask_key)
     stretch_state = {name: _json_value(getattr(p._stretch_o, name)) for name in (
         'gamma', 'stddevs', 'shadows', 'midtones', 'highlights', 'black_clip',
-        'stride', 'scale_factor', 'operation_count') if hasattr(p._stretch_o, name)}
+        'stride', 'scale_factor', 'algorithm_version', 'operation_count')
+        if hasattr(p._stretch_o, name)}
     label = snapshot_label(p)
     label['style']['PIL_FONT_CUSTOM'] = ''
     record = {

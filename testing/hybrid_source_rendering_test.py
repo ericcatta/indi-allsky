@@ -28,7 +28,14 @@ with isolated_app(multi_camera=True) as app:
             camera = IndiAllSkyDbCameraTable.query.filter_by(id=cid).one()
             for mode in ('direct','pre_calibration','stack','focus'):
                 for night in (False,True):
-                    for stretch in ('mode1_stddev_cutoff','mode2_mtf','mode2_mtf_x2','mode3_adaptive_mtf'):
+                    stretch_variants = (
+                        ('mode1_stddev_cutoff', None),
+                        ('mode2_mtf', None),
+                        ('mode2_mtf_x2', None),
+                        ('mode3_adaptive_mtf', None),
+                        ('mode3_adaptive_mtf', 2),
+                    )
+                    for stretch, mode3_algorithm_version in stretch_variants:
                         c = deepcopy(IndiAllSkyConfigBase().base_config)
                         c.update(IMAGE_FOLDER=str(root),IMAGE_LABEL_SYSTEM='opencv',
                             FOCUS_MODE=mode=='focus',IMAGE_SAVE_FITS_PRE_DARK=mode=='pre_calibration',
@@ -48,6 +55,8 @@ with isolated_app(multi_camera=True) as app:
                             c[key]['ENABLE']=False
                         c['IMAGE_STRETCH'].update(CLASSNAME=stretch,DAYTIME=True,MOONMODE=True,
                             MODE3_MIDTONES=0.33,MODE3_BLACK_CLIP=-2.0)
+                        if mode3_algorithm_version is not None:
+                            c['IMAGE_STRETCH']['MODE3_ALGORITHM_VERSION'] = mode3_algorithm_version
                         c['IMAGE_CIRCLE_MASK'].update(ENABLE=True,DIAMETER=110,BLUR=3)
                         c['IMAGE_BORDER'].update(TOP=2,BOTTOM=3,LEFT=4,RIGHT=5)
                         p=ImageProcessor(c,Array('f',[46,8,200,0,0]),Array('f',[0]),Array('i',[1]),
@@ -98,6 +107,10 @@ with isolated_app(multi_camera=True) as app:
                         presentation=snapshot_presentation(p,1,assets)
                         p.label_image(label_text='Saved exposure')
                         recipe=snapshot_source_recipe(p,basis,presentation,assets,ccm=ccm)
+                        if stretch == 'mode3_adaptive_mtf':
+                            assert recipe['stretch_state']['algorithm_version'] == (mode3_algorithm_version or 1)
+                            frozen_version = recipe['settings']['IMAGE_STRETCH'].get('MODE3_ALGORITHM_VERSION')
+                            assert frozen_version == mode3_algorithm_version
                         assert 'never-archive' not in json.dumps(recipe)
                         c['GAMMA_CORRECTION']=2.0 # replay must not use current settings
                         with patch('indi_allsky.processing.ImageProcessor.calibrate',side_effect=AssertionError('Live calibration')), \
