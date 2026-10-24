@@ -17,7 +17,15 @@ def run():
             client=login_client(app,uid)
             response=client.get(endpoint)
             assert response.status_code==200,response.text[:500]
-            assert 'Snapshot at page load' in response.text
+            assert 'Saved images · refresh to update.' in response.text
+            refresh = re.search(r'href="([^"]+)"\s*>Refresh</a>', response.text)
+            assert refresh and html.unescape(refresh[1]).endswith('/modern-admin/now')
+            details = re.search(
+                r'<details class="modern-admin-table-panel">\s*'
+                r'<summary><strong>Capture and processing details</strong></summary>(.*?)</details>',
+                response.text, re.S)
+            assert details
+            assert 'This is a snapshot at page load. A saved frame does not by itself prove that capture is still running.' in details[1]
             assert response.text.count('>Browse camera images</a>')==2
             assert 'now-frame-error' in response.text
             for removed in ('Placeholder answers','Static briefing','placeholder-only','now-outputs-title','now-health-title','now-questions-title',
