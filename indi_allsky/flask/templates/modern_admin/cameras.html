@@ -16,6 +16,10 @@ var camera_id = {{ camera_id }};
     {% set modern_admin_heading = 'Camera Management' %}
     {% set modern_admin_title_id = 'modern-admin-cameras-title' %}
     {% include 'modern_admin/_shell_header.html' %}
+    <header class="modern-admin-section-heading">
+        <div><h2>Cameras</h2><p>Manage capture profiles and open the tools for each camera.</p></div>
+        <a class="modern-admin-media-button" href="{{ url_for('indi_allsky.modern_admin_camera_add_view') }}">Add camera</a>
+    </header>
 
     {% if modern_admin_camera_switch_error %}
     <section class="modern-admin-message-panel modern-admin-message-error" aria-label="Camera switch error">
@@ -87,6 +91,16 @@ var camera_id = {{ camera_id }};
                     <a class="modern-admin-media-button" href="{{ camera.gallery_url }}">Gallery</a>
                     {% endif %}
                 </div>
+                {% if camera.id %}
+                <details>
+                    <summary>Camera tools</summary>
+                    <nav class="modern-admin-link-grid" aria-label="Tools for {{ camera.name }}">
+                        {% for target, label in (('focus', 'Focus'), ('camera_info', 'Camera information'), ('image_lag', 'Image timing'), ('adu_history', 'Brightness history'), ('dark_library', 'Dark library'), ('mask', 'Detection mask')) %}
+                        <a href="{{ url_for('indi_allsky.modern_admin_' + target + '_view', camera_id=camera.id, profile_id=camera.profile_id) }}">{{ label }}</a>
+                        {% endfor %}
+                    </nav>
+                </details>
+                {% endif %}
                 {% if camera.switch_enabled and not camera.profile_mode and modern_admin_can_manage_cameras %}
                 <form data-camera-management-form class="modern-admin-camera-switch-form" method="post" action="{{ url_for('indi_allsky.modern_admin_cameras_view') }}">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
@@ -107,7 +121,8 @@ var camera_id = {{ camera_id }};
         {% endif %}
     </section>
 
-    <section class="modern-admin-table-panel" aria-labelledby="multi-camera-title">
+    <details class="modern-admin-table-panel">
+        <summary>Capture mode and profile configuration</summary>
         <div class="modern-admin-section-heading">
             <p class="modern-admin-eyebrow">Capture mode</p>
             <h2 id="multi-camera-title">Multi-camera capture</h2>
@@ -173,24 +188,17 @@ var camera_id = {{ camera_id }};
                 <p class="modern-admin-note">Save the mode, then restart indi-allsky to apply it.</p>
             </article>
         </div>
-    </section>
+    </details>
 
-    <section class="modern-admin-table-panel" aria-labelledby="camera-actions-title">
-        <div class="modern-admin-section-heading">
-            <p class="modern-admin-eyebrow">Camera Actions</p>
-            <h2 id="camera-actions-title">Add Camera</h2>
-        </div>
-        <p class="modern-admin-note">Create a new camera configuration from the current active config.</p>
-        <a class="modern-admin-placeholder-link" href="{{ url_for('indi_allsky.modern_admin_camera_add_view') }}">Add camera</a>
-    </section>
-
-    <section class="modern-admin-placeholder-page" aria-label="Camera pages">
-        <p class="modern-admin-eyebrow">Camera Views</p>
+    <details class="modern-admin-table-panel">
+        <summary>Setup and diagnostic tools</summary>
         <div class="modern-admin-link-grid">
             {% for label, endpoint in modern_admin_section_links %}
+            {% if endpoint != 'indi_allsky.modern_admin_camera_add_view' %}
             <a href="{{ url_for(endpoint) }}">{{ label }}</a>
+            {% endif %}
             {% endfor %}
         </div>
-    </section>
+    </details>
 </main>
 {% endblock %}

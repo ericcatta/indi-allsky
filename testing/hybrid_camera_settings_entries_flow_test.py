@@ -41,14 +41,17 @@ def run():
         back = unescape(re.search(r'href="([^"]+)"[^>]*>Back to Settings Inventory</a>', page.text)[1])
         index = clients[0].get(back)
         assert 'data-settings-editors' in index.text
-        assert '<summary>Technical reference and settings inventory</summary>' in index.text
+        assert '<summary>Advanced configuration and recovery</summary>' in index.text
+        assert '<summary>Technical settings inventory</summary>' in index.text
+        assert 'aria-label="Camera settings shortcuts"' not in index.text
+        assert 'aria-label="Settings levels"' not in index.text
         for target in ('/settings/timelapse', '/settings/full', '/config-history', '/config-restore'):
             hrefs = [unescape(href) for href in re.findall(r'href="([^"]+)"', index.text) if target in href]
             assert hrefs, target
             for href in hrefs:
                 assert clients[0].get(href, follow_redirects=True).status_code == 200, href
         links = [unescape(href) for href in re.findall(r'href="([^"]+)"', index.text)
-                 if '/settings/exposure-gain' in href]
+                 if '/settings/cameras' in href]
         assert links
         for href in links:
             arrived = clients[0].get(href, follow_redirects=True)
@@ -76,7 +79,7 @@ def run():
                 assert parse_qs(urlsplit(back).query) == {'camera_id':[str(cid)], 'profile_id':[profile_id]}
                 index = client.get(back)
                 link = next(unescape(href) for href in re.findall(r'href="([^"]+)"', index.text)
-                            if '/settings/exposure-gain' in href)
+                            if '/settings/cameras' in href)
                 assert parse_qs(urlsplit(link).query) == {'camera_id':[str(cid)], 'profile_id':[profile_id]}
                 arrived = client.get(link, follow_redirects=True)
                 assert BrowserValues(arrived.text).values['camera-driver-profile_id'] == profile_id

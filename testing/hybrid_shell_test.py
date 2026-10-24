@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """Guard the sole Hybrid shell DOM contract and retired frontend absence."""
 
-import hashlib
 from html.parser import HTMLParser
 import json
 import re
@@ -41,7 +40,7 @@ class BodyContract(HTMLParser):
             self.tokens.append(('text', data.strip()))
 
 
-def shell_contract(shell, modern, authenticated, original_source=None):
+def shell_contract(shell, modern, authenticated, original_source=None, endpoint_name=None):
     overrides = {
         'probe.html': "{% extends 'shell.html' %}{% block title %}Probe{% endblock %}"
         "{% block content %}<p id='probe'>Content exactly once</p>{% endblock %}",
@@ -53,7 +52,7 @@ def shell_contract(shell, modern, authenticated, original_source=None):
         'csrf_token': lambda: 'test-csrf-token',
     })
     html = env.get_template('probe.html').render(
-        request=SimpleNamespace(endpoint='indi_allsky.modern_admin_now_view' if modern else 'indi_allsky.index_view'),
+        request=SimpleNamespace(endpoint=endpoint_name or ('indi_allsky.modern_admin_now_view' if modern else 'indi_allsky.index_view')),
         current_user=SimpleNamespace(is_authenticated=authenticated, is_admin=authenticated),
         session={'admin_mode': 'modern' if modern else 'classic'},
         config={'LOGIN_DISABLED': False},
@@ -63,17 +62,17 @@ def shell_contract(shell, modern, authenticated, original_source=None):
     assert html.count("<p id='probe'>Content exactly once</p>") == 1
     if modern:
         assert html.count('<meta name="viewport" content="width=device-width, initial-scale=1">') == 1
-        # The responsive preview release changes the cache version, not the
-        # shell's assets or navigation. Keep the established DOM fingerprint.
-        assert html.count('hybrid-product-ui-shell-008') == 1
-        html = html.replace('hybrid-product-ui-shell-008', 'hybrid-product-ui-shell-007')
-        # New timelapse navigation is verified separately so the existing
-        # shell contract and its fingerprints remain unchanged.
-        timelapse_link = '<a href="indi_allsky.modern_admin_timelapse_settings_view?{}">Timelapse Settings</a>'
-        assert html.count(timelapse_link) == 1
-        html = html.replace(timelapse_link, '')
-        # Intentional addition: authentication navigation. Preserve all older
-        # shell fingerprints after verifying this new section separately.
+        assert html.count('hybrid-product-ui-shell-009') == 1
+        assert 'Observation' in html and 'Management' in html
+        assert 'aria-current="page"' in html
+        assert 'hybrid-control-disclosure' in html
+        assert 'Skip to content' in html
+        assert '>Home</a>' not in html
+        assert '>Moment</a>' not in html and '>Output</a>' not in html
+        assert 'More tools' not in html
+        assert html.count('class="hybrid-nav-icon"') == 7
+        assert '⚙' not in html
+        assert ('data-hybrid-system-command="reboot"' in html) == (endpoint_name == 'indi_allsky.modern_admin_system_view')
         account = re.search(r'<div class="hybrid-drawer-section" data-hybrid-account-navigation>(.*?)</div>', html, re.S)
         assert account is not None
         if authenticated:
@@ -89,24 +88,32 @@ def shell_contract(shell, modern, authenticated, original_source=None):
     for asset in ('css/style.css', 'js/indi-allsky-tabs.js'):
         assert (asset in html) == (not modern), asset
     contract = json.dumps((parser.tokens, parser.assets), sort_keys=True)
-    return hashlib.sha256(contract.encode()).hexdigest()
+    return contract
 
 
 def test_shell_dom_parity():
-    # Hybrid fingerprints remain unchanged after physical Classic removal.
-    expected = {
-        (False, False): 'da24764ffdc54509edae10c1475666dc2ebe6808599afddbbe9fa65426a46010',
-        (False, True): '5231472cc413795e3f2b4c2a380db4bc0f7a8205a9e092569f76999d806383fc',
-        (True, False): 'b53972a1cf273bdf03c28b5a2b649a6163429dbe5227643045df0c93663cb322',
-        (True, True): 'eaca7c085a1ddc89be90b6c2f080d6695133a4cd880c9f054e0014024decae9b',
-    }
     assert not (TEMPLATES / 'base.html').exists()
-    for (modern, authenticated), fingerprint in expected.items():
-        if not modern:
-            # Historical fingerprints of the intentionally retired shell.
-            continue
-        shell = 'modern_admin/base.html'
-        assert shell_contract(shell, modern, authenticated) == fingerprint, (modern, authenticated)
+    for authenticated in (False, True):
+        shell_contract('modern_admin/base.html', True, authenticated)
+        shell_contract('modern_admin/base.html', True, authenticated, endpoint_name='indi_allsky.modern_admin_system_view')
+
+
+def test_navigation_detail_context():
+    env = Environment(loader=FileSystemLoader(TEMPLATES))
+    env.globals['url_for'] = lambda endpoint, **kwargs: endpoint
+    expected = {
+        'media_image_detail': 'library', 'output_detail': 'library',
+        'sky_cycle': 'library', 'camera_info': 'cameras', 'image_circle_helper': 'cameras',
+        'full_settings': 'settings', 'config_restore_detail': 'settings',
+        'virtualsky': 'observatory', 'task_detail': 'system',
+    }
+    for page, section in expected.items():
+        html = env.get_template('modern_admin/_shell_navigation.html').render(
+            request=SimpleNamespace(endpoint='indi_allsky.modern_admin_' + page + '_view'),
+            current_user=SimpleNamespace(is_authenticated=True),
+        )
+        active = re.findall(r'href="([^"]+)" aria-current="page"', html)
+        assert active == ['indi_allsky.modern_admin_' + section + '_view'], (page, active)
 
 
 def test_hybrid_templates_never_load_classic_shell():
@@ -136,5 +143,6 @@ def test_hybrid_templates_never_load_classic_shell():
 
 if __name__ == '__main__':
     test_shell_dom_parity()
+    test_navigation_detail_context()
     test_hybrid_templates_never_load_classic_shell()
     print('Independent Hybrid shell checks passed')

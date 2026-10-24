@@ -9,13 +9,7 @@
 <h1 id="sky-cycle-title">Sky Cycle</h1>
 <p>Latest recorded capture cycle for each camera. A cycle uses the acquisition date stored with the frames and may span midnight.</p>
 <p>Day and night below are recorded capture modes. They do not classify astronomical twilight or prove uninterrupted coverage.</p>
-<nav class="modern-admin-link-grid" aria-label="Cycle navigation">
 <a href="{{ url_for('indi_allsky.modern_admin_sky_cycle_view') }}">Refresh report</a>
-<a href="{{ url_for('indi_allsky.modern_admin_now_view') }}">Now</a>
-<a href="{{ url_for('indi_allsky.modern_admin_highlights_view') }}">Highlights</a>
-<a href="{{ url_for('indi_allsky.modern_admin_library_view') }}">Library</a>
-<a href="{{ url_for('indi_allsky.modern_admin_observatory_view') }}">Observatory</a>
-</nav>
 </header>
 {% if capture_cycles_error %}<p role="alert">{{ capture_cycles_error }}</p>{% endif %}
 {% for cycle in capture_cycles %}
@@ -39,10 +33,5 @@
 {% endif %}
 </section>
 {% else %}{% if not capture_cycles_error %}<p>No cameras are registered.</p>{% endif %}{% endfor %}
-<section class="modern-admin-table-panel"><h2>Events and sky conditions</h2>
-<p>This report does not yet evaluate twilight, detection events, source lineage or sky conditions. No simulated results are shown.</p>
-<a href="{{ url_for('indi_allsky.modern_admin_moment_detail_view') }}">Moment detail</a>
-<a href="{{ url_for('indi_allsky.modern_admin_output_detail_view') }}">Output detail</a>
-</section>
 </main>
 {% endblock %}

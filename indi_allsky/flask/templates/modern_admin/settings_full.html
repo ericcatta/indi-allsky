@@ -104,9 +104,8 @@ var camera_id = {{ camera_id }};
                     {% elif field_meta.is_submit_control %}
                         {# Rendered in the save action panel below. #}
                     {% else %}
-                    <label class="modern-admin-settings-edit-field {% if field_meta.is_checkbox %}modern-admin-settings-edit-field-checkbox{% endif %}" for="{{ field_meta.name }}" data-full-settings-row data-full-settings-field="{{ field_meta.name }}" data-full-settings-search="{{ field_meta.search_text | e }}">
-                        <span class="modern-admin-settings-edit-label">{{ field_meta.label }}</span>
-                        <span class="modern-admin-settings-edit-meta">{{ field_meta.name }} · {{ field_meta.config_key }} · {{ field_meta.field_type }}</span>
+                    <div class="modern-admin-settings-edit-field {% if field_meta.is_checkbox %}modern-admin-settings-edit-field-checkbox{% endif %}" data-full-settings-row data-full-settings-field="{{ field_meta.name }}" data-full-settings-search="{{ field_meta.search_text | e }}">
+                        <label class="modern-admin-settings-edit-label" for="{{ field_meta.name }}">{{ field_meta.label }}</label>
                         {% if field_meta.is_checkbox %}
                         <span class="modern-admin-settings-toggle-row">
                             {{ field(id=field_meta.name, data_modern_full_field='1') }}
@@ -121,14 +120,18 @@ var camera_id = {{ camera_id }};
                         {% else %}
                             {{ field(id=field_meta.name, data_modern_full_field='1') }}
                         {% endif %}
-                        <span class="modern-admin-settings-edit-help">{{ field_meta.validators }}</span>
-                        <span class="modern-admin-settings-edit-help">
-                            <span class="modern-admin-settings-badge modern-admin-settings-risk-{{ field_meta.risk }}">{{ field_meta.risk }}</span>
-                            <span class="modern-admin-settings-badge">{{ field_meta.scope }}</span>
-                            <span class="modern-admin-settings-badge modern-admin-settings-restart-{{ field_meta.restart_required }}">{{ field_meta.restart_required }}</span>
-                        </span>
+                        <details class="modern-admin-settings-field-details" data-full-settings-technical data-full-settings-technical-search="{{ (field_meta.name ~ ' ' ~ field_meta.config_key ~ ' ' ~ field_meta.field_type) | lower | e }}">
+                            <summary>Technical details</summary>
+                            <span class="modern-admin-settings-edit-meta">{{ field_meta.name }} · {{ field_meta.config_key }} · {{ field_meta.field_type }}</span>
+                            <span class="modern-admin-settings-edit-help">{{ field_meta.validators }}</span>
+                            <span class="modern-admin-settings-edit-help">
+                                <span class="modern-admin-settings-badge modern-admin-settings-risk-{{ field_meta.risk }}">{{ field_meta.risk }}</span>
+                                <span class="modern-admin-settings-badge">{{ field_meta.scope }}</span>
+                                <span class="modern-admin-settings-badge modern-admin-settings-restart-{{ field_meta.restart_required }}">{{ field_meta.restart_required }}</span>
+                            </span>
+                        </details>
                         <span id="{{ field_meta.name }}-error" class="modern-admin-settings-edit-error" hidden></span>
-                    </label>
+                    </div>
                     {% endif %}
                     {% endfor %}
                 </div>
@@ -168,5 +171,5 @@ var camera_id = {{ camera_id }};
     'csrfToken': csrf_token(),
     'canSave': (login_disabled or current_user.is_admin)|default(false)
 }|tojson }}</script>
-<script src="{{ url_for('indi_allsky.static', filename='modern_admin/full-settings.js', v='settings-filter-feedback-v2') }}" defer></script>
+<script src="{{ url_for('indi_allsky.static', filename='modern_admin/full-settings.js', v='settings-technical-disclosure-v3') }}" defer></script>
 {% endblock %}

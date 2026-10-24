@@ -2,15 +2,23 @@
 <section class="modern-admin-table-panel">
   <h1>{{ archive_title }}</h1>
   <p>Browse saved media across the complete archive. Capture day keeps night sessions together; filters apply to all records, with up to 48 results per page.</p>
+  <nav class="modern-admin-link-grid" aria-label="Archive tools">
+    <a href="{{ url_for('indi_allsky.modern_admin_sky_cycle_view') }}">Sky Cycle report</a>
+    <a href="{{ url_for('indi_allsky.modern_admin_loop_view') }}">Image Loop</a>
+    <a href="{{ url_for('indi_allsky.modern_admin_media_panorama_loop_view') }}">Panorama Loop</a>
+  </nav>
   <form method="get" id="hybrid-archive-filters" class="modern-admin-filter-bar">
     <label>Media type <select name="kind">{% for key,label in archive_kinds.items() %}<option value="{{ key }}" {% if archive_values.kind == key %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></label>
     <label>Camera <select name="camera_id">{% for choice in modern_admin_media_camera_filters %}<option value="{{ choice.camera_id or '' }}" {% if choice.active %}selected{% endif %}>{{ choice.label }}</option>{% endfor %}</select></label>
     <label>Capture day from <input type="date" name="start" value="{{ archive_values.start }}"></label>
     <label>Capture day to <input type="date" name="end" value="{{ archive_values.end }}"></label>
-    <label>Filename contains <input type="search" name="search" value="{{ archive_values.search }}" maxlength="255"></label>
-    <label>Day/Night <select name="period"><option value="">All</option><option value="day" {% if archive_values.period == 'day' %}selected{% endif %}>Day</option><option value="night" {% if archive_values.period == 'night' %}selected{% endif %}>Night</option></select></label>
-    <label>Uploaded <select name="uploaded"><option value="">All</option><option value="yes" {% if archive_values.uploaded == 'yes' %}selected{% endif %}>Uploaded</option><option value="no" {% if archive_values.uploaded == 'no' %}selected{% endif %}>Not uploaded</option></select></label>
     <label>Order <select name="sort"><option value="newest" {% if archive_values.sort == 'newest' %}selected{% endif %}>Newest first</option><option value="oldest" {% if archive_values.sort == 'oldest' %}selected{% endif %}>Oldest first</option></select></label>
+    <details{% if archive_values.search or archive_values.period or archive_values.uploaded %} open{% endif %}>
+      <summary>More filters</summary>
+      <label>Filename contains <input type="search" name="search" value="{{ archive_values.search }}" maxlength="255"></label>
+      <label>Day/Night <select name="period"><option value="">All</option><option value="day" {% if archive_values.period == 'day' %}selected{% endif %}>Day</option><option value="night" {% if archive_values.period == 'night' %}selected{% endif %}>Night</option></select></label>
+      <label>Uploaded <select name="uploaded"><option value="">All</option><option value="yes" {% if archive_values.uploaded == 'yes' %}selected{% endif %}>Uploaded</option><option value="no" {% if archive_values.uploaded == 'no' %}selected{% endif %}>Not uploaded</option></select></label>
+    </details>
     <button type="submit">Apply filters</button>
     <a href="{{ url_for(archive_endpoint, kind=archive_values.kind, camera_id=modern_admin_media_selected_filter.camera_id, profile_id=modern_admin_media_selected_filter.profile_id) }}">Reset filters</a>
   </form>

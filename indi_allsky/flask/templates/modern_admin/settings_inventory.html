@@ -11,38 +11,42 @@
     {% set modern_admin_title_id = 'modern-admin-settings-title' %}
     {% include 'modern_admin/_shell_header.html' %}
     <section class="modern-admin-table-panel" aria-labelledby="settings-editors-title">
-        <h2 id="settings-editors-title">Configure Hybrid</h2>
-        <p>Choose what to configure. Camera settings apply to the selected profile; video processing and system settings are shared.</p>
+        <h2 id="settings-editors-title">Settings by topic</h2>
+        <p>Choose the part of Hybrid you want to configure. Camera settings apply to the selected profile; the other topics are shared by all cameras.</p>
         <div class="modern-admin-settings-action-grid" data-settings-editors>
             {% for endpoint, label, description in (
-                ('modern_admin_camera_settings_view', 'Camera Profile Settings', 'Profiles, connection, exposure, gain, white balance and image geometry.'),
-                ('modern_admin_storage_protection_settings_view', 'Storage Protection', 'Automatic cleanup thresholds and minimum image retention.'),
-                ('modern_admin_timelapse_settings_view', 'Timelapse Settings', 'Reduce flicker and choose brightness smoothing for generated videos.'),
-                ('modern_admin_full_settings_view', 'Full Settings', 'Search and edit shared settings, storage, notifications, processing and integrations.'),
-                ('modern_admin_config_history_view', 'Config History', 'Review saved configuration revisions.'),
-                ('modern_admin_config_restore_view', 'Restore Config', 'Select and validate a saved revision before restoring it.')
+                ('modern_admin_camera_settings_view', 'Camera', 'Connection, exposure, gain, white balance, processing and image geometry for the selected profile.'),
+                ('modern_admin_storage_protection_settings_view', 'Storage and archive', 'Archive formats, disk availability, cleanup thresholds and image retention.'),
+                ('modern_admin_timelapse_settings_view', 'Video and timelapse', 'Brightness smoothing for timelapses and generated videos.'),
+                ('modern_admin_analytics_settings_view', 'Analytics', 'Chart metrics, metering regions and sky quality camera settings.'),
+                ('modern_admin_acquisition_save_settings_view', 'Acquisition and save', 'Capture output formats, compression and save hooks.'),
+                ('modern_admin_fits_source_settings_view', 'FITS and source files', 'Source files, FITS headers, retention and upload options.')
             ) %}
             <a class="modern-admin-settings-action-card" href="{{ url_for('indi_allsky.' + endpoint, camera_id=camera_id, profile_id=request.args.get('profile_id')) }}">
                 <span><strong>{{ label }}</strong><small>{{ description }}</small></span><span aria-hidden="true">›</span>
             </a>
             {% endfor %}
         </div>
-        <h3>Camera controls</h3>
-        <nav class="modern-admin-link-grid" aria-label="Camera settings shortcuts">
-            {% for path, label in (('camera_profile', 'Camera Profile Identity'), ('camera_connection', 'Camera Connection'), ('exposure_gain', 'Exposure / Gain'), ('auto_exposure_gain', 'Auto Exposure / Auto Gain'), ('hybrid_awb', 'Hybrid AWB')) %}
-            <a class="modern-admin-inline-link" href="{{ url_for('indi_allsky.modern_admin_' + path + '_settings_view', camera_id=camera_id, profile_id=request.args.get('profile_id')) }}">{{ label }}</a>
-            {% endfor %}
-        </nav>
     </section>
-    <nav class="modern-admin-link-grid" aria-label="Settings levels">
-        {% for level in ('basic', 'advanced', 'developer') %}
-        <a href="{{ url_for('indi_allsky.modern_admin_' + level + '_settings_view', camera_id=camera_id, profile_id=request.args.get('profile_id')) }}">{{ level | title }}</a>
-        {% endfor %}
-    </nav>
-    <details class="modern-admin-table-panel" id="settings-technical-reference">
-        <summary>Technical reference and settings inventory</summary>
-        <p>Read-only ownership documentation and compatibility references. Use the editors above to change configuration.</p>
-        {% include 'modern_admin/_settings_inventory_reference.html' %}
+    <details class="modern-admin-table-panel" id="settings-advanced-tools">
+        <summary>Advanced configuration and recovery</summary>
+        <p>Use these tools to edit less common shared settings, review previous revisions, or recover a configuration.</p>
+        <div class="modern-admin-settings-action-grid">
+            {% for endpoint, label, description in (
+                ('modern_admin_full_settings_view', 'Full Settings', 'Search and edit shared processing, integration and system fields.'),
+                ('modern_admin_config_history_view', 'Config History', 'Review and download saved configuration revisions.'),
+                ('modern_admin_config_restore_view', 'Restore Config', 'Validate a saved revision before restoring it.')
+            ) %}
+            <a class="modern-admin-settings-action-card" href="{{ url_for('indi_allsky.' + endpoint, camera_id=camera_id, profile_id=request.args.get('profile_id')) }}">
+                <span><strong>{{ label }}</strong><small>{{ description }}</small></span><span aria-hidden="true">›</span>
+            </a>
+            {% endfor %}
+        </div>
+        <details id="settings-technical-reference">
+            <summary>Technical settings inventory</summary>
+            <p>Read-only ownership and compatibility reference.</p>
+            {% include 'modern_admin/_settings_inventory_reference.html' %}
+        </details>
     </details>
 </main>
 {% endblock %}

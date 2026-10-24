@@ -8,13 +8,20 @@
 <p>Snapshot at {{ observatory_view.observed_at }}. All registered cameras are shown.</p>
 <p>Capture service: <strong>{{ modern_admin_capture_service_status.label }}</strong></p>
 <p>Frame freshness reflects saved image timestamps. It does not prove camera connectivity, file integrity or uninterrupted capture.</p>
-<nav class="modern-admin-link-grid" aria-label="Observatory navigation">
-<a href="{{ url_for('indi_allsky.modern_admin_observatory_view') }}">Refresh status</a>
-<a href="{{ url_for('indi_allsky.modern_admin_now_view') }}">Now</a>
-<a href="{{ url_for('indi_allsky.modern_admin_sky_cycle_view') }}">Capture cycles and generated outputs</a>
-<a href="{{ url_for('indi_allsky.modern_admin_notifications_view') }}">Notifications</a>
-</nav>
+<a href="{{ url_for('indi_allsky.modern_admin_observatory_view') }}">Refresh snapshot</a>
 </header>
+<section class="modern-admin-table-panel" aria-labelledby="observatory-tools">
+<h2 id="observatory-tools">Observation tools</h2>
+<nav class="modern-admin-link-grid" aria-label="Observation tools">
+<a href="{{ url_for('indi_allsky.modern_admin_sqm_view') }}">SQM</a>
+<a href="{{ url_for('indi_allsky.modern_admin_charts_view') }}">Charts</a>
+<a href="{{ url_for('indi_allsky.modern_admin_sensor_panel_view') }}">Sensor Panel</a>
+<a href="{{ url_for('indi_allsky.modern_admin_astropanel_view') }}">AstroPanel</a>
+<a href="{{ url_for('indi_allsky.modern_admin_virtualsky_view') }}">VirtualSky</a>
+<a href="{{ url_for('indi_allsky.modern_admin_realtime_keogram_view') }}">Realtime Keogram</a>
+<a href="{{ url_for('indi_allsky.modern_admin_longterm_keogram_view') }}">Long-term Keogram</a>
+</nav>
+</section>
 <section class="modern-admin-table-panel" aria-labelledby="observatory-cameras">
 <h2 id="observatory-cameras">Cameras and saved sources</h2>
 {% if observatory_view.cameras_error %}<p role="alert">{{ observatory_view.cameras_error }}</p>{% endif %}
@@ -37,14 +44,16 @@
 </div>
 <p>Source timestamps do not establish frame-by-frame correspondence or verify file availability. Inspect the files in Library.</p>
 </section>
-<section class="modern-admin-table-panel" aria-labelledby="observatory-storage">
+<details class="modern-admin-table-panel">
+<summary><strong>Operational details</strong></summary>
+<section aria-labelledby="observatory-storage">
 <h2 id="observatory-storage">Media filesystem</h2>
 {% if observatory_view.storage_error %}<p role="alert">{{ observatory_view.storage_error }}</p>{% else %}
 <p>{{ '%.2f'|format(observatory_view.storage.free / 1073741824) }} GiB free of {{ '%.2f'|format(observatory_view.storage.total / 1073741824) }} GiB; {{ observatory_view.storage.percent }}% used.</p>
 <p>Filesystem capacity for the configured media directory, including other files on that filesystem. This read does not test write access.</p>
 {% endif %}<a href="{{ url_for('indi_allsky.modern_admin_storage_view') }}">Storage details</a>
 </section>
-<section class="modern-admin-table-panel" aria-labelledby="observatory-tasks">
+<section aria-labelledby="observatory-tasks">
 <h2 id="observatory-tasks">Task records</h2>
 {% if observatory_view.tasks_error %}<p role="alert">{{ observatory_view.tasks_error }}</p>{% else %}
 <p>Counts cover retained task history across all cameras. Queued and running rows are pending work; saved state alone does not prove a worker is active.</p>
@@ -53,21 +62,12 @@
 </tbody></table></div>{% endif %}
 <a href="{{ url_for('indi_allsky.modern_admin_taskqueue_view') }}">Inspect tasks and results</a>
 </section>
-<section class="modern-admin-table-panel" aria-labelledby="observatory-integrations">
+<section aria-labelledby="observatory-integrations">
 <h2 id="observatory-integrations">Integration configuration</h2>
 {% for integration in observatory_view.integrations %}<p>{{ integration.label }}: {{ 'Configured or enabled' if integration.configured else 'Not configured or disabled' }}</p>{% endfor %}
 <p>Configuration indicators do not test credentials, connectivity or successful delivery.</p>
 <a href="{{ url_for('indi_allsky.modern_admin_uploads_view') }}">Upload configuration and results</a>
 </section>
-<section class="modern-admin-table-panel" aria-labelledby="observatory-tools">
-<h2 id="observatory-tools">Observation tools</h2>
-<nav class="modern-admin-link-grid" aria-label="Observation tools">
-<a href="{{ url_for('indi_allsky.modern_admin_sqm_view') }}">SQM</a>
-<a href="{{ url_for('indi_allsky.modern_admin_astropanel_view') }}">AstroPanel</a>
-<a href="{{ url_for('indi_allsky.modern_admin_virtualsky_view') }}">VirtualSky</a>
-<a href="{{ url_for('indi_allsky.modern_admin_realtime_keogram_view') }}">Realtime Keogram</a>
-<a href="{{ url_for('indi_allsky.modern_admin_longterm_keogram_view') }}">Long-term Keogram</a>
-</nav>
-</section>
+</details>
 </main>
 {% endblock %}

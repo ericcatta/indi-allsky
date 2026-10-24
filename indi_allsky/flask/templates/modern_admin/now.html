@@ -4,44 +4,26 @@
 
 {% block head %}
 <link href="{{ url_for('indi_allsky.static', filename='modern_admin/modern-admin.css', v='modern-now-product-experience-v1') }}" rel="stylesheet">
-<link href="{{ url_for('indi_allsky.static', filename='modern_admin/hybrid-product-ui.css', v='hybrid-product-ui-shell-008') }}" rel="stylesheet">
 {% endblock %}
 
 {% block content %}
 <main class="modern-admin-shell hybrid-product-shell hybrid-product-now" aria-labelledby="modern-admin-now-title">
     <header class="modern-admin-table-panel" aria-label="Hybrid Now product briefing">
-        <div class="modern-admin-section-heading">
-            <div>
-                <p class="modern-admin-eyebrow">Hybrid AllSky Now</p>
-                <h1 id="modern-admin-now-title">Now</h1>
-            </div>
-            <span class="modern-admin-status-pill modern-admin-status-neutral">Snapshot at page load</span>
-        </div>
-
-        <h2>{{ modern_admin_now.current_verdict }}</h2>
-        <p class="modern-admin-note">Latest saved frames and capture metadata. Refresh to update this snapshot; a saved frame does not by itself prove that capture is still running.</p>
-        <div class="modern-admin-link-grid">
-            <a href="{{ url_for('indi_allsky.modern_admin_now_view') }}">Refresh status</a>
-            <a href="{{ url_for('indi_allsky.modern_admin_highlights_view') }}">Review Highlights</a>
-            <a href="{{ url_for('indi_allsky.modern_admin_sky_cycle_view') }}">Sky Cycle Report</a>
-            <a href="{{ url_for('indi_allsky.modern_admin_observatory_view') }}">Observatory</a>
-            <a href="{{ url_for('indi_allsky.modern_admin_library_view') }}">Library</a>
-        </div>
+        <h1 id="modern-admin-now-title">Now</h1>
+        <p><strong>{{ modern_admin_now.current_verdict }}</strong></p>
+        <p class="modern-admin-note">Saved images · refresh to update. <a href="{{ url_for('indi_allsky.modern_admin_now_view') }}">Refresh</a></p>
     </header>
 
     <section class="modern-admin-table-panel hybrid-now-camera-panel" aria-labelledby="now-camera-frames-title">
         {% set camera_frames = modern_admin_now.latest_camera_frames %}
+        {% set visible_frames = camera_frames['items']|selectattr('camera_id')|list %}
         <div class="modern-admin-section-heading">
-            <div>
-                <p class="modern-admin-eyebrow">Saved images</p>
-                <h2 id="now-camera-frames-title">Latest Camera Frames</h2>
-            </div>
-            <span class="modern-admin-status-pill modern-admin-status-neutral">{{ camera_frames.status }}</span>
+            <h2 id="now-camera-frames-title">Cameras</h2>
+            <span class="modern-admin-status-pill modern-admin-status-neutral">{{ visible_frames|length }}</span>
         </div>
-        <p class="modern-admin-note">Most recent saved image for each camera. Browse camera images to inspect earlier frames.</p>
 
         <section class="hybrid-camera-frame-grid" aria-label="Latest frames by camera">
-            {% for frame in camera_frames['items'] if frame.camera_id %}
+            {% for frame in visible_frames %}
             <article class="hybrid-camera-frame-card">
                 <div class="hybrid-camera-frame-media">
                     {% if frame.image_available and frame.safe_image_url %}
@@ -64,7 +46,10 @@
         </section>
     </section>
 
-    <section class="modern-admin-table-panel" aria-labelledby="now-current-title">
+    <details class="modern-admin-table-panel">
+        <summary><strong>Capture and processing details</strong></summary>
+        <p class="modern-admin-note">This is a snapshot at page load. A saved frame does not by itself prove that capture is still running.</p>
+        <section aria-labelledby="now-current-title">
         {% set latest_frame = modern_admin_now.latest_frame_summary %}
         {% set latest_output = modern_admin_now.latest_generated_output_summary %}
         {% set current_phase = modern_admin_now.current_phase_summary %}
@@ -148,9 +133,9 @@
                 <span class="modern-admin-status-pill modern-admin-status-muted">{{ latest_output.source_table_label }}</span>
             </article>
         </section>
-    </section>
+        </section>
 
-    <section class="modern-admin-table-panel" aria-labelledby="now-source-title">
+        <section aria-labelledby="now-source-title">
         <h2 id="now-source-title">Source metadata</h2>
         <h3>{{ source_confidence.confidence_label }}</h3>
         <p>{{ source_confidence.note }}</p>
@@ -159,11 +144,8 @@
         {% for evidence_item in source_confidence.evidence %}<p>{{ evidence_item }}</p>{% endfor %}
         <a href="{{ url_for('indi_allsky.modern_admin_library_view', kind='fits', camera_id=camera_id) }}">Inspect FITS sources</a>
         <a href="{{ url_for('indi_allsky.modern_admin_library_view', kind='raw', camera_id=camera_id) }}">Inspect RAW sources</a>
-    </section>
-    <section class="modern-admin-table-panel"><h2>Further checks</h2>
-        <p>Review saved image metadata in Highlights and capture records in Sky Cycle. Detector classifications, processing recipes and source lineage are not evaluated on this page.</p>
-        <a href="{{ url_for('indi_allsky.modern_admin_observatory_view') }}">Open observatory tools</a>
-    </section>
+        </section>
+    </details>
 </main>
 <script src="{{ url_for('indi_allsky.static', filename='modern_admin/now-frames.js') }}"></script>
 {% endblock %}

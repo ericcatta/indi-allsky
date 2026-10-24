@@ -137,6 +137,11 @@
                 const matches = (!domainOnly || !domainOnly.checked || focusFields.has(row.dataset.fullSettingsField))
                     && (!query || row.dataset.fullSettingsSearch.indexOf(query) !== -1);
                 row.hidden = !matches;
+                const technical = row.querySelector('[data-full-settings-technical]');
+                if (technical) {
+                    const technicalSearch = technical.dataset.fullSettingsTechnicalSearch || '';
+                    technical.open = Boolean(query && matches && technicalSearch.indexOf(query) !== -1);
+                }
                 if (matches) {
                     visibleCount += 1;
                 }

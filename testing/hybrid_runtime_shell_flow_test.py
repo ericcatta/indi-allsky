@@ -49,7 +49,9 @@ def run(runtime_config):
                 provider.assert_called_once_with()
                 assert 'Capture: Running' in response.text, page
                 controls = Controls(response.text).controls
-                assert len(controls) == 6, (page, controls)
+                system_page = page in ('tasks', 'notifications', 'storage/file-space-usage', 'system/info')
+                assert len(controls) == (6 if system_page else 5), (page, controls)
+                assert any('data-hybrid-system-command' in c for c in controls) == system_page, page
                 assert all(('disabled' in c) == (uid != 1) for c in controls), (uid, page)
                 assert {c['data-hybrid-abort-profile'] for c in controls if 'data-hybrid-abort-profile' in c} == {'test-profile-1', 'test-profile-2'}
                 assert {c['data-hybrid-abort-camera'] for c in controls if 'data-hybrid-abort-camera' in c} == {'1', '2'}

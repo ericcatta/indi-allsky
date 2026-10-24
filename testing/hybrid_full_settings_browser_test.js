@@ -13,7 +13,8 @@ async function run({canSave=true, response, duplicate=false, filterText='', init
         RELOAD_ON_SAVE: {...control(''), checked:true}, FOCUS_MODE: {...control(''), checked:false},
         'OWNER-error': {hidden:true, textContent:''},
     };
-    const row = {dataset:{fullSettingsSearch:'owner test observer',fullSettingsField:'OWNER'}, hidden:false};
+    const technical = {dataset:{fullSettingsTechnicalSearch:'owner owner config stringfield'},open:false};
+    const row = {dataset:{fullSettingsSearch:'owner owner config stringfield test observer',fullSettingsField:'OWNER'}, hidden:false,querySelector:()=>technical};
     const domainOnly = {checked:true,addEventListener() {}};
     const count = {textContent:''};
     const section = {hidden:false,open:false,querySelectorAll:()=>[row],querySelector:()=>count};
@@ -38,7 +39,7 @@ async function run({canSave=true, response, duplicate=false, filterText='', init
         }});
     if (initialSearch) { assert.equal(filter.value, initialSearch); assert.equal(section.open, true); filterText = initialSearch; }
     filterHandler();
-    assert.equal(row.hidden, focused || filterText !== '' && !'owner test observer'.includes(filterText.toLowerCase()));
+    assert.equal(row.hidden, focused || filterText !== '' && !row.dataset.fullSettingsSearch.includes(filterText.toLowerCase()));
     const promise = submit({preventDefault() {}});
     if (canSave) assert.equal(button.disabled,true);
     if (duplicate) await submit({preventDefault() {}});
@@ -46,10 +47,15 @@ async function run({canSave=true, response, duplicate=false, filterText='', init
     assert.equal(calls,canSave ? 1 : 0);
     assert.equal(button.disabled,!canSave);
     if(canSave) assert.deepEqual(sent,{OWNER:'Test observer',CONFIG_NOTE:'Keep this until saved',RELOAD_ON_SAVE:true,FOCUS_MODE:false});
-    return {message:message.textContent,fields,row,domainOnly,filterStatus,search(value) { filter.value=value;filterHandler(); }};
+    return {message:message.textContent,fields,row,technical,domainOnly,filterStatus,search(value) { filter.value=value;filterHandler(); }};
 }
 (async()=>{
-    await run({initialSearch:'owner'});
+    const technicalSearch = await run({initialSearch:'owner config'});
+    assert.equal(technicalSearch.technical.open,true);
+    technicalSearch.search('test observer');
+    assert.equal(technicalSearch.technical.open,false);
+    technicalSearch.search('');
+    assert.equal(technicalSearch.technical.open,false);
     const focused = await run({focused:true});
     assert.match(focused.filterStatus.textContent,/turn off the group filter/);
     focused.domainOnly.checked=false;focused.search('owner');

@@ -228,7 +228,9 @@ var camera_id = {{ camera_id }};
                     </section>
                 </form>
 
-                <div class="modern-admin-table-scroll">
+                <details class="modern-admin-table-panel" data-camera-settings-technical>
+                    <summary>Effective values and technical details</summary>
+                    <div class="modern-admin-table-scroll">
                     <table class="modern-admin-data-table modern-admin-settings-table modern-admin-camera-settings-table">
                         <thead>
                             <tr>
@@ -255,7 +257,8 @@ var camera_id = {{ camera_id }};
                             {% endfor %}
                         </tbody>
                     </table>
-                </div>
+                    </div>
+                </details>
             </div>
         </details>
         {% elif section.key == 'driver-connection' %}
@@ -349,7 +352,9 @@ var camera_id = {{ camera_id }};
                     </section>
                 </form>
 
-                <div class="modern-admin-table-scroll">
+                <details class="modern-admin-table-panel" data-camera-settings-technical>
+                    <summary>Effective values and technical details</summary>
+                    <div class="modern-admin-table-scroll">
                     <table class="modern-admin-data-table modern-admin-settings-table modern-admin-camera-settings-table">
                         <thead>
                             <tr>
@@ -376,7 +381,8 @@ var camera_id = {{ camera_id }};
                             {% endfor %}
                         </tbody>
                     </table>
-                </div>
+                    </div>
+                </details>
             </div>
         </details>
         {% elif section.key == 'acquisition' %}
@@ -475,7 +481,9 @@ var camera_id = {{ camera_id }};
                     </section>
                 </form>
 
-                <div class="modern-admin-table-scroll">
+                <details class="modern-admin-table-panel" data-camera-settings-technical>
+                    <summary>Effective values and technical details</summary>
+                    <div class="modern-admin-table-scroll">
                     <table class="modern-admin-data-table modern-admin-settings-table modern-admin-camera-settings-table">
                         <thead>
                             <tr>
@@ -502,7 +510,8 @@ var camera_id = {{ camera_id }};
                             {% endfor %}
                         </tbody>
                     </table>
-                </div>
+                    </div>
+                </details>
             </div>
         </details>
         {% elif section.key == 'lens-optics' %}
@@ -582,7 +591,9 @@ var camera_id = {{ camera_id }};
                     </section>
                 </form>
 
-                <div class="modern-admin-table-scroll">
+                <details class="modern-admin-table-panel" data-camera-settings-technical>
+                    <summary>Effective values and technical details</summary>
+                    <div class="modern-admin-table-scroll">
                     <table class="modern-admin-data-table modern-admin-settings-table modern-admin-camera-settings-table">
                         <thead>
                             <tr>
@@ -609,7 +620,8 @@ var camera_id = {{ camera_id }};
                             {% endfor %}
                         </tbody>
                     </table>
-                </div>
+                    </div>
+                </details>
             </div>
         </details>
         {% else %}
@@ -749,6 +761,9 @@ var camera_id = {{ camera_id }};
             if (query && visibleCount > 0) {
                 section.open = true;
             }
+            section.querySelectorAll('[data-camera-settings-technical]').forEach((technical) => {
+                technical.open = Boolean(query && visibleCount > 0);
+            });
         });
 
         if (!query) {

@@ -11,8 +11,8 @@
     {% set modern_admin_title_id = 'settings-level-title' %}
     {% include 'modern_admin/_shell_header.html' %}
     <section class="modern-admin-table-panel">
-        <h2>{{ settings_level_title }} Settings</h2>
-        <p>Open a section to inspect its current values or use its controls. Administrator access is required for configuration changes.</p>
+        <h2>{{ settings_level_title }} settings links</h2>
+        <p>This compatibility page keeps existing bookmarks working. The topic-based Settings page is the primary place to choose an editor.</p>
         <div class="modern-admin-settings-action-grid" data-settings-level-links>
             {% for endpoint, label, description in settings_navigation %}
             <a class="modern-admin-settings-action-card" href="{{ url_for('indi_allsky.' + endpoint, camera_id=camera_id, profile_id=request.args.get('profile_id')) }}">
@@ -20,12 +20,7 @@
             </a>
             {% endfor %}
         </div>
-        <nav class="modern-admin-link-grid" aria-label="Settings levels">
-            {% for level, endpoint in (('Basic', 'basic'), ('Advanced', 'advanced'), ('Developer', 'developer')) %}
-            <a href="{{ url_for('indi_allsky.modern_admin_' + endpoint + '_settings_view', camera_id=camera_id, profile_id=request.args.get('profile_id')) }}">{{ level }}</a>
-            {% endfor %}
-            <a href="{{ url_for('indi_allsky.modern_admin_settings_view', camera_id=camera_id, profile_id=request.args.get('profile_id')) }}">All settings</a>
-        </nav>
+        <p><a class="modern-admin-inline-link" href="{{ url_for('indi_allsky.modern_admin_settings_view', camera_id=camera_id, profile_id=request.args.get('profile_id')) }}">Back to Settings</a></p>
     </section>
 </main>
 {% endblock %}

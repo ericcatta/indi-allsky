@@ -1497,7 +1497,7 @@
 
 .hybrid-camera-frame-card {
   display: grid;
-  grid-template-columns: minmax(190px, 0.62fr) minmax(0, 0.38fr);
+  grid-template-columns: minmax(0, 1fr);
   min-height: 230px;
   overflow: hidden;
   border: 1px solid rgba(215, 219, 202, 0.16);
@@ -1569,17 +1569,21 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: 18px;
-  border-left: 1px solid var(--hybrid-console-line);
+  padding: 12px 16px;
+  border-top: 1px solid var(--hybrid-console-line);
 }
 
 .hybrid-camera-frame-copy h3 {
-  margin-top: 6px;
-  font-size: 1.22rem;
+  margin: 3px 0 5px;
+  font-size: 1rem;
+}
+
+.hybrid-camera-frame-copy .modern-admin-card-label {
+  margin-bottom: 6px;
 }
 
 .hybrid-camera-frame-copy p {
-  margin-bottom: 8px;
+  margin-bottom: 5px;
   color: var(--hybrid-console-muted);
   font-size: 0.88rem;
 }
@@ -1689,6 +1693,11 @@
     grid-template-columns: minmax(0, 1fr) minmax(230px, 0.28fr);
   }
 
+  .hybrid-product-now > header.modern-admin-table-panel:first-child {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+  }
+
   .hybrid-product-shell > .modern-admin-table-panel:first-child .modern-admin-section-heading,
   .hybrid-product-shell > .modern-admin-table-panel:first-child h2,
   .hybrid-product-shell > .modern-admin-table-panel:first-child .modern-admin-note {
@@ -1775,4 +1784,90 @@
 .hybrid-app-drawer a:focus-visible {
   outline: 2px solid currentColor;
   outline-offset: 3px;
+}
+
+/* Observation-first shell: persistent navigation, quiet header, contextual controls. */
+.hybrid-app-shell { --hybrid-sidebar-width: 224px; }
+.hybrid-app-topbar { gap: 16px; min-height: 72px; flex-wrap: nowrap; padding: 12px 28px; box-shadow: none; backdrop-filter: blur(18px); }
+.hybrid-app-brand-mark { border-radius: 12px; }
+.hybrid-app-actions { margin-left: auto; gap: 10px; flex-basis: auto; flex-wrap: nowrap; }
+.hybrid-header-status { border: 0; background: transparent; padding: 5px 0; font-size: .75rem; white-space: nowrap; }
+.hybrid-header-status::before { content: ''; display: inline-block; width: 6px; height: 6px; margin-right: 8px; border-radius: 50%; background: currentColor; }
+.hybrid-control-disclosure { position: relative; }
+.hybrid-control-disclosure > summary { cursor: pointer; padding: 9px 12px; border: 1px solid rgba(143,216,208,.18); border-radius: 9px; font-size: .75rem; list-style: none; }
+.hybrid-control-disclosure > summary::after { content: '⌄'; margin-left: 9px; }
+.hybrid-control-disclosure[open] > summary { background: rgba(143,216,208,.12); }
+.hybrid-control-disclosure .hybrid-runtime-actions { position: absolute; right: 0; top: calc(100% + 12px); z-index: 70; width: 300px; max-width: calc(100vw - 32px); margin: 0; padding: 14px; display: flex; flex-wrap: wrap; gap: 8px; background: #111713; border: 1px solid rgba(143,216,208,.22); border-radius: 14px; box-shadow: 0 18px 48px #0006; }
+.hybrid-theme-day .hybrid-control-disclosure .hybrid-runtime-actions { background: #fff; }
+.hybrid-app-drawer { width: var(--hybrid-sidebar-width); display: flex; flex-direction: column; padding: 26px 16px 20px; box-shadow: none; }
+.hybrid-sidebar-heading { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; }
+.hybrid-sidebar-label { color: #88978f; font-size: .7rem; letter-spacing: .025em; }
+.hybrid-drawer-close { display: none; border: 0; background: transparent; color: inherit; font-size: 26px; padding: 0 8px; }
+.hybrid-drawer-section { margin-bottom: 26px; }
+.hybrid-drawer-section p { margin: 0 12px 10px; color: #88978f; font-size: .6rem; letter-spacing: .14em; }
+.hybrid-app-drawer .hybrid-nav-link { display: flex; align-items: center; gap: 12px; min-height: 44px; margin: 4px 0; padding: 10px 12px; border: 1px solid transparent; border-radius: 10px; color: #abb8b1; text-decoration: none; font-size: .85rem; }
+.hybrid-nav-icon { width: 20px; height: 20px; flex: 0 0 20px; color: currentColor; opacity: .8; }
+.hybrid-app-drawer .hybrid-nav-link:hover { background: rgba(143,216,208,.06); color: #e1ede7; }
+.hybrid-app-drawer .hybrid-nav-link.active { color: #d6f6e8; background: rgba(143,216,208,.1); border-color: rgba(143,216,208,.12); }
+.hybrid-nav-marker { margin-left: auto; width: 5px; height: 5px; background: #8fd8d0; border-radius: 50%; }
+.hybrid-management-nav { padding-top: 20px; border-top: 1px solid rgba(143,216,208,.12); }
+.hybrid-tools-disclosure { margin: 0 12px 26px; color: #88978f; font-size: .75rem; }
+.hybrid-tools-disclosure summary { cursor: pointer; padding-block: 6px; }
+.hybrid-tools-disclosure a { color: inherit; text-decoration: none; font-size: .75rem; }
+.hybrid-sidebar-footer { margin-top: auto; padding-top: 24px; border-top: 1px solid rgba(143,216,208,.12); }
+.hybrid-sidebar-footer .hybrid-drawer-section { margin-bottom: 12px; }
+.hybrid-sidebar-footer a { color: #abb8b1; text-decoration: none; font-size: .75rem; }
+.hybrid-sidebar-footer .hybrid-theme-toggle { margin-left: 12px; padding-inline: 14px; min-height: 32px; border-radius: 8px; font-size: .7rem; }
+.hybrid-sidebar-caption { display: block; margin: 22px 12px 0; color: #66786c; font-size: .65rem; }
+.hybrid-theme-day .hybrid-app-drawer .hybrid-nav-link, .hybrid-theme-day .hybrid-sidebar-footer a { color: #526157; }
+.hybrid-theme-day .hybrid-app-drawer .hybrid-nav-link.active { color: #225d53; background: #dfeee7; }
+.hybrid-theme-day .hybrid-app-drawer .hybrid-nav-link:hover { color: #225d53; }
+.hybrid-skip-link { position: fixed; z-index: 100; left: 16px; top: -100px; padding: 12px 18px; border-radius: 8px; background: #d6f6e8; color: #12251b; }
+.hybrid-skip-link:focus { top: 10px; }
+.hybrid-control-disclosure summary:focus-visible, .hybrid-tools-disclosure summary:focus-visible, .hybrid-drawer-close:focus-visible { outline: 2px solid #8fd8d0; outline-offset: 4px; }
+@media (min-width: 1040px) {
+  .hybrid-app-drawer { top: 0; transform: none; z-index: 45; }
+  .hybrid-app-topbar, .hybrid-app-content { margin-left: var(--hybrid-sidebar-width); }
+  .hybrid-menu-button, .hybrid-menu-scrim, .hybrid-menu-checkbox:checked ~ .hybrid-menu-scrim { display: none; }
+}
+@media (max-width: 1039px) {
+  .hybrid-app-drawer { width: min(300px, calc(100vw - 38px)); z-index: 60; }
+  .hybrid-drawer-close { display: block; }
+  .hybrid-app-topbar { padding: 12px 16px; }
+  .hybrid-app-actions { flex-basis: auto; flex-wrap: nowrap; }
+  .hybrid-app-brand small { display: none; }
+  .hybrid-shell-body.hybrid-navigation-open { overflow: hidden; }
+}
+@media (max-width: 640px) {
+  .hybrid-app-topbar { gap: 10px; align-items: center; flex-wrap: wrap; }
+  .hybrid-app-brand strong { font-size: .95rem; }
+  .hybrid-app-brand-mark { width: 32px; height: 32px; }
+  .hybrid-app-actions { gap: 7px; flex-wrap: wrap; justify-content: flex-start; }
+  .hybrid-header-status { font-size: .65rem; }
+  .hybrid-control-disclosure > summary { font-size: .65rem; padding: 8px; }
+  .hybrid-system-disclosure > summary { font-size: 0; }
+  .hybrid-system-disclosure > summary::before { content: 'System'; font-size: .65rem; }
+  .hybrid-control-disclosure .hybrid-runtime-actions { position: fixed; top: 124px; right: 12px; width: calc(100vw - 24px); max-width: 340px; }
+}
+@media (prefers-reduced-motion: reduce) { .hybrid-app-drawer { transition: none; } }
+
+/* Clear section rhythm and comfortable touch targets across existing pages. */
+.hybrid-app-content .modern-admin-shell { background: transparent; }
+.hybrid-app-content .modern-admin-shell > section + section { margin-top: 22px; }
+.hybrid-app-content .modern-admin-table-panel { border-radius: 16px; box-shadow: none; }
+.hybrid-app-content h1 { letter-spacing: -.035em; line-height: 1.15; }
+.hybrid-app-content h2 { letter-spacing: -.02em; }
+.hybrid-app-content details > summary { min-height: 44px; cursor: pointer; padding: 12px 16px; line-height: 1.5; }
+.hybrid-app-content details > summary:focus-visible { outline: 2px solid var(--hybrid-console-cyan); outline-offset: 3px; }
+.hybrid-app-content details[open] > summary { border-bottom: 1px solid var(--hybrid-console-line); margin-bottom: 14px; }
+.hybrid-app-content button, .hybrid-app-content input:not([type="checkbox"]):not([type="radio"]), .hybrid-app-content select, .hybrid-app-content .modern-admin-link-grid a { min-height: 44px; }
+.hybrid-app-content .modern-admin-eyebrow { letter-spacing: .12em; font-size: .65rem; }
+.hybrid-app-drawer a, .hybrid-sidebar-footer .hybrid-theme-toggle, .hybrid-control-disclosure > summary { min-height: 44px; box-sizing: border-box; }
+.hybrid-control-disclosure > summary { display: flex; align-items: center; }
+.hybrid-app-topbar .hybrid-runtime-actions .hybrid-runtime-button { white-space: normal; overflow-wrap: anywhere; min-height: 44px; height: auto; max-width: 100%; text-align: left; }
+.hybrid-theme-day .hybrid-sidebar-label, .hybrid-theme-day .hybrid-drawer-section p, .hybrid-theme-day .hybrid-sidebar-caption { color: #526157; }
+@media (max-width: 640px) {
+  .hybrid-app-actions { width: 100%; margin-left: 0; justify-content: space-between; }
+  .hybrid-header-status { min-width: 0; white-space: normal; overflow-wrap: anywhere; flex: 1; }
+  .hybrid-app-content .modern-admin-table-panel { border-radius: 12px; padding: 16px; }
 }
